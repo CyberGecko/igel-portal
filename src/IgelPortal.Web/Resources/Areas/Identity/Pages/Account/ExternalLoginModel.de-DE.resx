@@ -11,4 +11,7 @@
           Bitte bestätigen Sie ihr Konto indem Sie &lt;a href='{0}'&gt;hier klicken&lt;/a&gt;.
         </value>
     </data>
+  <data name="Complete the security check again before registering." xml:space="preserve">
+    <value>Bitte wiederhole die Sicherheitsprüfung, bevor du dich registrierst.</value>
+  </data>
 </root>

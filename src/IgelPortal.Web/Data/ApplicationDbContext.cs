@@ -21,9 +21,18 @@ namespace IgelPortal.Web.Data
         public DbSet<DevicePublicKey> DevicePublicKeys { get; set; }
         public DbSet<PublicKeyCredential> PublicKeyCredentials { get; set; }
 
+        public DbSet<AltchaReplay> AltchaReplays { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AltchaReplay>(replay =>
+            {
+                replay.HasKey(entry => entry.Id);
+                replay.Property(entry => entry.Id).HasMaxLength(64);
+                replay.HasIndex(entry => entry.ExpiresAtUtc);
+            });
 
             modelBuilder.ApplyConfiguration<Hedgehog>(new HedgehogMapping());
             modelBuilder.ApplyConfiguration<Territory>(new TerritoryMapping());

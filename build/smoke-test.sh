@@ -83,16 +83,36 @@ password="Aa9!$(openssl rand -hex 20)"
 register='/Identity/Account/Register'
 token=$(read_csrf "$register")
 test -n "$token"
-status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' \
-    --data-urlencode "__RequestVerificationToken=$token" \
-    --data-urlencode 'Input.FirstName=Igel' --data-urlencode 'Input.LastName=CI' \
-    --data-urlencode "Input.Email=$email" --data-urlencode "Input.Password=$password" \
-    --data-urlencode "Input.ConfirmPassword=$password" "$origin$register")
-[[ "$status" == 302 ]]
+grep -q '<altcha-widget' "$html"
+challenge=$("${browser[@]}" --fail "$origin/registration-captcha")
+solution=$(dotnet run --file build/solve-registration-captcha.cs --verbosity quiet <<< "$challenge")
+
+post_registration() {
+    "${browser[@]}" --output "$html" --write-out '%{http_code}' \
+        --header 'Accept-Language: en-GB' \
+        --data-urlencode "__RequestVerificationToken=$token" \
+        --data-urlencode 'Input.FirstName=Igel' --data-urlencode 'Input.LastName=CI' \
+        --data-urlencode "Input.Email=$1" --data-urlencode "Input.Password=$password" \
+        --data-urlencode "Input.ConfirmPassword=$password" \
+        --data-urlencode "Altcha=$2" "$origin$register"
+}
 
 db() {
     docker exec -i "$database" sh -c 'MYSQL_PWD="$MARIADB_PASSWORD" exec mariadb --batch --skip-column-names --user="$MARIADB_USER" "$MARIADB_DATABASE"'
 }
+
+for payload in '' 'invalid'; do
+    [[ "$(post_registration "$email" "$payload")" == 200 ]]
+    grep -q 'Complete the security check again before registering.' "$html"
+done
+[[ "$(db <<< 'SELECT COUNT(*) FROM AspNetUsers;')" == 0 ]]
+[[ "$(post_registration "$email" "$solution")" == 302 ]]
+[[ "$(post_registration 'replay@example.invalid' "$solution")" == 200 ]]
+grep -q 'Complete the security check again before registering.' "$html"
+[[ "$(db <<< 'SELECT COUNT(*) FROM AspNetUsers;')" == 1 ]]
+[[ "$(db <<< 'SELECT COUNT(*) FROM AltchaReplays;')" == 1 ]]
+[[ "$(post_registration "$email" '')" == 200 ]]
+[[ "$(post_registration "$email" '')" == 429 ]]
 
 # Confirm the test account and create data for authenticated page checks.
 db <<'SQL'
@@ -142,4 +162,4 @@ for attempt in 1 2; do
     [[ "$status" == 302 ]]
 done
 [[ "$(db <<< 'SELECT COUNT(*) FROM ServiceRequestResponses;')" == 1 ]]
-echo 'MariaDB migrations, health, login, authenticated lists, map, service response and passkey authorization verified.'
+echo 'MariaDB migrations, health, registration CAPTCHA, login, authenticated lists, map, service response and passkey authorization verified.'

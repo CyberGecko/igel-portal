@@ -3,6 +3,8 @@
 #nullable disable
 
 using IgelPortal.Web.Data.Identity;
+using IgelPortal.Web.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -17,6 +19,9 @@ using System.Text.Encodings.Web;
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
+    [EnableRateLimiting(RegistrationCaptcha.SubmitRateLimit)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [RequestSizeLimit(32768)]
     public partial class ExternalLoginModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -26,9 +31,10 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
         private readonly IEmailSender _emailSender;
         private readonly ILogger<ExternalLoginModel> _logger;
         private readonly IStringLocalizer<ExternalLoginModel> localizer;
+        private readonly RegistrationCaptcha captcha;
 
         public ExternalLoginModel(SignInManager<ApplicationUser> signInManager, UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore,
-            ILogger<ExternalLoginModel> logger, IEmailSender emailSender, IStringLocalizer<ExternalLoginModel> localizer)
+            ILogger<ExternalLoginModel> logger, IEmailSender emailSender, IStringLocalizer<ExternalLoginModel> localizer, RegistrationCaptcha captcha)
         {
             _signInManager = signInManager;
             _userManager = userManager;
@@ -37,6 +43,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             this.localizer = localizer;
+            this.captcha = captcha;
         }
 
         /// <summary>
@@ -126,6 +133,11 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
             {
                 ErrorMessage = this.localizer.GetString("Error loading external login information during confirmation.");
                 return RedirectToPage("./Login", new { ReturnUrl = returnUrl });
+            }
+
+            if (ModelState.IsValid && !await captcha.VerifyAsync(HttpContext))
+            {
+                ModelState.AddModelError(string.Empty, localizer[RegistrationCaptcha.ErrorMessage]);
             }
 
             if (ModelState.IsValid)

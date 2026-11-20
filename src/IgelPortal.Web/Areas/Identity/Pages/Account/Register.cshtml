@@ -39,6 +39,7 @@
                 <label asp-for="Input.ConfirmPassword"></label>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
+            <partial name="_RegistrationCaptcha" />
             <button id="registerSubmit" type="submit" class="btn btn-lg btn-primary w-100">@Localizer["Register"]</button>
         </form>
 
@@ -66,4 +67,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script type="module" src="~/lib/altcha/altcha.i18n.min.js" asp-append-version="true"></script>
 }

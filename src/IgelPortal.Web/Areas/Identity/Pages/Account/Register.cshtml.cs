@@ -3,6 +3,8 @@
 #nullable disable
 
 using IgelPortal.Web.Data.Identity;
+using IgelPortal.Web.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using IgelPortal.Web.Pages.Hedgehogs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
@@ -16,6 +18,9 @@ using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
+    [EnableRateLimiting(RegistrationCaptcha.SubmitRateLimit)]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
+    [RequestSizeLimit(32768)]
     public partial class RegisterModel : PageModel
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
@@ -25,9 +30,10 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly IStringLocalizer<RegisterModel> localizer;
+        private readonly RegistrationCaptcha captcha;
 
         public RegisterModel(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, SignInManager<ApplicationUser> signInManager, ILogger<RegisterModel> logger,
-                             IEmailSender emailSender, IStringLocalizer<RegisterModel> localizer)
+                             IEmailSender emailSender, IStringLocalizer<RegisterModel> localizer, RegistrationCaptcha captcha)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -36,6 +42,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
             _logger = logger;
             _emailSender = emailSender;
             this.localizer = localizer;
+            this.captcha = captcha;
         }
 
         /// <summary>
@@ -65,8 +72,13 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
 
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
-            returnUrl ??= Url.Content("~/");
+            ReturnUrl = returnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
+            if (ModelState.IsValid && !await captcha.VerifyAsync(HttpContext))
+            {
+                ModelState.AddModelError(string.Empty, localizer[RegistrationCaptcha.ErrorMessage]);
+            }
+
             if (ModelState.IsValid)
             {
                 var user = CreateUser();
