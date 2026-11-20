@@ -1,9 +1,10 @@
+using Altcha.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
 
 namespace IgelPortal.Web.Services;
 
-public sealed class PasskeyFlow(DatabaseReplayStore replayStore)
+public sealed class PasskeyFlow(IAltchaReplayStore replayStore, TimeProvider clock)
 {
     public const string RateLimitPolicy = "passkey";
     public const int CredentialSizeLimit = 32_768;
@@ -15,7 +16,7 @@ public sealed class PasskeyFlow(DatabaseReplayStore replayStore)
         var ticket = await context.AuthenticateAsync(IdentityConstants.TwoFactorUserIdScheme);
         var operation = registration ? "Attestation" : "Assertion";
         if (!ticket.Succeeded || ticket.Properties is not { ExpiresUtc: { } expiresAt } properties ||
-            expiresAt <= DateTimeOffset.UtcNow || !properties.Items.TryGetValue("PasskeyOperation", out var actualOperation) ||
+            expiresAt <= clock.GetUtcNow() || !properties.Items.TryGetValue("PasskeyOperation", out var actualOperation) ||
             actualOperation != operation || !properties.Items.TryGetValue("PasskeyState", out var state) ||
             string.IsNullOrEmpty(state))
         {

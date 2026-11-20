@@ -14,7 +14,8 @@ public sealed class PortalSignInManager(
     IOptions<IdentityOptions> options,
     ILogger<SignInManager<ApplicationUser>> logger,
     IAuthenticationSchemeProvider schemes,
-    IUserConfirmation<ApplicationUser> confirmation)
+    IUserConfirmation<ApplicationUser> confirmation,
+    TimeProvider clock)
     : SignInManager<ApplicationUser>(userManager, contextAccessor, claimsFactory, options, logger, schemes, confirmation)
 {
     private const string AuthenticatedAt = "igel.authenticated-at";
@@ -28,7 +29,7 @@ public sealed class PortalSignInManager(
         if (authenticationProperties.IssuedUtc is null)
         {
             authenticationProperties.Items[AuthenticatedAt] =
-                DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
+                clock.GetUtcNow().ToUnixTimeSeconds().ToString(CultureInfo.InvariantCulture);
         }
 
         return base.SignInWithClaimsAsync(user, authenticationProperties, additionalClaims);
@@ -37,7 +38,7 @@ public sealed class PortalSignInManager(
     public static async Task<bool> HasRecentAuthenticationAsync(HttpContext context)
     {
         var result = await context.AuthenticateAsync(IdentityConstants.ApplicationScheme);
-        var now = DateTimeOffset.UtcNow;
+        var now = context.RequestServices.GetRequiredService<TimeProvider>().GetUtcNow();
         return result.Succeeded && result.Properties is { } properties &&
             properties.Items.TryGetValue(AuthenticatedAt, out var value) &&
             long.TryParse(value, CultureInfo.InvariantCulture, out var timestamp) &&

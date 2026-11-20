@@ -130,17 +130,9 @@ public sealed class CareJournalService(ApplicationDbContext db, CareAccess acces
         int? grams, string? note, BodyView? view, BodyRegion? region, int? x, int? y) => ChangeAsync(id, user, async (_, permissions) =>
     {
         if (!permissions.CanRecord) return CareResult.Denied;
-        if (kind is not (CareEntryKind.Weight or CareEntryKind.Observation or CareEntryKind.Finding or CareEntryKind.Mark) || when > DateTime.UtcNow)
-            return CareResult.Invalid;
         note = note?.Trim();
-        if (note?.Length > 2000 || (kind == CareEntryKind.Weight ? grams is not (> 0 and <= 10000) : string.IsNullOrEmpty(note)))
-            return CareResult.Invalid;
+        if (!IsValidEntry(kind, when, DateTime.UtcNow, grams, note, view, region, x, y)) return CareResult.Invalid;
         var point = x.HasValue || y.HasValue;
-        if ((view.HasValue && !Enum.IsDefined(view.Value)) || (region.HasValue && !Enum.IsDefined(region.Value)) ||
-            (point && (!view.HasValue || x is not (>= 0 and <= 1000) || y is not (>= 0 and <= 1000))) ||
-            (kind == CareEntryKind.Mark && !point && !region.HasValue) ||
-            ((kind is CareEntryKind.Weight or CareEntryKind.Observation) && (point || view.HasValue || region.HasValue)))
-            return CareResult.Invalid;
 
         var episode = await db.CareEpisodes.SingleOrDefaultAsync(item => item.Id == episodeId && item.OpenHedgehogId == id);
         if (episode is null || when < episode.StartedAtUtc) return CareResult.Conflict;
@@ -169,6 +161,23 @@ public sealed class CareJournalService(ApplicationDbContext db, CareAccess acces
             db.CareEntries.Add(update);
             return CareResult.Saved;
         });
+
+    internal static bool IsValidEntry(CareEntryKind kind, DateTime when, DateTime now, int? grams, string? note,
+        BodyView? view, BodyRegion? region, int? x, int? y)
+    {
+        if (kind is not (CareEntryKind.Weight or CareEntryKind.Observation or CareEntryKind.Finding or CareEntryKind.Mark) || when > now)
+            return false;
+        if (note?.Length > 2000 || (kind == CareEntryKind.Weight ? grams is not (> 0 and <= 10000) : string.IsNullOrEmpty(note)))
+            return false;
+        var point = x.HasValue || y.HasValue;
+        if ((view.HasValue && !Enum.IsDefined(view.Value)) || (region.HasValue && !Enum.IsDefined(region.Value)) ||
+            (point && (!view.HasValue || x is not (>= 0 and <= 1000) || y is not (>= 0 and <= 1000))) ||
+            (kind == CareEntryKind.Mark && !point && !region.HasValue) ||
+            ((kind is CareEntryKind.Weight or CareEntryKind.Observation) && (point || view.HasValue || region.HasValue)))
+            return false;
+
+        return true;
+    }
 
     private static CareEntry NewEntry(Guid episodeId, CareEntryKind kind, DateTime when, CarePermissions user, string? note,
         int? grams = null, BodyView? view = null, BodyRegion? region = null, int? x = null, int? y = null) => new()

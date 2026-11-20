@@ -44,7 +44,7 @@ public sealed class CareModel(CareJournalService journal, MedicationPlanService 
     public async Task<IActionResult> OnPostPlanAsync(Guid id, Guid episodeId, Guid planId, string? medication, string? amount, string? instructions,
         string? startDate, string? endDate, string?[]? dailyTimes, Guid? replacePlanId)
     {
-        if (!Valid || !TrySchedule(startDate, endDate, dailyTimes, out var schedule))
+        if (!Valid || !MedicationSchedule.TryBuild(clock, DateOnly.FromDateTime(clock.LocalNow), startDate, endDate, dailyTimes, out var schedule))
         {
             TempData["CareNotice"] = "Check the date range and administration times. Use 1–4 distinct times per day and a period of at most 90 days. Times must exist and be unambiguous in the portal time zone.";
             return RedirectToPage(pageName: null, pageHandler: null, routeValues: new { id }, fragment: "medication");
@@ -83,36 +83,5 @@ public sealed class CareModel(CareJournalService journal, MedicationPlanService 
             _ => "Check the entered values and try again."
         };
         return RedirectToPage(pageName: null, pageHandler: null, routeValues: new { id }, fragment: fragment);
-    }
-
-    private bool TrySchedule(string? from, string? to, string?[]? dailyTimes, out IReadOnlyList<DateTime> schedule)
-    {
-        schedule = [];
-        if (!DateOnly.TryParseExact(from, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start) ||
-            !DateOnly.TryParseExact(to, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end) ||
-            end.DayNumber - start.DayNumber is < 0 or >= 90 || dailyTimes is null || dailyTimes.Length > 4 ||
-            start < DateOnly.FromDateTime(clock.LocalNow))
-            return false;
-
-        var times = new SortedSet<TimeOnly>();
-        foreach (var value in dailyTimes)
-        {
-            if (string.IsNullOrWhiteSpace(value)) continue;
-            if (!TimeOnly.TryParseExact(value, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out var time) || !times.Add(time))
-                return false;
-        }
-        if (times.Count == 0) return false;
-
-        var result = new List<DateTime>();
-        for (int offset = 0; offset <= end.DayNumber - start.DayNumber; offset++)
-        {
-            foreach (var time in times)
-            {
-                if (!clock.TryToUtc(start.AddDays(offset).ToDateTime(time), out var day)) return false;
-                result.Add(day);
-            }
-        }
-        schedule = result;
-        return true;
     }
 }

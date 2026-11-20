@@ -13,10 +13,15 @@ dotnet user-secrets --project src/IgelPortal.Web set 'ConnectionStrings:DefaultC
 dotnet run --project src/IgelPortal.Web
 ```
 
-Für einen Release-Build mit Schwachstellenprüfung der NuGet-Abhängigkeiten und einem Starttest gegen eine leere MariaDB 10.11 in Docker:
+## Tests
+
+Die Unit-Tests prüfen Anmeldung, Registrierung, Gruppenrechte, Pflege und Medikamentenpläne, Revierwechsel, Pflegeanfragen und den Mailversand. Sie benötigen weder eine Datenbank noch externe Dienste. Azure DevOps führt sie bei CI- und Release-Builds aus und veröffentlicht die Ergebnisse im Buildbericht. Der anschließende Smoke-Test prüft die Anwendung mit einer leeren MariaDB 10.11 in Docker.
+
+Die gleichen Prüfungen lokal ausführen:
 
 ```bash
-dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
+dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1900%3BNU1901%3BNU1902%3BNU1903%3BNU1904%3BNU1905
 dotnet build src/IgelPortal.sln -c Release --no-restore
+dotnet test src/IgelPortal.sln -c Release --no-build --no-restore
 bash build/smoke-test.sh
 ```

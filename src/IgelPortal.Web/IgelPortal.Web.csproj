@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <InternalsVisibleTo Include="IgelPortal.Web.Tests" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Features.json" />
   </ItemGroup>
 

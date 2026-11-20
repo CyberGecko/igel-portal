@@ -9,8 +9,22 @@ steps:
       set -euo pipefail
       dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1900%3BNU1901%3BNU1902%3BNU1903%3BNU1904%3BNU1905
       dotnet build src/IgelPortal.sln --configuration Release --no-restore
-      dotnet test src/IgelPortal.sln --configuration Release --no-build --no-restore
-    displayName: Audit dependencies, build and test
+    displayName: Audit dependencies and build
+
+  - bash: |
+      set -euo pipefail
+      dotnet test src/IgelPortal.sln --configuration Release --no-build --no-restore \
+        --logger "trx;LogFilePrefix=unit" --results-directory "$(Agent.TempDirectory)/igel-test-results"
+    displayName: Run unit tests
+
+  - task: PublishTestResults@2
+    displayName: Publish unit test results
+    condition: succeededOrFailed()
+    inputs:
+      testResultsFormat: VSTest
+      searchFolder: $(Agent.TempDirectory)/igel-test-results
+      testResultsFiles: '*.trx'
+      failTaskOnFailedTests: true
 
   - task: UseNode@1
     displayName: Use Node.js 22
