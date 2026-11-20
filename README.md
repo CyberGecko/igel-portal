@@ -5,6 +5,7 @@ Das Igel-Portal hilft Igel-Hilfsgruppen und Vereinen, die Versorgung von Igeln g
 ## Was du im Portal tun kannst
 
 - **Igel betreuen.** Igel erfassen, einer zuständigen Person zuordnen sowie ihr Heimatrevier und ihren aktuellen Aufenthaltsort festhalten.
+- **Pflege dokumentieren.** Gewichte, Beobachtungen, Verletzungen und Markierungen im Pflegetagebuch festhalten. Die Körperkarte hilft, Stellen wiederzufinden. Berechtigte können Medikamentenpläne erstellen, die einzelne Helfende übernehmen und abarbeiten.
 - **Reviere und Pflegeangebote planen.** Reviere anlegen, angebotene Leistungen und Kapazitäten pflegen und die Reviere einer Gemeinschaft auf einer Karte ansehen.
 - **Gemeinschaften organisieren.** Eine Gemeinschaft gründen oder den Beitritt anfragen. Verantwortliche können Anfragen bearbeiten, Mitglieder verwalten und Moderationsrechte vergeben.
 - **Hilfe koordinieren.** Für einen Igel eine Pflegeleistung anfragen. Das Portal benachrichtigt die zuständigen Helfenden per E-Mail. Sie können ihre Verfügbarkeit bestätigen, und Verantwortliche können die Anfrage anschließend als erledigt markieren.

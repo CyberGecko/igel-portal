@@ -48,6 +48,9 @@
                             <li class="nav-item">
                                 <a class="nav-link" asp-area="" asp-page="/Communities/Join">@Localizer["Communities"]</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Hedgehogs/CareTasks">@SharedLocalizer["My tasks"]</a>
+                            </li>
                         }
                         @if (User.IsInRole(RoleNames.ADMIN))
                         {

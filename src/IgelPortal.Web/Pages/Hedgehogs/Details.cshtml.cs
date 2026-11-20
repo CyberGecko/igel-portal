@@ -1,4 +1,5 @@
-﻿using IgelPortal.Web.Data.Models;
+﻿using IgelPortal.Web.Data.Care;
+using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -7,9 +8,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace IgelPortal.Web.Pages.Hedgehogs
 {
     [Authorize(Roles = RoleNames.USER)]
-    public class DetailsModel(IHedgehogDataService dataService, IAuthorizationService authorization) : PageModel
+    public class DetailsModel(IHedgehogDataService dataService, IAuthorizationService authorization, CareAccess careAccess) : PageModel
     {
         private readonly IHedgehogDataService dataService = dataService;
+
+        public bool CanReadCare { get; private set; }
 
         public Hedgehog Hedgehog { get; set; } = default!;
 
@@ -32,6 +35,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
                 return Forbid();
             }
             this.Hedgehog = hedgehog;
+            CanReadCare = (await careAccess.ForAsync(hedgehog.Id, hedgehog.CommunityId, hedgehog.AttachedUser, User)).CanRead;
             return base.Page();
         }
     }

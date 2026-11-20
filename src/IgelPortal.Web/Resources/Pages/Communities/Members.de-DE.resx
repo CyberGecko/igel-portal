@@ -21,4 +21,6 @@
   <data name="Make Owner" xml:space="preserve">
         <value>Zu Besitzer machen</value>
     </data>
+  <data name="Revoke medication planning" xml:space="preserve"><value>Planungsberechtigung entziehen</value></data>
+  <data name="Grant medication planning" xml:space="preserve"><value>Medikamentenplanung erlauben</value></data>
 </root>

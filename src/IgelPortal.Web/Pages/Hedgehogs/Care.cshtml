@@ -1,0 +1,275 @@
+@page "{id:guid}"
+@using IgelPortal.Web.Data.Care
+@model IgelPortal.Web.Pages.Hedgehogs.CareModel
+@{
+    var journal = Model.Journal;
+    var episode = journal.Episode;
+    bool isOpen = episode?.OpenHedgehogId is not null;
+    var weights = journal.Entries.Where(item => item.Kind == CareEntryKind.Weight).ToList();
+    var latest = weights.FirstOrDefault();
+    var previous = weights.Skip(1).FirstOrDefault();
+    var findings = journal.Entries.Where(item => item.Kind == CareEntryKind.Finding && item.ResolvedAtUtc is null).ToList();
+    var activePlans = journal.Plans.Where(item => item.EndedAtUtc is null && item.CommunityId == journal.Hedgehog.CommunityId).ToList();
+    var pending = activePlans.SelectMany(item => item.Doses)
+        .Where(dose => dose.Status == DoseStatus.Pending && Model.Clock.FromUtc(dose.ScheduledAtUtc).Date <= Model.Clock.LocalNow.Date).Count();
+    var lastDose = journal.Plans.SelectMany(plan => plan.Doses.Where(dose => dose.Status == DoseStatus.Given && dose.GivenAtUtc.HasValue)
+        .Select(dose => new { plan.Medication, dose.GivenAtUtc })).OrderByDescending(item => item.GivenAtUtc).FirstOrDefault();
+    var unassigned = activePlans.Count(plan => plan.Assignment != PlanAssignment.Accepted && plan.Doses.Any(dose => dose.Status == DoseStatus.Pending));
+    ViewData["Title"] = SharedLocalizer["Care journal"];
+}
+
+<div class="page-heading">
+    <div>
+        <p class="mb-1">@SharedLocalizer["Care journal"]</p>
+        <h1>@journal.Hedgehog.Name</h1>
+        <p class="text-body-secondary small mb-0">@SharedLocalizer["Times use {0}.", Model.Clock.ZoneId]</p>
+    </div>
+    <a asp-page="./CareTasks" class="btn btn-outline-primary">@SharedLocalizer["My tasks"]</a>
+</div>
+
+@if (TempData["CareNotice"] is string notice)
+{
+    <p class="alert alert-info" role="status">@SharedLocalizer[notice]</p>
+}
+
+@if (journal.Episodes.Count > 0)
+{
+    <section class="care-overview mb-3" aria-label="@SharedLocalizer["Care stays"]">
+        <label for="care-stay" class="form-label">@SharedLocalizer["Care stay"]</label>
+        <form method="get" asp-route-id="@journal.Hedgehog.Id" class="portal-actions">
+            <select id="care-stay" name="episodeId" class="form-select care-stay-select">
+                @foreach (var stay in journal.Episodes)
+                {
+                    var label = stay.OpenHedgehogId.HasValue
+                        ? SharedLocalizer["Active since {0}", Model.Clock.FromUtc(stay.StartedAtUtc).ToString("d")].Value
+                        : $"{Model.Clock.FromUtc(stay.StartedAtUtc):d} – {Model.Clock.FromUtc(stay.EndedAtUtc!.Value):d} · {SharedLocalizer[$"Care.End.{stay.EndReason}"]}";
+                    <option value="@stay.Id" selected="@(stay.Id == episode?.Id)">@label</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-outline-primary">@SharedLocalizer["Show"]</button>
+        </form>
+    </section>
+}
+
+@if (episode is null || !journal.Episodes.Any(item => item.OpenHedgehogId.HasValue))
+{
+    @if (journal.Permissions.CanManageTeam)
+    {
+        <form method="post" asp-page-handler="Start" class="portal-form mb-3">
+            <label for="started-at" class="form-label">@SharedLocalizer["Admission date and time"]</label>
+            <input id="started-at" name="startedAt" class="form-control mb-3" type="datetime-local" value="@Model.Clock.InputNow" required />
+            <button type="submit" class="btn btn-primary">@SharedLocalizer["Start care stay"]</button>
+        </form>
+    }
+    else if (episode is null)
+    {
+        <p class="portal-empty">@SharedLocalizer["No care stay has been started."]</p>
+    }
+}
+
+@if (episode is not null)
+{
+    <section class="records-grid mb-3" aria-label="@SharedLocalizer["Care overview"]">
+        <div class="record-card">
+            <h2>@SharedLocalizer["Latest weight"]</h2>
+            @if (latest is null)
+            {
+                <p class="mb-0">@SharedLocalizer["No weights recorded."]</p>
+            }
+            else
+            {
+                <p class="care-metric mb-0">@latest.WeightGrams g</p>
+                <small>@Model.Clock.FromUtc(latest.OccurredAtUtc).ToString("g")
+                @if (previous is not null)
+                {
+                    <span> · @((latest.WeightGrams!.Value - previous.WeightGrams!.Value).ToString("+0;-0;0")) g</span>
+                }
+                </small>
+            }
+        </div>
+        <div class="record-card">
+            <h2>@SharedLocalizer["Open findings"]</h2>
+            <p class="care-metric mb-0">@findings.Count</p>
+            <a href="#body-map">@SharedLocalizer["Body map"]</a>
+        </div>
+        @if (isOpen)
+        {
+            <div class="record-card">
+                <h2>@SharedLocalizer["Doses due today or earlier"]</h2>
+                <p class="care-metric mb-0">@pending</p>
+                @if (lastDose is not null)
+                {
+                    <small>@SharedLocalizer["Last dose: {0} · {1}", lastDose.Medication, Model.Clock.FromUtc(lastDose.GivenAtUtc!.Value).ToString("g")]</small>
+                }
+                @if (journal.Permissions.CanPlan && unassigned > 0)
+                {
+                    <small>@SharedLocalizer["Plans awaiting an accepted assignment: {0}", unassigned]</small>
+                }
+                <a href="#medication">@SharedLocalizer["Medication plans"]</a>
+            </div>
+        }
+    </section>
+
+    <nav class="portal-actions mb-4" aria-label="@SharedLocalizer["Care journal"]">
+        <a class="btn btn-primary" href="#weight">@(isOpen && journal.Permissions.CanRecord ? SharedLocalizer["Weigh"] : SharedLocalizer["Weight history"])</a>
+        <a class="btn btn-outline-primary" href="#medication">@SharedLocalizer["Medication plans"]</a>
+        <a class="btn btn-outline-primary" href="#body-map">@(isOpen && journal.Permissions.CanRecord ? SharedLocalizer["Record an observation"] : SharedLocalizer["Body map"])</a>
+        <a class="btn btn-outline-primary" href="#timeline">@SharedLocalizer["Timeline"]</a>
+    </nav>
+
+    <section id="weight" class="care-section">
+        <h2>@SharedLocalizer["Weight history"]</h2>
+        @if (isOpen && journal.Permissions.CanRecord)
+        {
+            <form method="post" asp-page-handler="Entry" class="portal-form mb-3">
+                <input type="hidden" name="episodeId" value="@episode.Id" />
+                <input type="hidden" name="kind" value="@CareEntryKind.Weight" />
+                <div class="care-fields">
+                    <div>
+                        <label for="weight-grams" class="form-label">@SharedLocalizer["Weight in grams"]</label>
+                        <input id="weight-grams" name="grams" class="form-control" type="number" min="1" max="10000" inputmode="numeric" required />
+                    </div>
+                    <div>
+                        <label for="weight-at" class="form-label">@SharedLocalizer["Measured at"]</label>
+                        <input id="weight-at" name="occurredAt" class="form-control" type="datetime-local" value="@Model.Clock.InputNow" required />
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3">@SharedLocalizer["Save weight"]</button>
+            </form>
+        }
+        @if (weights.Count > 0)
+        {
+            <div class="care-chart portal-empty">
+                @if (weights.Count > 1)
+                {
+                    <canvas id="care-weight-chart" data-zone="@Model.Clock.ZoneId" aria-hidden="true" hidden></canvas>
+                    <p id="care-weight-scale" class="small mb-2" hidden></p>
+                }
+                <details>
+                    <summary>@SharedLocalizer["Measurements as a table"]</summary>
+                    <div class="table-responsive">
+                        <table class="table mb-0">
+                            <thead><tr><th scope="col">@SharedLocalizer["Measured at"]</th><th scope="col">@SharedLocalizer["Weight in grams"]</th><th scope="col">@SharedLocalizer["Recorded by"]</th></tr></thead>
+                            <tbody>
+                                @foreach (var weight in weights)
+                                {
+                                    <tr data-weight="@weight.WeightGrams" data-time="@(new DateTimeOffset(DateTime.SpecifyKind(weight.OccurredAtUtc, DateTimeKind.Utc)).ToUnixTimeMilliseconds())">
+                                        <td>@Model.Clock.FromUtc(weight.OccurredAtUtc).ToString("g")</td><td>@weight.WeightGrams</td><td>@weight.EnteredBy</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </details>
+            </div>
+        }
+    </section>
+
+    <partial name="_CareBodyMap" model="Model" />
+    <partial name="_CareMedication" model="Model" />
+
+    <section id="timeline" class="care-section">
+        <h2>@SharedLocalizer["Timeline"]</h2>
+        @{
+            var history = journal.Entries.Select(item => (At: item.OccurredAtUtc, Entry: (CareEntry?)item, Plan: (MedicationPlan?)null, Dose: (MedicationDose?)null))
+                .Concat(journal.Plans.SelectMany(plan => plan.Doses.Where(dose => dose.Status is DoseStatus.Given or DoseStatus.Skipped)
+                    .Select(dose => (At: dose.GivenAtUtc ?? dose.RecordedAtUtc ?? dose.ScheduledAtUtc, Entry: (CareEntry?)null, Plan: (MedicationPlan?)plan, Dose: (MedicationDose?)dose))))
+                .OrderByDescending(item => item.At).ToList();
+        }
+        @if (history.Count == 0)
+        {
+            <p class="portal-empty">@SharedLocalizer["There are no entries yet."]</p>
+        }
+        else
+        {
+            <ul class="list-group">
+                @foreach (var item in history)
+                {
+                    <li class="list-group-item">
+                        <small>@Model.Clock.FromUtc(item.At).ToString("g")</small>
+                        @if (item.Entry is CareEntry entry)
+                        {
+                            <div class="fw-semibold">@SharedLocalizer[$"Care.Entry.{entry.Kind}"] · @entry.EnteredBy</div>
+                            @if (entry.WeightGrams.HasValue)
+                            {
+                                <div>@entry.WeightGrams g</div>
+                            }
+                            @if (entry.Region is BodyRegion region)
+                            {
+                                <div>@SharedLocalizer[$"Care.Region.{region}"]</div>
+                            }
+                            @if (entry.ParentEntryId is Guid parentId && journal.ParentNotes.TryGetValue(parentId, out var parent))
+                            {
+                                <p class="mb-0 small">@SharedLocalizer["Update to: {0}", parent]</p>
+                            }
+                            <div class="care-text">@entry.Note</div>
+                        }
+                        else if (item.Dose is MedicationDose dose)
+                        {
+                            <div class="fw-semibold">@item.Plan?.Medication · @SharedLocalizer[$"Care.Dose.{dose.Status}"] · @dose.RecordedBy</div>
+                            <div>@dose.ActualAmount</div>
+                            <div class="care-text">@dose.Note</div>
+                        }
+                    </li>
+                }
+            </ul>
+        }
+    </section>
+
+    @if (isOpen && journal.Permissions.CanManageTeam)
+    {
+        <details class="portal-form mb-3">
+            <summary>@SharedLocalizer["End care stay"]</summary>
+            <p class="mt-2">@SharedLocalizer["Ending this stay cancels all open medication doses. Recorded entries remain in the journal."]</p>
+            <form method="post" asp-page-handler="End">
+                <input type="hidden" name="episodeId" value="@episode.Id" />
+                <label for="end-reason" class="form-label">@SharedLocalizer["Reason"]</label>
+                <select id="end-reason" name="reason" class="form-select mb-3" required>
+                    <option value="">@SharedLocalizer["Select a reason"]</option>
+                    @foreach (var reason in Enum.GetValues<CareEndReason>())
+                    {
+                        <option value="@reason">@SharedLocalizer[$"Care.End.{reason}"]</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-outline-danger">@SharedLocalizer["End care stay"]</button>
+            </form>
+        </details>
+    }
+}
+
+@if (journal.Permissions.CanManageTeam && journal.Hedgehog.CommunityId.HasValue)
+{
+    <section id="team" class="care-section">
+        <h2>@SharedLocalizer["Care team"]</h2>
+        <p>@SharedLocalizer["The assigned keeper can record care. Add other members who help with this hedgehog."]</p>
+        @foreach (var member in journal.CommunityUsers.Where(person => journal.TeamIds.Contains(person.Id)))
+        {
+            <form method="post" asp-page-handler="Team" class="portal-actions mb-2">
+                <input type="hidden" name="helperId" value="@member.Id" />
+                <span>@member.Name</span>
+                <button type="submit" name="add" value="false" class="btn btn-outline-danger">@SharedLocalizer["Remove from team"]</button>
+            </form>
+        }
+        @if (journal.CommunityUsers.Any(person => !journal.TeamIds.Contains(person.Id)))
+        {
+            <form method="post" asp-page-handler="Team" class="portal-form">
+                <label for="new-helper" class="form-label">@SharedLocalizer["Community member"]</label>
+                <select id="new-helper" name="helperId" class="form-select mb-3" required>
+                    <option value="">@SharedLocalizer["Select a helper"]</option>
+                    @foreach (var person in journal.CommunityUsers.Where(person => !journal.TeamIds.Contains(person.Id)))
+                    {
+                        <option value="@person.Id">@person.Name</option>
+                    }
+                </select>
+                <button type="submit" class="btn btn-primary" name="add" value="true">@SharedLocalizer["Add to care team"]</button>
+            </form>
+        }
+    </section>
+}
+
+@section Head {
+    <link rel="stylesheet" href="~/css/care.css" asp-append-version="true" />
+}
+@section Scripts {
+    <script src="~/js/care.js" asp-append-version="true"></script>
+}

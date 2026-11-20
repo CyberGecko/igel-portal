@@ -47,9 +47,13 @@
     </dl>
 </div>
 <div class="portal-actions mt-3">
+    @if (Model.CanReadCare)
+    {
+        <a class="btn btn-primary" asp-page="./Care" asp-route-id="@Model.Hedgehog.Id">@SharedLocalizer["Care journal"]</a>
+    }
     @if (Model.Hedgehog.AttachedUser == User.Identity?.Name)
     {
-        <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Hedgehog.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
+        <a class="btn btn-outline-primary" asp-page="./Edit" asp-route-id="@Model.Hedgehog.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
     }
     <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Back to List"]</a>
 </div>

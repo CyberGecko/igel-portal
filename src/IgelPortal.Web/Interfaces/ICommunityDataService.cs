@@ -15,6 +15,7 @@ namespace IgelPortal.Web.Interfaces
         Task PromoteUserToCommunityModerator(Guid? communityId, String userName);
         Task DemoteUserFromCommunityModerator(Guid? communityId, String userName);
         Task RemoveUserFromCommunity(Guid? communityId, String userName);
+        Task<bool> SetMedicationPlanner(Guid communityId, string userName, bool grant);
         Task<bool> TryAddUserAsApplicant(Guid communityId, IIdentity? user);
         Task AddUserAsOwner(Guid? communityId, IIdentity? user);
         Task AddUserAsOwner(Guid? communityId, String userName);

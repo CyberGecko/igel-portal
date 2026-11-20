@@ -1,0 +1,58 @@
+@page
+@using IgelPortal.Web.Data.Care
+@model IgelPortal.Web.Pages.Hedgehogs.CareTasksModel
+@{
+    ViewData["Title"] = SharedLocalizer["My tasks"];
+}
+
+<div class="page-heading"><h1>@ViewData["Title"]</h1></div>
+@if (Model.Tasks.Count == 0)
+{
+    <p class="portal-empty">@SharedLocalizer["You have no open medication tasks."]</p>
+}
+else
+{
+    <div class="records-grid mb-4">
+        @foreach (var item in Model.Tasks)
+        {
+            <article class="record-card">
+                <h2>@item.HedgehogName</h2>
+                <p class="mb-0"><strong>@item.Plan.Medication</strong> · @item.Plan.Amount</p>
+                @if (item.Plan.Assignment == PlanAssignment.Offered)
+                {
+                    <p class="mb-0">@SharedLocalizer["Plan offered to you"]</p>
+                }
+                else
+                {
+                    <ul class="mb-0">
+                        @foreach (var dose in item.Due)
+                        {
+                            <li>
+                                @Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")
+                                @if (dose.ScheduledAtUtc <= DateTime.UtcNow)
+                                {
+                                    <strong> · @SharedLocalizer["Due"]</strong>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+                <div class="portal-actions">
+                    <a class="btn btn-primary" asp-page="./Care" asp-route-id="@item.HedgehogId" asp-fragment="@($"plan-{item.Plan.Id}")">
+                        @(item.Plan.Assignment == PlanAssignment.Offered ? SharedLocalizer["Review plan"] : SharedLocalizer["Open doses"])
+                    </a>
+                </div>
+            </article>
+        }
+    </div>
+}
+@if (Model.Hedgehogs.Count > 0)
+{
+    <h2 class="h4">@SharedLocalizer["Hedgehogs in my care"]</h2>
+    <ul class="list-group">
+        @foreach (var item in Model.Hedgehogs)
+        {
+            <li class="list-group-item"><a asp-page="./Care" asp-route-id="@item.Id">@item.Name</a></li>
+        }
+    </ul>
+}

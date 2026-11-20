@@ -59,6 +59,16 @@ else
                                         <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirm-delete" data-formId="Remove_@(item.UserName.Replace("@", "").Replace(".", ""))"><i class="bi bi-person-x"></i><span class="d-none d-md-inline"> @Localizer["Remove Member"]</span></a>
                                     </form>
                                 }
+                                @if (!item.CommunityRoles.Contains(CommunityRoles.OWNER) &&
+                                     item.CommunityRoles.Any(role => role is CommunityRoles.MEMBER or CommunityRoles.MODERATOR))
+                                {
+                                    bool hasPermission = item.CommunityRoles.Contains(CommunityRoles.MEDICATION_PLANNER);
+                                    <form method="post" class="d-inline" asp-page-handler="MedicationPermission" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName">
+                                        <button type="submit" class="btn btn-outline-primary" name="grant" value="@(!hasPermission ? "true" : "false")">
+                                            @Localizer[hasPermission ? "Revoke medication planning" : "Grant medication planning"]
+                                        </button>
+                                    </form>
+                                }
                                 @if (User.IsInRole(RoleNames.ADMIN) && !item.CommunityRoles.Contains(CommunityRoles.OWNER))
                                 {
                                     <form method="post" class="d-inline" asp-page-handler="MakeOwner" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-info"><i class="bi bi-person-badge"></i><span class="d-none d-md-inline"> @Localizer["Make Owner"]</span></button></form>

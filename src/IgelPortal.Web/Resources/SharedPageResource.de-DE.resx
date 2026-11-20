@@ -124,4 +124,133 @@
   <data name="Change language" xml:space="preserve">
     <value>Sprache wechseln</value>
   </data>
+  <data name="Accept plan" xml:space="preserve"><value>Plan übernehmen</value></data>
+  <data name="Active since {0}" xml:space="preserve"><value>Aktiv seit {0}</value></data>
+  <data name="Actual amount and unit" xml:space="preserve"><value>Tatsächlich gegebene Menge mit Einheit</value></data>
+  <data name="Actually given at" xml:space="preserve"><value>Tatsächlicher Zeitpunkt der Gabe</value></data>
+  <data name="Add an update or close this entry" xml:space="preserve"><value>Verlauf ergänzen oder Eintrag abschließen</value></data>
+  <data name="Add to care team" xml:space="preserve"><value>Ins Pflegeteam aufnehmen</value></data>
+  <data name="Admission date and time" xml:space="preserve"><value>Aufnahmedatum und Uhrzeit</value></data>
+  <data name="All scheduled doses" xml:space="preserve"><value>Alle geplanten Gaben</value></data>
+  <data name="Ask a helper to take this plan" xml:space="preserve"><value>Helfende Person für diesen Plan anfragen</value></data>
+  <data name="Body map" xml:space="preserve"><value>Körperkarte</value></data>
+  <data name="Body region" xml:space="preserve"><value>Körperstelle</value></data>
+  <data name="Care journal" xml:space="preserve"><value>Pflegetagebuch</value></data>
+  <data name="Care overview" xml:space="preserve"><value>Pflegeübersicht</value></data>
+  <data name="Care stay" xml:space="preserve"><value>Pflegeaufenthalt</value></data>
+  <data name="Care stays" xml:space="preserve"><value>Pflegeaufenthalte</value></data>
+  <data name="Care team" xml:space="preserve"><value>Pflegeteam</value></data>
+  <data name="Check the date range and administration times. Use 1–4 distinct times per day and a period of at most 90 days. Times must exist and be unambiguous in the portal time zone." xml:space="preserve"><value>Prüfe den Zeitraum und die Uhrzeiten. Pro Tag sind 1–4 unterschiedliche Uhrzeiten und insgesamt höchstens 90 Tage möglich. Bei der Zeitumstellung müssen die Zeiten eindeutig sein.</value></data>
+  <data name="Check the entered values and try again." xml:space="preserve"><value>Prüfe die Angaben und versuche es erneut.</value></data>
+  <data name="Clear point" xml:space="preserve"><value>Punkt entfernen</value></data>
+  <data name="Close with note" xml:space="preserve"><value>Mit Notiz abschließen</value></data>
+  <data name="Community member" xml:space="preserve"><value>Mitglied der Gemeinschaft</value></data>
+  <data name="Create a separate plan" xml:space="preserve"><value>Neuen, separaten Plan anlegen</value></data>
+  <data name="Create or replace a medication plan" xml:space="preserve"><value>Medikamentenplan anlegen oder ersetzen</value></data>
+  <data name="Daily times ({0})" xml:space="preserve"><value>Tägliche Uhrzeiten ({0})</value></data>
+  <data name="Date and time" xml:space="preserve"><value>Datum und Uhrzeit</value></data>
+  <data name="Decline plan" xml:space="preserve"><value>Plan ablehnen</value></data>
+  <data name="Doses due today or earlier" xml:space="preserve"><value>Bis heute fällige Gaben</value></data>
+  <data name="End care stay" xml:space="preserve"><value>Pflegeaufenthalt beenden</value></data>
+  <data name="End plan" xml:space="preserve"><value>Plan beenden</value></data>
+  <data name="Ending this plan cancels its open doses and keeps its recorded history." xml:space="preserve"><value>Offene Gaben werden storniert. Bereits erfasste Gaben bleiben im Tagebuch.</value></data>
+  <data name="Ending this stay cancels all open medication doses. Recorded entries remain in the journal." xml:space="preserve"><value>Mit dem Ende des Aufenthalts werden alle offenen Gaben storniert. Erfasste Einträge bleiben im Tagebuch.</value></data>
+  <data name="Entry type" xml:space="preserve"><value>Art des Eintrags</value></data>
+  <data name="First day" xml:space="preserve"><value>Erster Tag</value></data>
+  <data name="First time" xml:space="preserve"><value>Erste Uhrzeit</value></data>
+  <data name="Hedgehogs in my care" xml:space="preserve"><value>Igel in meiner Pflege</value></data>
+  <data name="Instructions (optional)" xml:space="preserve"><value>Hinweise (optional)</value></data>
+  <data name="Last day (inclusive)" xml:space="preserve"><value>Letzter Tag (einschließlich)</value></data>
+  <data name="Latest weight" xml:space="preserve"><value>Letztes Gewicht</value></data>
+  <data name="Measured at" xml:space="preserve"><value>Gemessen am</value></data>
+  <data name="Measurements as a table" xml:space="preserve"><value>Messwerte als Tabelle</value></data>
+  <data name="Medication" xml:space="preserve"><value>Präparat</value></data>
+  <data name="Medication plans" xml:space="preserve"><value>Medikamentenpläne</value></data>
+  <data name="My tasks" xml:space="preserve"><value>Meine Aufgaben</value></data>
+  <data name="Next open dose" xml:space="preserve"><value>Nächste offene Gabe</value></data>
+  <data name="No body region" xml:space="preserve"><value>Keine Körperstelle ausgewählt</value></data>
+  <data name="No care stay has been started." xml:space="preserve"><value>Es wurde noch kein Pflegeaufenthalt begonnen.</value></data>
+  <data name="No medication plans recorded." xml:space="preserve"><value>Es sind noch keine Medikamentenpläne erfasst.</value></data>
+  <data name="No weights recorded." xml:space="preserve"><value>Es sind noch keine Gewichte erfasst.</value></data>
+  <data name="Note or reason if not given" xml:space="preserve"><value>Notiz oder Grund, falls nicht gegeben</value></data>
+  <data name="Observation, finding or mark details" xml:space="preserve"><value>Beschreibung der Beobachtung, des Befunds oder der Markierung</value></data>
+  <data name="Open doses" xml:space="preserve"><value>Offene Gaben ansehen</value></data>
+  <data name="Open findings" xml:space="preserve"><value>Offene Befunde</value></data>
+  <data name="Optional time {0}" xml:space="preserve"><value>Uhrzeit {0} (optional)</value></data>
+  <data name="Plan created by {0}" xml:space="preserve"><value>Plan angelegt von {0}</value></data>
+  <data name="Plan ended" xml:space="preserve"><value>Plan beendet</value></data>
+  <data name="Plan offered to you" xml:space="preserve"><value>Dir zur Übernahme angeboten</value></data>
+  <data name="Point on" xml:space="preserve"><value>Gesetzter Punkt auf</value></data>
+  <data name="Prescribed amount and unit" xml:space="preserve"><value>Vorgegebene Menge mit Einheit</value></data>
+  <data name="Previous community" xml:space="preserve"><value>Plan aus einer früheren Gemeinschaft</value></data>
+  <data name="Reason" xml:space="preserve"><value>Grund</value></data>
+  <data name="Record a dose" xml:space="preserve"><value>Gabe dokumentieren</value></data>
+  <data name="Record an observation" xml:space="preserve"><value>Beobachtung notieren</value></data>
+  <data name="Record as given" xml:space="preserve"><value>Als gegeben erfassen</value></data>
+  <data name="Record as not given" xml:space="preserve"><value>Als nicht gegeben erfassen</value></data>
+  <data name="Recorded by" xml:space="preserve"><value>Erfasst von</value></data>
+  <data name="Remove from team" xml:space="preserve"><value>Aus Pflegeteam entfernen</value></data>
+  <data name="Replace an existing plan (optional)" xml:space="preserve"><value>Bestehenden Plan ersetzen (optional)</value></data>
+  <data name="Replacement cancels open doses in the previous plan and keeps its recorded history." xml:space="preserve"><value>Offene Gaben des alten Plans werden storniert. Sein bisheriger Verlauf bleibt erhalten.</value></data>
+  <data name="Review plan" xml:space="preserve"><value>Plan ansehen</value></data>
+  <data name="Save assignment" xml:space="preserve"><value>Zuweisung speichern</value></data>
+  <data name="Save entry" xml:space="preserve"><value>Eintrag speichern</value></data>
+  <data name="Save medication plan" xml:space="preserve"><value>Medikamentenplan speichern</value></data>
+  <data name="Save update" xml:space="preserve"><value>Verlauf speichern</value></data>
+  <data name="Save weight" xml:space="preserve"><value>Gewicht speichern</value></data>
+  <data name="Saved." xml:space="preserve"><value>Gespeichert.</value></data>
+  <data name="Scheduled dose" xml:space="preserve"><value>Geplante Gabe</value></data>
+  <data name="Scheduled for" xml:space="preserve"><value>Geplant für</value></data>
+  <data name="Select a helper" xml:space="preserve"><value>Helfende Person auswählen</value></data>
+  <data name="Select a reason" xml:space="preserve"><value>Grund auswählen</value></data>
+  <data name="Show" xml:space="preserve"><value>Anzeigen</value></data>
+  <data name="Start care stay" xml:space="preserve"><value>Pflegeaufenthalt beginnen</value></data>
+  <data name="Status" xml:space="preserve"><value>Status</value></data>
+  <data name="Tap the diagram to set a point, or select a body region in the form." xml:space="preserve"><value>Tippe auf die Karte, um einen Punkt zu setzen. Alternativ kannst du im Formular eine Körperstelle auswählen.</value></data>
+  <data name="The assigned keeper can record care. Add other members who help with this hedgehog." xml:space="preserve"><value>Die zuständige Person kann Einträge erfassen. Nimm weitere Mitglieder auf, die bei diesem Igel mithelfen.</value></data>
+  <data name="The entry has changed or falls outside the current stay. Check the current status and try again." xml:space="preserve"><value>Der Eintrag wurde geändert oder liegt außerhalb des aktuellen Aufenthalts. Prüfe den aktuellen Stand und versuche es erneut.</value></data>
+  <data name="The previous helper is no longer eligible. Select a new helper for the remaining doses." xml:space="preserve"><value>Die bisher zuständige Person kann keine Gaben mehr dokumentieren. Wähle eine neue Person für die offenen Gaben aus.</value></data>
+  <data name="There are no entries yet." xml:space="preserve"><value>Es gibt noch keine Einträge.</value></data>
+  <data name="Timeline" xml:space="preserve"><value>Verlauf</value></data>
+  <data name="Times use {0}." xml:space="preserve"><value>Zeitzone: {0}.</value></data>
+  <data name="Unassigned" xml:space="preserve"><value>Nicht zugewiesen</value></data>
+  <data name="Update note" xml:space="preserve"><value>Notiz zum Verlauf</value></data>
+  <data name="Update to: {0}" xml:space="preserve"><value>Verlauf zu: {0}</value></data>
+  <data name="Weigh" xml:space="preserve"><value>Wiegen</value></data>
+  <data name="Weight history" xml:space="preserve"><value>Gewichtsverlauf</value></data>
+  <data name="Weight in grams" xml:space="preserve"><value>Gewicht in Gramm</value></data>
+  <data name="You have no open medication tasks." xml:space="preserve"><value>Du hast keine offenen Medikamentenaufgaben.</value></data>
+  <data name="MedicationPlanner" xml:space="preserve"><value>Medikamentenpläne verwalten</value></data>
+  <data name="Care.Entry.Weight" xml:space="preserve"><value>Gewicht</value></data>
+  <data name="Care.Entry.Observation" xml:space="preserve"><value>Beobachtung</value></data>
+  <data name="Care.Entry.Finding" xml:space="preserve"><value>Befund / Verletzung</value></data>
+  <data name="Care.Entry.Mark" xml:space="preserve"><value>Markierung</value></data>
+  <data name="Care.Entry.Update" xml:space="preserve"><value>Verlaufseintrag</value></data>
+  <data name="Care.View.Top" xml:space="preserve"><value>Draufsicht</value></data>
+  <data name="Care.View.Left" xml:space="preserve"><value>Linke Seite</value></data>
+  <data name="Care.View.Right" xml:space="preserve"><value>Rechte Seite</value></data>
+  <data name="Care.Region.Head" xml:space="preserve"><value>Kopf</value></data>
+  <data name="Care.Region.BackLeft" xml:space="preserve"><value>Rücken links</value></data>
+  <data name="Care.Region.BackRight" xml:space="preserve"><value>Rücken rechts</value></data>
+  <data name="Care.Region.FrontLegLeft" xml:space="preserve"><value>Linkes Vorderbein</value></data>
+  <data name="Care.Region.FrontLegRight" xml:space="preserve"><value>Rechtes Vorderbein</value></data>
+  <data name="Care.Region.HindLegLeft" xml:space="preserve"><value>Linkes Hinterbein</value></data>
+  <data name="Care.Region.HindLegRight" xml:space="preserve"><value>Rechtes Hinterbein</value></data>
+  <data name="Care.Region.Belly" xml:space="preserve"><value>Bauch</value></data>
+  <data name="Care.Region.Other" xml:space="preserve"><value>Andere Körperstelle</value></data>
+  <data name="Care.End.Released" xml:space="preserve"><value>Ausgewildert</value></data>
+  <data name="Care.End.Transferred" xml:space="preserve"><value>Übergeben</value></data>
+  <data name="Care.End.Died" xml:space="preserve"><value>Verstorben</value></data>
+  <data name="Care.End.Other" xml:space="preserve"><value>Anderer Grund</value></data>
+  <data name="Care.Assignment.Unassigned" xml:space="preserve"><value>Nicht zugewiesen</value></data>
+  <data name="Care.Assignment.Offered" xml:space="preserve"><value>Übernahme angefragt</value></data>
+  <data name="Care.Assignment.Accepted" xml:space="preserve"><value>Übernommen</value></data>
+  <data name="Care.Assignment.Declined" xml:space="preserve"><value>Abgelehnt</value></data>
+  <data name="Care.Dose.Pending" xml:space="preserve"><value>Offen</value></data>
+  <data name="Care.Dose.Given" xml:space="preserve"><value>Gegeben</value></data>
+  <data name="Care.Dose.Skipped" xml:space="preserve"><value>Nicht gegeben</value></data>
+  <data name="Care.Dose.Cancelled" xml:space="preserve"><value>Storniert</value></data>
+  <data name="Due" xml:space="preserve"><value>Fällig</value></data>
+  <data name="Last dose: {0} · {1}" xml:space="preserve"><value>Letzte Gabe: {0} · {1}</value></data>
+  <data name="Plans awaiting an accepted assignment: {0}" xml:space="preserve"><value>Pläne ohne bestätigte Zuständigkeit: {0}</value></data>
 </root>

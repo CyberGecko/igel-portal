@@ -22,6 +22,224 @@ namespace IgelPortal.Web.Migrations
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareEntry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("EnteredAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("EnteredBy")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("EnteredById")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid>("EpisodeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int>("Kind")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(2000)
+                        .HasColumnType("varchar(2000)");
+
+                    b.Property<DateTime>("OccurredAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid?>("ParentEntryId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<int?>("PositionX")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PositionY")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Region")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("ResolvedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int?>("View")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("WeightGrams")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ParentEntryId");
+
+                    b.HasIndex("EpisodeId", "OccurredAtUtc");
+
+                    b.ToTable("CareEntries");
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareEpisode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<int?>("EndReason")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("EndedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("HedgehogId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<Guid?>("OpenHedgehogId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("StartedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OpenHedgehogId")
+                        .IsUnique();
+
+                    b.HasIndex("HedgehogId", "StartedAtUtc");
+
+                    b.ToTable("CareEpisodes");
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareHelper", b =>
+                {
+                    b.Property<Guid>("HedgehogId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("UserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid>("CommunityId")
+                        .HasColumnType("char(36)");
+
+                    b.HasKey("HedgehogId", "UserId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CareHelpers");
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.MedicationDose", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("ActualAmount")
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<DateTime?>("GivenAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<Guid>("PlanId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime?>("RecordedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("RecordedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("RecordedById")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("ScheduledAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlanId", "ScheduledAtUtc")
+                        .IsUnique();
+
+                    b.ToTable("MedicationDoses");
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.MedicationPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Amount")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("varchar(80)");
+
+                    b.Property<string>("AssignedUserId")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<int>("Assignment")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("AssignmentChangedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("CommunityId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("CreatedBy")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("varchar(256)");
+
+                    b.Property<string>("CreatedById")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime?>("EndedAtUtc")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<Guid>("EpisodeId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("Instructions")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
+                    b.Property<string>("Medication")
+                        .IsRequired()
+                        .HasMaxLength(160)
+                        .HasColumnType("varchar(160)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AssignedUserId");
+
+                    b.HasIndex("EpisodeId");
+
+                    b.ToTable("MedicationPlans");
+                });
+
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.AltchaReplay", b =>
                 {
                     b.Property<string>("Id")
@@ -593,6 +811,62 @@ namespace IgelPortal.Web.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareEntry", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Care.CareEpisode", null)
+                        .WithMany()
+                        .HasForeignKey("EpisodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("IgelPortal.Web.Data.Care.CareEntry", null)
+                        .WithMany()
+                        .HasForeignKey("ParentEntryId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareEpisode", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Entities.Hedgehog", null)
+                        .WithMany()
+                        .HasForeignKey("HedgehogId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.CareHelper", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Entities.Hedgehog", null)
+                        .WithMany()
+                        .HasForeignKey("HedgehogId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("IgelPortal.Web.Data.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.MedicationDose", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Care.MedicationPlan", null)
+                        .WithMany("Doses")
+                        .HasForeignKey("PlanId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.MedicationPlan", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Care.CareEpisode", null)
+                        .WithMany()
+                        .HasForeignKey("EpisodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.AuthenticatorTransport", b =>
                 {
                     b.HasOne("IgelPortal.Web.Data.Entities.PublicKeyCredential", null)
@@ -771,6 +1045,11 @@ namespace IgelPortal.Web.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("IgelPortal.Web.Data.Care.MedicationPlan", b =>
+                {
+                    b.Navigation("Doses");
                 });
 
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.Community", b =>
