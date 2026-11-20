@@ -13,6 +13,10 @@ Kontobestätigung, Passwort-Reset und Pflegeanfragen nutzen die Brevo-Transaktio
 
 Für die Produktion benötigt der Dienst ausgehendes HTTPS zu `api.brevo.com` auf Port 443. Bei aktiviertem Versand prüft die Anwendung beim Start, ob Schlüssel und Absender konfiguriert sind. Nach erfolgreicher Umstellung können die alten `Smtp`-Einstellungen entfernt werden.
 
+## Zeitzone für die Pflege
+
+Das Pflegetagebuch und die Medikamentenpläne verwenden standardmäßig `Europe/Berlin`. Betreiber können mit `Care__TimeZone` eine andere installierte Systemzeitzone setzen. Bereits erfasste Einträge und geplante Gaben speichern ihre Zeitpunkte in UTC. Eine Änderung der Anzeigezeitzone verschiebt diese Zeitpunkte nicht.
+
 ## Schutz der Registrierung
 
 Die Registrierung mit Passwort und die erstmalige Kontoerstellung per Google verlangen eine lokal gehostete ALTCHA-Sicherheitsprüfung. Aufgaben sind fünf Minuten gültig, an die Browser-Sitzung gebunden und nur einmal verwendbar. Die Anwendung begrenzt pro IP Aufgaben und Formular-POSTs getrennt auf 20 beziehungsweise 5 pro Minute. Der Browser benötigt HTTPS und JavaScript. Bestehende Anmeldungen mit Passwort oder Passkey verwenden kein CAPTCHA. Eine verknüpfte Google-Anmeldung verlangt die Aufgabe nur bei der erstmaligen Kontoerstellung.

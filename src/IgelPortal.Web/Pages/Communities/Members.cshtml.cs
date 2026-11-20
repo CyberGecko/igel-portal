@@ -105,6 +105,14 @@ namespace IgelPortal.Web.Pages.Communities
             return RedirectToPage(new { id });
         }
 
+        public async Task<IActionResult> OnPostMedicationPermission([FromRoute] Guid id, [FromRoute] string? username, bool grant)
+        {
+            if (string.IsNullOrWhiteSpace(username) || !await dataService.SetMedicationPlanner(id, username, grant))
+                return BadRequest();
+
+            return RedirectToPage(new { id });
+        }
+
         private async Task GetCommunityMemberList(Guid id)
         {
             Boolean isCommunityModerator = await this.dataService.HasUserCommunityMemberRole(id, base.User.Identity, CommunityRoles.MODERATOR);

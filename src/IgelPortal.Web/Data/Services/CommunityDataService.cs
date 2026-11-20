@@ -235,6 +235,37 @@ namespace IgelPortal.Web.Data.Services
             await this.dbContext.SaveChangesAsync();
         }
 
+        public async Task<bool> SetMedicationPlanner(Guid communityId, string userName, bool grant)
+        {
+            var members = dbContext.CommunityMembers.Where(member => member.CommunityId == communityId && member.UserName == userName
+                && member.Community.DeletedDate == null);
+            if (!await members.AnyAsync(member => member.CommunityRoleName == CommunityRoles.MEMBER ||
+                member.CommunityRoleName == CommunityRoles.MODERATOR || member.CommunityRoleName == CommunityRoles.OWNER))
+                return false;
+
+            var existing = await members.SingleOrDefaultAsync(member => member.CommunityRoleName == CommunityRoles.MEDICATION_PLANNER);
+            if (!grant && existing is not null)
+            {
+                dbContext.CommunityMembers.Remove(existing);
+                await dbContext.SaveChangesAsync();
+            }
+            else if (grant && existing is null)
+            {
+                var role = new Entities.CommunityMember { CommunityId = communityId, UserName = userName,
+                    CommunityRoleName = CommunityRoles.MEDICATION_PLANNER };
+                dbContext.CommunityMembers.Add(role);
+                try
+                {
+                    await dbContext.SaveChangesAsync();
+                }
+                catch (DbUpdateException exception) when (exception.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry })
+                {
+                    dbContext.Entry(role).State = EntityState.Detached;
+                }
+            }
+            return true;
+        }
+
         public async Task<bool> TryAddUserAsApplicant(Guid communityId, IIdentity? user)
         {
             if (string.IsNullOrWhiteSpace(user?.Name) ||

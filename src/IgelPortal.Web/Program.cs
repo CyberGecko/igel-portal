@@ -1,3 +1,4 @@
+using IgelPortal.Web.Data.Care;
 using Altcha;
 using Altcha.AspNetCore;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -50,6 +51,10 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.S
 builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<IHedgehogDataService, HedgehogDataService>();
+builder.Services.AddScoped<CareAccess>();
+builder.Services.AddScoped<CareJournalService>();
+builder.Services.AddScoped<MedicationPlanService>();
+builder.Services.AddSingleton<CareClock>();
 builder.Services.AddScoped<ITerritoryDataService, TerritoryDataService>();
 builder.Services.AddScoped<ICommunityDataService, CommunityDataService>();
 builder.Services.AddScoped<ITerritoryServiceDataService, TerritoryServiceDataService>();

@@ -1,0 +1,193 @@
+@using IgelPortal.Web.Data.Care
+@model IgelPortal.Web.Pages.Hedgehogs.CareModel
+@{
+    var journal = Model.Journal;
+    var episode = journal.Episode!;
+    bool isOpen = episode.OpenHedgehogId.HasValue;
+    var currentPlans = journal.Plans.Where(plan => plan.EndedAtUtc is null && plan.CommunityId == journal.Hedgehog.CommunityId).ToList();
+}
+
+<section id="medication" class="care-section">
+    <h2>@SharedLocalizer["Medication plans"]</h2>
+    @if (isOpen && journal.Permissions.CanPlan)
+    {
+        <details class="portal-form mb-3" id="new-medication-plan">
+            <summary>@SharedLocalizer["Create or replace a medication plan"]</summary>
+            <form method="post" asp-page-handler="Plan" class="mt-3">
+                <input type="hidden" name="episodeId" value="@episode.Id" />
+                <input type="hidden" name="planId" value="@Guid.NewGuid()" />
+                <div class="care-fields">
+                    <div>
+                        <label for="medication-name" class="form-label">@SharedLocalizer["Medication"]</label>
+                        <input id="medication-name" name="medication" class="form-control" maxlength="160" required />
+                    </div>
+                    <div>
+                        <label for="medication-amount" class="form-label">@SharedLocalizer["Prescribed amount and unit"]</label>
+                        <input id="medication-amount" name="amount" class="form-control" maxlength="80" required />
+                    </div>
+                    <div>
+                        <label for="plan-start" class="form-label">@SharedLocalizer["First day"]</label>
+                        <input id="plan-start" name="startDate" class="form-control" type="date" min="@Model.Today" value="@Model.Today" required />
+                    </div>
+                    <div>
+                        <label for="plan-end" class="form-label">@SharedLocalizer["Last day (inclusive)"]</label>
+                        <input id="plan-end" name="endDate" class="form-control" type="date" min="@Model.Today" value="@Model.Today" required />
+                    </div>
+                </div>
+                <fieldset class="mt-3">
+                    <legend>@SharedLocalizer["Daily times ({0})", Model.Clock.ZoneId]</legend>
+                    <div class="care-fields">
+                        @for (var index = 1; index <= 4; index++)
+                        {
+                            <div>
+                                <label for="dose-time-@index" class="form-label">@(index == 1 ? SharedLocalizer["First time"] : SharedLocalizer["Optional time {0}", index])</label>
+                                <input id="dose-time-@index" name="dailyTimes" class="form-control" type="time" required="@(index == 1)" />
+                            </div>
+                        }
+                    </div>
+                </fieldset>
+                <div class="mt-3">
+                    <label for="plan-instructions" class="form-label">@SharedLocalizer["Instructions (optional)"]</label>
+                    <textarea id="plan-instructions" name="instructions" class="form-control" rows="2" maxlength="1000"></textarea>
+                </div>
+                @if (currentPlans.Count > 0)
+                {
+                    <div class="mt-3">
+                        <label for="replace-plan" class="form-label">@SharedLocalizer["Replace an existing plan (optional)"]</label>
+                        <select id="replace-plan" name="replacePlanId" class="form-select">
+                            <option value="">@SharedLocalizer["Create a separate plan"]</option>
+                            @foreach (var plan in currentPlans)
+                            {
+                                <option value="@plan.Id">@plan.Medication · @plan.Amount · @Model.Clock.FromUtc(plan.CreatedAtUtc).ToString("g")</option>
+                            }
+                        </select>
+                        <p class="form-text mb-0">@SharedLocalizer["Replacement cancels open doses in the previous plan and keeps its recorded history."]</p>
+                    </div>
+                }
+                <button type="submit" class="btn btn-primary mt-3">@SharedLocalizer["Save medication plan"]</button>
+            </form>
+        </details>
+    }
+
+    @if (journal.Plans.Count == 0)
+    {
+        <p class="portal-empty">@SharedLocalizer["No medication plans recorded."]</p>
+    }
+    @foreach (var plan in journal.Plans)
+    {
+        var pending = plan.Doses.Where(dose => dose.Status == DoseStatus.Pending).ToList();
+        var ended = plan.EndedAtUtc.HasValue;
+        var available = isOpen && !ended && plan.CommunityId == journal.Hedgehog.CommunityId;
+        var assignedName = plan.AssignedUserId is string userId ? journal.AssignedNames.GetValueOrDefault(userId) : null;
+        var assignedToMe = plan.AssignedUserId == journal.Permissions.UserId;
+        <article class="record-card mb-3 care-plan" id="plan-@plan.Id">
+            <div>
+                <h3 class="h5 mb-1">@plan.Medication</h3>
+                <p class="mb-1">@plan.Amount · @(ended ? SharedLocalizer["Plan ended"] : available ? SharedLocalizer[$"Care.Assignment.{plan.Assignment}"] : SharedLocalizer["Previous community"])
+                    @if (assignedName is not null)
+                    {
+                        <span> · @assignedName</span>
+                    }
+                </p>
+                <small>@SharedLocalizer["Plan created by {0}", plan.CreatedBy]</small>
+                @if (!string.IsNullOrWhiteSpace(plan.Instructions))
+                {
+                    <p class="care-text mt-2 mb-0">@plan.Instructions</p>
+                }
+                @if (available && pending.Count > 0)
+                {
+                    <p class="mt-2 mb-0"><strong>@SharedLocalizer["Next open dose"]:</strong> @Model.Clock.FromUtc(pending[0].ScheduledAtUtc).ToString("g")</p>
+                }
+            </div>
+
+            @if (available && journal.Permissions.CanPlan)
+            {
+                <form method="post" asp-page-handler="Offer">
+                    <input type="hidden" name="planId" value="@plan.Id" />
+                    <label for="helper-@plan.Id" class="form-label">@SharedLocalizer["Ask a helper to take this plan"]</label>
+                    <div class="portal-actions">
+                        <select id="helper-@plan.Id" name="helperId" class="form-select care-stay-select">
+                            <option value="">@SharedLocalizer["Unassigned"]</option>
+                            @foreach (var person in journal.Eligible)
+                            {
+                                <option value="@person.Id" selected="@(person.Id == plan.AssignedUserId)">@person.Name</option>
+                            }
+                        </select>
+                        <button class="btn btn-outline-primary" type="submit">@SharedLocalizer["Save assignment"]</button>
+                    </div>
+                    @if (plan.AssignedUserId is not null && !journal.Eligible.Any(item => item.Id == plan.AssignedUserId))
+                    {
+                        <p class="form-text mb-0">@SharedLocalizer["The previous helper is no longer eligible. Select a new helper for the remaining doses."]</p>
+                    }
+                </form>
+            }
+
+            @if (available && assignedToMe && journal.Permissions.CanRecord && plan.Assignment == PlanAssignment.Offered)
+            {
+                <form method="post" asp-page-handler="Respond" class="portal-actions">
+                    <input type="hidden" name="planId" value="@plan.Id" />
+                    <button type="submit" class="btn btn-primary" name="accept" value="true">@SharedLocalizer["Accept plan"]</button>
+                    <button type="submit" class="btn btn-outline-secondary" name="accept" value="false">@SharedLocalizer["Decline plan"]</button>
+                </form>
+            }
+
+            @if (available && assignedToMe && journal.Permissions.CanRecord && plan.Assignment == PlanAssignment.Accepted && pending.Count > 0)
+            {
+                <form method="post" asp-page-handler="Dose" class="portal-form care-dose-form">
+                    <input type="hidden" name="planId" value="@plan.Id" />
+                    <h4 class="h6">@SharedLocalizer["Record a dose"]</h4>
+                    <label for="dose-@plan.Id" class="form-label">@SharedLocalizer["Scheduled dose"]</label>
+                    <select name="doseId" id="dose-@plan.Id" class="form-select mb-2" required>
+                        @foreach (var dose in pending)
+                        {
+                            <option value="@dose.Id">@Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")</option>
+                        }
+                    </select>
+                    <div class="care-fields mb-2">
+                        <div>
+                            <label for="given-at-@plan.Id" class="form-label">@SharedLocalizer["Actually given at"]</label>
+                            <input name="givenAt" id="given-at-@plan.Id" class="form-control" type="datetime-local" value="@Model.Clock.InputNow" />
+                        </div>
+                        <div>
+                            <label for="actual-amount-@plan.Id" class="form-label">@SharedLocalizer["Actual amount and unit"]</label>
+                            <input name="actualAmount" id="actual-amount-@plan.Id" class="form-control" maxlength="80" value="@plan.Amount" />
+                        </div>
+                    </div>
+                    <label for="dose-note-@plan.Id" class="form-label">@SharedLocalizer["Note or reason if not given"]</label>
+                    <textarea name="note" id="dose-note-@plan.Id" class="form-control mb-2" rows="2" maxlength="1000"></textarea>
+                    <div class="portal-actions">
+                        <button type="submit" class="btn btn-primary" name="given" value="true">@SharedLocalizer["Record as given"]</button>
+                        <button type="submit" class="btn btn-outline-secondary" name="given" value="false">@SharedLocalizer["Record as not given"]</button>
+                    </div>
+                </form>
+            }
+
+            <details>
+                <summary>@SharedLocalizer["All scheduled doses"]</summary>
+                <div class="table-responsive">
+                    <table class="table mb-0">
+                        <thead><tr><th scope="col">@SharedLocalizer["Scheduled for"]</th><th scope="col">@SharedLocalizer["Status"]</th><th scope="col">@SharedLocalizer["Recorded by"]</th></tr></thead>
+                        <tbody>
+                            @foreach (var dose in plan.Doses)
+                            {
+                                <tr><td>@Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")</td><td>@SharedLocalizer[$"Care.Dose.{dose.Status}"]</td><td>@dose.RecordedBy</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+
+            @if (available && journal.Permissions.CanPlan)
+            {
+                <details>
+                    <summary>@SharedLocalizer["End plan"]</summary>
+                    <form method="post" asp-page-handler="StopPlan" class="mt-2">
+                        <input type="hidden" name="planId" value="@plan.Id" />
+                        <p>@SharedLocalizer["Ending this plan cancels its open doses and keeps its recorded history."]</p>
+                        <button type="submit" class="btn btn-outline-danger">@SharedLocalizer["End plan"]</button>
+                    </form>
+                </details>
+            }
+        </article>
+    }
+</section>

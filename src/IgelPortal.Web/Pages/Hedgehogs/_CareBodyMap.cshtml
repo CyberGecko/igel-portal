@@ -1,0 +1,125 @@
+@using IgelPortal.Web.Data.Care
+@model IgelPortal.Web.Pages.Hedgehogs.CareModel
+@{
+    var journal = Model.Journal;
+    var episode = journal.Episode!;
+    bool writable = episode.OpenHedgehogId.HasValue && journal.Permissions.CanRecord;
+    var sites = journal.Entries.Where(item => item.Kind == CareEntryKind.Finding && item.ResolvedAtUtc is null)
+        .Concat(journal.ActiveMarks).ToList();
+}
+
+<section class="care-section" id="body-map">
+    <h2>@SharedLocalizer["Body map"]</h2>
+    @if (writable)
+    {
+        <p>@SharedLocalizer["Tap the diagram to set a point, or select a body region in the form."]</p>
+    }
+
+    <div class="portal-actions mb-2" id="care-view-controls" hidden>
+        @foreach (var view in Enum.GetValues<BodyView>())
+        {
+            <button type="button" class="btn btn-outline-primary" data-care-select-view="@view" aria-pressed="false">@SharedLocalizer[$"Care.View.{view}"]</button>
+        }
+    </div>
+    <div class="care-body-views" data-care-writable="@writable.ToString().ToLowerInvariant()">
+        @foreach (var view in Enum.GetValues<BodyView>())
+        {
+            var imagePath = $"~/images/care-body-{view.ToString().ToLowerInvariant()}.webp";
+            <figure class="portal-empty care-body-figure" data-care-view="@view">
+                <figcaption class="fw-semibold mb-2">@SharedLocalizer[$"Care.View.{view}"]</figcaption>
+                <div class="care-body-image">
+                    <img src="@imagePath" asp-append-version="true" width="480" height="360" alt="@SharedLocalizer[$"Care.View.{view}"]" />
+                    @foreach (var item in sites.Where(entry => entry.View == view && entry.PositionX.HasValue && entry.PositionY.HasValue))
+                    {
+                        <a class="care-dot @(item.Kind == CareEntryKind.Mark ? "care-mark" : "care-finding")"
+                           href="#site-@item.Id" data-care-x="@item.PositionX" data-care-y="@item.PositionY"
+                           title="@item.Note" aria-label="@SharedLocalizer[$"Care.Entry.{item.Kind}"]: @item.Note" hidden>
+                            @(item.Kind == CareEntryKind.Mark ? "●" : "!")
+                        </a>
+                    }
+                    <span class="care-dot care-selection" hidden aria-hidden="true">+</span>
+                </div>
+            </figure>
+        }
+    </div>
+
+    @if (sites.Count > 0)
+    {
+        <ul class="list-group mb-3">
+            @foreach (var item in sites)
+            {
+                <li id="site-@item.Id" class="list-group-item">
+                    <strong>@SharedLocalizer[$"Care.Entry.{item.Kind}"]</strong>
+                    @if (item.Region is BodyRegion region)
+                    {
+                        <span> · @SharedLocalizer[$"Care.Region.{region}"]</span>
+                    }
+                    else if (item.View is BodyView view)
+                    {
+                        <span> · @SharedLocalizer[$"Care.View.{view}"]</span>
+                    }
+                    <span class="d-block care-text">@item.Note</span>
+                    <small>@Model.Clock.FromUtc(item.OccurredAtUtc).ToString("g") · @item.EnteredBy</small>
+                    @if (writable)
+                    {
+                        <details class="record-actions">
+                            <summary>@SharedLocalizer["Add an update or close this entry"]</summary>
+                            <form method="post" asp-page-handler="FollowUp">
+                                <input type="hidden" name="episodeId" value="@episode.Id" />
+                                <input type="hidden" name="entryId" value="@item.Id" />
+                                <label class="form-label" for="update-@item.Id">@SharedLocalizer["Update note"]</label>
+                                <textarea id="update-@item.Id" name="note" class="form-control mb-2" rows="2" maxlength="2000" required></textarea>
+                                <div class="portal-actions">
+                                    <button class="btn btn-primary" type="submit" name="resolve" value="false">@SharedLocalizer["Save update"]</button>
+                                    <button class="btn btn-outline-primary" type="submit" name="resolve" value="true">@SharedLocalizer["Close with note"]</button>
+                                </div>
+                            </form>
+                        </details>
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (writable)
+    {
+        <form method="post" asp-page-handler="Entry" class="portal-form" id="care-site-form">
+            <input type="hidden" name="episodeId" value="@episode.Id" />
+            <input type="hidden" name="view" />
+            <input type="hidden" name="positionX" />
+            <input type="hidden" name="positionY" />
+            <div class="care-fields">
+                <div>
+                    <label for="entry-kind" class="form-label">@SharedLocalizer["Entry type"]</label>
+                    <select id="entry-kind" name="kind" class="form-select">
+                        @foreach (var kind in new[] { CareEntryKind.Observation, CareEntryKind.Finding, CareEntryKind.Mark })
+                        {
+                            <option value="@kind">@SharedLocalizer[$"Care.Entry.{kind}"]</option>
+                        }
+                    </select>
+                </div>
+                <div>
+                    <label for="note-at" class="form-label">@SharedLocalizer["Date and time"]</label>
+                    <input id="note-at" name="occurredAt" class="form-control" type="datetime-local" value="@Model.Clock.InputNow" required />
+                </div>
+                <div>
+                    <label for="body-region" class="form-label">@SharedLocalizer["Body region"]</label>
+                    <select id="body-region" name="region" class="form-select">
+                        <option value="">@SharedLocalizer["No body region"]</option>
+                        @foreach (var region in Enum.GetValues<BodyRegion>())
+                        {
+                            <option value="@region">@SharedLocalizer[$"Care.Region.{region}"]</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="portal-actions mt-2">
+                <p class="mb-0" id="care-point-label" data-point-text="@SharedLocalizer["Point on"]" role="status"></p>
+                <button class="btn btn-outline-secondary" id="care-clear-point" type="button" hidden>@SharedLocalizer["Clear point"]</button>
+            </div>
+            <label class="form-label mt-3" for="site-note">@SharedLocalizer["Observation, finding or mark details"]</label>
+            <textarea class="form-control mb-3" id="site-note" name="note" rows="3" maxlength="2000" required></textarea>
+            <button class="btn btn-primary" type="submit">@SharedLocalizer["Save entry"]</button>
+        </form>
+    }
+</section>

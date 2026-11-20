@@ -1,4 +1,5 @@
-﻿using IgelPortal.Web.Data.Entities;
+﻿using IgelPortal.Web.Data.Care;
+using IgelPortal.Web.Data.Entities;
 using IgelPortal.Web.Data.Entities.Mappings;
 using IgelPortal.Web.Data.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -23,9 +24,16 @@ namespace IgelPortal.Web.Data
 
         public DbSet<AltchaReplay> AltchaReplays { get; set; }
 
+        public DbSet<CareEpisode> CareEpisodes => Set<CareEpisode>();
+        public DbSet<CareHelper> CareHelpers => Set<CareHelper>();
+        public DbSet<CareEntry> CareEntries => Set<CareEntry>();
+        public DbSet<MedicationPlan> MedicationPlans => Set<MedicationPlan>();
+        public DbSet<MedicationDose> MedicationDoses => Set<MedicationDose>();
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ConfigureCare();
 
             modelBuilder.Entity<AltchaReplay>(replay =>
             {

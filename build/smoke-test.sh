@@ -163,3 +163,77 @@ for attempt in 1 2; do
 done
 [[ "$(db <<< 'SELECT COUNT(*) FROM ServiceRequestResponses;')" == 1 ]]
 echo 'MariaDB migrations, health, registration CAPTCHA, login, authenticated lists, map, service response and passkey authorization verified.'
+
+# Exercise medication permissions and the once-only recording against MariaDB.
+db <<'SQL'
+INSERT INTO AspNetUsers (Id, UserName, NormalizedUserName, Email, NormalizedEmail, EmailConfirmed, PasswordHash,
+    SecurityStamp, PhoneNumberConfirmed, TwoFactorEnabled, LockoutEnabled, AccessFailedCount, FirstName, LastName)
+SELECT 'care-helper-fixture', 'helper-ci@example.invalid', 'HELPER-CI@EXAMPLE.INVALID', 'helper-ci@example.invalid', 'HELPER-CI@EXAMPLE.INVALID',
+    1, PasswordHash, UUID(), 0, 0, 1, 0, 'Helper', 'CI'
+FROM AspNetUsers WHERE Email = 'igel-ci@example.invalid';
+INSERT INTO AspNetUserRoles (UserId, RoleId)
+    SELECT 'care-helper-fixture', Id FROM AspNetRoles WHERE NormalizedName = 'USER';
+INSERT INTO CommunityMembers (UserName, CommunityId, CommunityRoleName) VALUES
+ ('igel-ci@example.invalid','10000000-0000-0000-0000-000000000001','Owner'),
+ ('helper-ci@example.invalid','10000000-0000-0000-0000-000000000001','Member'),
+ ('helper-ci@example.invalid','10000000-0000-0000-0000-000000000001','Moderator');
+SQL
+
+care='/Hedgehogs/Care/10000000-0000-0000-0000-000000000002'
+post_care() {
+    local handler=$1
+    shift
+    curl --silent --show-error --max-time 10 --header 'X-Forwarded-Proto: https' \
+        --cookie "$cookies" --output /dev/null --write-out '%{http_code}' \
+        --data-urlencode "__RequestVerificationToken=$token" "$@" "$origin$care?handler=$handler"
+}
+
+token=$(read_csrf "$care")
+test -n "$token"
+# Use yesterday for admission so the same-day schedule stays valid even at midnight.
+admission=$(TZ=Europe/Berlin date --date='yesterday 12:00' +%Y-%m-%dT%H:%M)
+[[ "$(post_care Start --data-urlencode "startedAt=$admission")" == 302 ]]
+episode=$(db <<< 'SELECT Id FROM CareEpisodes WHERE OpenHedgehogId IS NOT NULL;')
+test -n "$episode"
+[[ "$(post_care Team --data-urlencode 'helperId=care-helper-fixture' --data-urlencode 'add=true')" == 302 ]]
+
+today=$(TZ=Europe/Berlin date +%F)
+plan='10000000-0000-0000-0000-000000000007'
+plan_form=(--data-urlencode "episodeId=$episode" --data-urlencode "planId=$plan"
+    --data-urlencode 'medication=CI fixture' --data-urlencode 'amount=CI amount'
+    --data-urlencode "startDate=$today" --data-urlencode "endDate=$today" --data-urlencode 'dailyTimes=12:00')
+for attempt in 1 2; do
+    [[ "$(post_care Plan "${plan_form[@]}")" == 302 ]]
+done
+[[ "$(db <<< 'SELECT COUNT(*) FROM MedicationPlans;')" == 1 ]]
+dose=$(db <<< 'SELECT Id FROM MedicationDoses;')
+test -n "$dose"
+[[ "$(post_care Offer --data-urlencode "planId=$plan" --data-urlencode 'helperId=care-helper-fixture')" == 302 ]]
+[[ "$(post_care Respond --data-urlencode "planId=$plan" --data-urlencode 'accept=true')" == 302 ]]
+[[ "$(db <<< 'SELECT Assignment FROM MedicationPlans;')" == 1 ]]
+
+rm -f -- "$cookies"
+token=$(read_csrf "$login")
+test -n "$token"
+status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' \
+    --data-urlencode "__RequestVerificationToken=$token" --data-urlencode 'Input.Email=helper-ci@example.invalid' \
+    --data-urlencode "Input.Password=$password" "$origin$login")
+[[ "$status" == 302 ]]
+token=$(read_csrf "$care")
+test -n "$token"
+plan_form[3]='planId=10000000-0000-0000-0000-000000000008'
+[[ "$(post_care Plan "${plan_form[@]}")" == 302 ]]
+[[ "$(db <<< 'SELECT COUNT(*) FROM MedicationPlans;')" == 1 ]]
+
+given_at=$(TZ=Europe/Berlin date +%Y-%m-%dT%H:%M)
+dose_form=(--data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" --data-urlencode 'given=true'
+    --data-urlencode "givenAt=$given_at" --data-urlencode 'actualAmount=CI amount')
+[[ "$(post_care Dose "${dose_form[@]}")" == 302 ]]
+[[ "$(db <<< 'SELECT Status FROM MedicationDoses;')" == 0 ]]
+[[ "$(post_care Respond --data-urlencode "planId=$plan" --data-urlencode 'accept=true')" == 302 ]]
+# The second request tries a different outcome so an overwrite would be detectable.
+[[ "$(post_care Dose "${dose_form[@]}")" == 302 ]]
+[[ "$(post_care Dose --data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" \
+    --data-urlencode 'given=false' --data-urlencode 'note=duplicate fixture')" == 302 ]]
+[[ "$(db <<< "SELECT COUNT(*) FROM MedicationDoses WHERE Status=1 AND RecordedById='care-helper-fixture' AND Note IS NULL;")" == 1 ]]
+echo 'Care permissions, plan acceptance and once-only medication recording verified.'

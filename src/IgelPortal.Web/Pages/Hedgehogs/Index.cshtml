@@ -70,6 +70,7 @@ else
                     <div class="portal-actions">
                         @if (isOwner)
                         {
+                            <a class="btn btn-outline-primary" asp-page="./Care" asp-route-id="@item.Id">@SharedLocalizer["Care journal"]</a>
                             <a class="btn btn-outline-primary" asp-page="./Edit" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
                         }
                         <details class="record-actions">
