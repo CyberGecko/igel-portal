@@ -7,21 +7,34 @@
 }
 
 <h1>@ViewData["Title"]</h1>
-<div class="row mb-2">
-    <ul class="nav nav-tabs">
-        <li class="nav-item">
-            <a class="nav-link active" aria-current="@Localizer["With Password"]" href="#"><i class="bi bi-key"></i><span class="d-none d-md-inline"> @Localizer["With Password"]</span></a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="./PasskeyLogin"><i class="bi bi-fingerprint"></i><span class="d-none d-md-inline"> @Localizer["Passkey"]</span></a>
-        </li>
-    </ul>
+@if (Model.ConfirmAccount)
+{
+    <p class="alert alert-info">@Localizer["Sign in again to confirm changes to your account security."]</p>
+}
+<div class="row g-4">
+    <div class="col-md-6">
+        <form method="post" asp-page-handler="Passkey" asp-route-returnUrl="@Model.ReturnUrl" asp-route-confirmAccount="@Model.ConfirmAccount"
+              data-passkey-form="get" data-options-url="@Url.Page("./Login", "PasskeyOptions")"
+              data-error="@Localizer["Could not sign in with a passkey. Try again or use another sign-in method."]" hidden>
+            <input type="hidden" name="credential" />
+            <button id="passkey-sign-in" type="submit" class="w-100 btn btn-lg btn-primary">
+                <i class="bi bi-fingerprint" aria-hidden="true"></i> @Localizer["Sign in with a passkey"]
+            </button>
+            <p class="mt-2 mb-0 text-body-secondary">@Localizer["Use your device PIN, fingerprint, face recognition or a security key."]</p>
+            <div class="alert alert-danger mt-2" role="alert" data-passkey-error hidden></div>
+        </form>
+        @if (Model.PasskeyError is { } passkeyError)
+        {
+            <p class="alert alert-danger mt-2" role="alert">@passkeyError</p>
+        }
+        <p data-passkey-unavailable hidden>@Localizer["This browser does not support passkeys."]</p>
+    </div>
 </div>
-<div class="row">
-    <div class="col-md-4">
+<div class="row g-4 mt-2">
+    <div class="col-md-6">
         <section>
-            <form id="account" method="post">
-                <h2>@Localizer["Use a local account to log in."]</h2>
+            <form id="account" method="post" asp-route-returnUrl="@Model.ReturnUrl" asp-route-confirmAccount="@Model.ConfirmAccount">
+                <h2>@Localizer["Sign in with a password"]</h2>
                 <hr />
                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
                 <div class="form-floating mb-3">
@@ -59,11 +72,11 @@
     </div>
     @if ((Model.ExternalLogins?.Count ?? 0) > 0)
     {
-        <div class="col-md-6 col-md-offset-2">
+        <div class="col-md-6">
             <section>
                 <h3>@Localizer["Use another service to log in."]</h3>
                 <hr />
-                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal">
+                <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" asp-route-confirmAccount="@Model.ConfirmAccount" method="post" class="form-horizontal">
                     <div>
                         <p>
                             @foreach (AuthenticationScheme provider in Model.ExternalLogins!)
@@ -80,4 +93,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/passkeys.js" asp-append-version="true" defer></script>
 }

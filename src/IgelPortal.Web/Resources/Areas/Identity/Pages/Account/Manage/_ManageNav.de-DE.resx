@@ -13,7 +13,7 @@
         <value>Externe Anmeldungen</value>
     </data>
   <data name="Passkey authentication" xml:space="preserve">
-        <value>Passkey Anmeldung</value>
+        <value>Passkeys</value>
     </data>
   <data name="Two-factor authentication" xml:space="preserve">
         <value>Zwei-Faktor Authentifizierung</value>

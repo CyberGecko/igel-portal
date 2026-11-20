@@ -10,7 +10,7 @@
     {
         <li id="external-logins" class="nav-item"><a id="external-login" class="nav-link @ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins"><i class="bi bi-people"></i> @Localizer["External logins"]</a></li>
     }
-    <li class="nav-item"><a class="nav-link @ManageNavPages.PasskeyAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./PasskeyAuthentication"><i class="bi bi-fingerprint"></i> @Localizer["Passkey authentication"]</a></li>
+    <li class="nav-item"><a class="nav-link @ManageNavPages.PasskeyAuthenticationNavClass(ViewContext)" id="passkeys" asp-page="./PasskeyAuthentication"><i class="bi bi-fingerprint"></i> @Localizer["Passkey authentication"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication"><i class="bi bi-phone"></i> @Localizer["Two-factor authentication"]</a></li>
     <li class="nav-item"><a class="nav-link @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData"><i class="bi bi-person-bounding-box"></i> @Localizer["Personal data"]</a></li>
 </ul>

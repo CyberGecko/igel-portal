@@ -61,9 +61,9 @@ for path in /health/live /health/ready /; do
         --header 'X-Forwarded-Proto: https' --max-time 10 "$origin$path")
     [[ "$status" == 200 ]]
 done
+passkeys='/Identity/Account/Manage/PasskeyAuthentication'
 status=$(curl --silent --show-error --output /dev/null --write-out '%{http_code}' \
-    --header 'X-Forwarded-Proto: https' --header 'Content-Type: application/json' \
-    --data '{}' --max-time 10 "$origin/fido2/createattestationoptions")
+    --header 'X-Forwarded-Proto: https' --max-time 10 "$origin$passkeys")
 [[ "$status" == 302 || "$status" == 401 ]]
 cookies="$temporary/cookies.txt"
 html="$temporary/form.html"
@@ -139,10 +139,24 @@ SQL
 login='/Identity/Account/Login'
 token=$(read_csrf "$login")
 test -n "$token"
+grep -q 'id="passkey-sign-in"' "$html"
+status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' \
+    --data '' "$origin$login?handler=PasskeyOptions")
+[[ "$status" == 400 ]]
+assertion=$("${browser[@]}" --fail --data-urlencode "__RequestVerificationToken=$token" \
+    "$origin$login?handler=PasskeyOptions")
+[[ "$assertion" == *'"userVerification":"required"'* ]]
 status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' \
     --data-urlencode "__RequestVerificationToken=$token" --data-urlencode "Input.Email=$email" \
     --data-urlencode "Input.Password=$password" "$origin$login")
 [[ "$status" == 302 ]]
+token=$(read_csrf "$passkeys")
+test -n "$token"
+attestation=$("${browser[@]}" --fail --data-urlencode "__RequestVerificationToken=$token" \
+    "$origin$passkeys?handler=CreateOptions")
+[[ "$attestation" == *'"userVerification":"required"'* ]]
+[[ "$attestation" == *'"residentKey":"required"'* ]]
+[[ "$(db <<< 'SELECT COUNT(*) FROM AspNetUserPasskeys;')" == 0 ]]
 for path in '/Hedgehogs?filter=my' '/Territories?filter=my'; do
     status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' "$origin$path")
     [[ "$status" == 200 ]]

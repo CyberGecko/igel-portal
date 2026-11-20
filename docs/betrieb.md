@@ -23,6 +23,14 @@ Die Registrierung mit Passwort und die erstmalige Kontoerstellung per Google ver
 
 In Produktion `RegistrationCaptcha__HmacSecret` über die geschützte Serverkonfiguration setzen. Ein mit `openssl rand -hex 32` erzeugter Wert ist geeignet. Die Anwendung startet nur mit einem Schlüssel von mindestens 32 Zeichen. In Development kann die Anwendung für den lokalen Test selbst einen temporären Schlüssel erzeugen. Die Startmigration legt `AltchaReplays` an, damit eine Lösung auch nach einem Neustart nur einmal verwendbar ist.
 
+## Passkeys
+
+Das Portal verwendet die Passkey-Unterstützung von ASP.NET Core Identity. Die Startmigration legt `AspNetUserPasskeys` an. Sie übernimmt keine alten Fido2-Passkeys. Die alten Tabellen bleiben für einen Rollback auf das vorherige Release verfügbar.
+
+Für `https://www.igel-portal.de` verwendet das Portal standardmäßig `www.igel-portal.de` als Passkey-Domain. Bei einem eigenen Test- oder Produktionshost `Passkeys__ServerDomain` auf dessen HTTPS-Hostnamen setzen. Passkeys gelten für die Domain, auf der sie registriert wurden. Nginx muss den öffentlichen Host und das HTTPS-Protokoll an die Anwendung weitergeben.
+
+Nach dem Deployment mit einem bestätigten Testkonto anmelden, unter **Konto → Passkeys** einen benannten Passkey hinzufügen und diesen nach der Abmeldung auf der Login-Seite ausprobieren. In den Kontoeinstellungen können die einzelnen Passkeys nach einer frischen Anmeldung entfernt werden.
+
 ## Azure DevOps
 
 | Pipeline | Auslöser und Aufgabe |
@@ -46,7 +54,7 @@ Für das Deployment die Azure-Umgebung `igel-portal-production` mit Approval und
 
 - ASP.NET-Core-10-Runtime bereitstellen und die systemd-Unit auf `<DeployRoot>/current/IgelPortal.Web.dll` mit `WorkingDirectory=<DeployRoot>/current` und `ASPNETCORE_ENVIRONMENT=Production` konfigurieren. Kestrel an Loopback binden und im lokalen Reverse-Proxy `Host` und `X-Forwarded-Proto` weitergeben. Bei einer bestehenden Installation den Altstand vor dem ersten Wechsel als Rückfalloption sichern.
 - Der Deployment-Benutzer benötigt Schreibzugriff auf das Release-Verzeichnis und eng begrenzte sudo-Rechte für `systemctl restart` und `systemctl stop` dieser einen Unit. Der Dienstbenutzer benötigt Leserechte für Releases und die geschützte Konfiguration. Bei einem bereits verwendeten Verzeichnis muss `current` ein Symlink auf ein Verzeichnis unter `releases` sein.
-- `<DeployRoot>/shared/appsettings.json` aus der bisherigen Serverkonfiguration und der Repository-Vorlage zusammenführen. Verbindungszeichenfolge, Brevo-Schlüssel, gegebenenfalls Google-Zugangsdaten und `Syncfusion__LicenseKey` geschützt bereitstellen. `AllowedHosts` auf öffentliche Hosts und Loopback für die Health-Probes setzen. Die FIDO2-Origins und die Relying-Party-Domain für vorhandene Passkeys beibehalten.
+- `<DeployRoot>/shared/appsettings.json` aus der bisherigen Serverkonfiguration und der Repository-Vorlage zusammenführen. Verbindungszeichenfolge, Brevo-Schlüssel, gegebenenfalls Google-Zugangsdaten und `Syncfusion__LicenseKey` geschützt bereitstellen. `AllowedHosts` auf öffentliche Hosts und Loopback für die Health-Probes setzen. Für Passkeys die HTTPS-Domain wie oben beschrieben konfigurieren.
 - `DataProtection__KeyRingPath` auf einen dauerhaften, nur für den Dienstbenutzer zugänglichen Ort setzen. Wenn bestehende Sitzungen und Identity-Token gültig bleiben sollen, die vorhandenen Data-Protection-Schlüssel übernehmen und die Anwendung auf die bisherige Data-Protection-Anwendungskennung konfigurieren.
 - Vor dem Release ein Datenbank-Backup erstellen. Das Deployment prüft die Prüfsumme, legt ein neues Release-Verzeichnis an und wechselt `current` atomar. Bei Fehlern startet es das vorherige Release. Datenbankmigrationen bleiben bei einem Anwendungs-Rollback bestehen.
 
@@ -63,6 +71,6 @@ SET @igel_import_email = '<E-Mail des zu übernehmenden Kontos>';
 SOURCE /absoluter/pfad/build/deployment/import-single-account.sql
 ```
 
-Der Import prüft die ausgewählte Zieldatenbank, ihre leeren Fachdaten und die Eindeutigkeit des Kontos. Er übernimmt die Rollendefinitionen und Rollen-Claims sowie die Zuweisungen und vorhandenen Anmeldedaten dieses Kontos in einer Transaktion. Alte Sitzungen werden erneuert. Die Ausgabe zeigt nur Anzahl der Konten, Rollen und Zuweisungen.
+Der Import prüft die ausgewählte Zieldatenbank, ihre leeren Fachdaten und die Eindeutigkeit des Kontos. Er übernimmt die Rollendefinitionen und Rollen-Claims sowie die Zuweisungen, Passwortdaten und verknüpften Anmeldeanbieter dieses Kontos in einer Transaktion. Passkeys werden nach dem Import neu eingerichtet. Alte Sitzungen werden erneuert. Die Ausgabe zeigt nur Anzahl der Konten, Rollen und Zuweisungen.
 
-Vor der öffentlichen Umschaltung Anmeldung, Rollen und Brevo mit dem neuen Dienst prüfen. Die alte Installation bis zum Abschluss der Prüfungen als Rückfallmöglichkeit bereithalten. Der öffentliche Host bleibt `www.igel-portal.de`, damit die Passkey-Domain erhalten bleibt.
+Vor der öffentlichen Umschaltung Anmeldung, Rollen und Brevo mit dem neuen Dienst prüfen. Die alte Installation bis zum Abschluss der Prüfungen als Rückfallmöglichkeit bereithalten. Neue Passkeys auf dem öffentlichen Host `www.igel-portal.de` registrieren.

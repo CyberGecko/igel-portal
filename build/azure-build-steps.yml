@@ -7,7 +7,7 @@ steps:
 
   - bash: |
       set -euo pipefail
-      dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
+      dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1900%3BNU1901%3BNU1902%3BNU1903%3BNU1904%3BNU1905
       dotnet build src/IgelPortal.sln --configuration Release --no-restore
       dotnet test src/IgelPortal.sln --configuration Release --no-build --no-restore
     displayName: Audit dependencies, build and test

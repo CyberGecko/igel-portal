@@ -256,20 +256,6 @@ namespace IgelPortal.Web.Migrations
                     b.ToTable("AltchaReplays");
                 });
 
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.AuthenticatorTransport", b =>
-                {
-                    b.Property<byte[]>("PublicKeyCredentialId")
-                        .HasMaxLength(200)
-                        .HasColumnType("varbinary(200)");
-
-                    b.Property<int>("Value")
-                        .HasColumnType("int");
-
-                    b.HasKey("PublicKeyCredentialId", "Value");
-
-                    b.ToTable("Fido2AuthenticatorTransports", (string)null);
-                });
-
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.Community", b =>
                 {
                     b.Property<Guid>("Id")
@@ -331,22 +317,6 @@ namespace IgelPortal.Web.Migrations
                     b.ToTable("CommunityMembers");
                 });
 
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.DevicePublicKey", b =>
-                {
-                    b.Property<byte[]>("PublicKeyCredentialId")
-                        .HasMaxLength(255)
-                        .HasColumnType("varbinary(255)");
-
-                    b.Property<byte[]>("Value")
-                        .HasMaxLength(1024)
-                        .HasColumnType("varbinary(1024)");
-
-                    b.HasKey("PublicKeyCredentialId", "Value")
-                        .HasName("FK_Fido2DevicePubKeys_PubKeyCreds");
-
-                    b.ToTable("Fido2DevicePublicKeys", (string)null);
-                });
-
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.Hedgehog", b =>
                 {
                     b.Property<Guid>("Id")
@@ -399,50 +369,6 @@ namespace IgelPortal.Web.Migrations
                     b.HasIndex("UsedServiceId");
 
                     b.ToTable("Hedgehogs");
-                });
-
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.PublicKeyCredential", b =>
-                {
-                    b.Property<byte[]>("Id")
-                        .HasColumnType("varbinary(3072)");
-
-                    b.Property<Guid>("AaGuid")
-                        .HasColumnType("char(36)");
-
-                    b.Property<byte[]>("AttestationClientDataJson")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<string>("AttestationFormat")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.Property<byte[]>("AttestationObject")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<bool>("IsBackedUp")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<bool>("IsBackupEligible")
-                        .HasColumnType("tinyint(1)");
-
-                    b.Property<byte[]>("PublicKey")
-                        .IsRequired()
-                        .HasColumnType("longblob");
-
-                    b.Property<uint>("SignatureCounter")
-                        .HasColumnType("int unsigned");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("varchar(255)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Fido2PublicKeyCredentials", (string)null);
                 });
 
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.ServiceRequest", b =>
@@ -777,6 +703,23 @@ namespace IgelPortal.Web.Migrations
                     b.ToTable("AspNetUserLogins", (string)null);
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserPasskey<string>", b =>
+                {
+                    b.Property<byte[]>("CredentialId")
+                        .HasMaxLength(1024)
+                        .HasColumnType("varbinary(1024)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("varchar(255)");
+
+                    b.HasKey("CredentialId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("AspNetUserPasskeys", (string)null);
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.Property<string>("UserId")
@@ -867,15 +810,6 @@ namespace IgelPortal.Web.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.AuthenticatorTransport", b =>
-                {
-                    b.HasOne("IgelPortal.Web.Data.Entities.PublicKeyCredential", null)
-                        .WithMany("AuthenticatorTransports")
-                        .HasForeignKey("PublicKeyCredentialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.CommunityMember", b =>
                 {
                     b.HasOne("IgelPortal.Web.Data.Entities.Community", "Community")
@@ -885,15 +819,6 @@ namespace IgelPortal.Web.Migrations
                         .IsRequired();
 
                     b.Navigation("Community");
-                });
-
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.DevicePublicKey", b =>
-                {
-                    b.HasOne("IgelPortal.Web.Data.Entities.PublicKeyCredential", null)
-                        .WithMany("DevicePublicKeys")
-                        .HasForeignKey("PublicKeyCredentialId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.Hedgehog", b =>
@@ -921,15 +846,6 @@ namespace IgelPortal.Web.Migrations
                     b.Navigation("HomeTerritory");
 
                     b.Navigation("UsedService");
-                });
-
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.PublicKeyCredential", b =>
-                {
-                    b.HasOne("IgelPortal.Web.Data.Identity.ApplicationUser", null)
-                        .WithMany("PublicKeyCredentials")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.ServiceRequest", b =>
@@ -1023,6 +939,57 @@ namespace IgelPortal.Web.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserPasskey<string>", b =>
+                {
+                    b.HasOne("IgelPortal.Web.Data.Identity.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.OwnsOne("Microsoft.AspNetCore.Identity.IdentityPasskeyData", "Data", b1 =>
+                        {
+                            b1.Property<byte[]>("IdentityUserPasskeyCredentialId");
+
+                            b1.Property<byte[]>("AttestationObject")
+                                .IsRequired();
+
+                            b1.Property<byte[]>("ClientDataJson")
+                                .IsRequired();
+
+                            b1.Property<DateTimeOffset>("CreatedAt");
+
+                            b1.Property<bool>("IsBackedUp");
+
+                            b1.Property<bool>("IsBackupEligible");
+
+                            b1.Property<bool>("IsUserVerified");
+
+                            b1.Property<string>("Name");
+
+                            b1.Property<byte[]>("PublicKey")
+                                .IsRequired();
+
+                            b1.Property<uint>("SignCount");
+
+                            b1.PrimitiveCollection<string>("Transports");
+
+                            b1.HasKey("IdentityUserPasskeyCredentialId");
+
+                            b1.ToTable("AspNetUserPasskeys");
+
+                            b1
+                                .ToJson("Data")
+                                .HasColumnType("json");
+
+                            b1.WithOwner()
+                                .HasForeignKey("IdentityUserPasskeyCredentialId");
+                        });
+
+                    b.Navigation("Data")
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -1068,13 +1035,6 @@ namespace IgelPortal.Web.Migrations
                     b.Navigation("ServiceRequests");
                 });
 
-            modelBuilder.Entity("IgelPortal.Web.Data.Entities.PublicKeyCredential", b =>
-                {
-                    b.Navigation("AuthenticatorTransports");
-
-                    b.Navigation("DevicePublicKeys");
-                });
-
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.ServiceRequest", b =>
                 {
                     b.Navigation("Responses");
@@ -1092,11 +1052,6 @@ namespace IgelPortal.Web.Migrations
             modelBuilder.Entity("IgelPortal.Web.Data.Entities.TerritoryAttachedService", b =>
                 {
                     b.Navigation("Hedgehogs");
-                });
-
-            modelBuilder.Entity("IgelPortal.Web.Data.Identity.ApplicationUser", b =>
-                {
-                    b.Navigation("PublicKeyCredentials");
                 });
 #pragma warning restore 612, 618
         }

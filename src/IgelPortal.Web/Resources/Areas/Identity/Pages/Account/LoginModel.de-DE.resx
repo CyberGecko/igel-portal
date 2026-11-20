@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Passkey sign-in failed. Try again or use another sign-in method." xml:space="preserve">
+    <value>Die Anmeldung mit Passkey ist fehlgeschlagen. Versuche es erneut oder wähle eine andere Anmeldemethode.</value>
+  </data>
+</root>
