@@ -21,7 +21,6 @@ public static class HedgehogMapping
         CurrentTerritory = current!,
         Community = community!,
         UsedService = service!,
-        Image = entity.ImageString,
         OpenServiceRequests = openRequests
     };
 }

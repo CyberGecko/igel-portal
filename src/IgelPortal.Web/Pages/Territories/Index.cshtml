@@ -1,11 +1,10 @@
 ﻿@page "{filter?}"
 @using Syncfusion.EJ2.Maps
 @model IgelPortal.Web.Pages.Territories.IndexModel
-@inject IgelPortal.Web.Interfaces.ITerritoryDataService DataService
 
 
 @{
-    ViewData["Title"] = $"{Localizer["Territories"].Value} {SharedLocalizer["Index"].Value}";
+    ViewData["Title"] = ViewBag.IsCommunityOverview ? Localizer["Community Territories"] : Localizer["My territories"];
     var toolbar = new string[] { "Zoom", "ZoomIn", "ZoomOut", "Pan", "Reset" };
 
     var tooltip = new MapsTooltipSettings
@@ -26,80 +25,70 @@
             };
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="page-heading">
+    <h1>@ViewData["Title"]</h1>
+    @if (!ViewBag.IsCommunityOverview)
+    {
+        <a class="btn btn-primary" asp-page="./Create" asp-route-filter="@ViewBag.Filter">
+            <i class="bi bi-plus-circle" aria-hidden="true"></i> @SharedLocalizer["Add territory"]
+        </a>
+    }
+</div>
+@if (TempData["RecordNotice"] is string notice)
+{
+    <p class="alert alert-success" role="status">@SharedLocalizer[notice]</p>
+}
 
 @if (!ViewBag.IsCommunityOverview)
 {
-    <p>
-        <a class="btn btn-success" asp-page="./Create" asp-route-filter="@ViewBag.Filter"><i class="bi bi-plus-circle"></i><span class="d-none d-md-inline"> @SharedLocalizer["Create New"]</span></a>
-    </p>
     @if (Model.Territories.Count == 0)
     {
-        <p>@SharedLocalizer["No Territories registered"]</p>
+        <p class="portal-empty">@SharedLocalizer["No Territories registered"]</p>
     }
     else
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Territories[0].Name)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Territories[0].City)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Territories[0].Community)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Territories[0].AttachedServices)
-                    </th>
-                    <th>
-                        @Html.DisplayNameFor(model => model.Territories[0].ChangeDate)
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.Territories)
-                {
-                    <tr>
-                        <td>
-                            @item.Name
-                        </td>
-                        <td>
-                            @item.City
-                        </td>
-                        <td>
-                            @(item.Community ?? SharedLocalizer["No community"].Value)
-                        </td>
-                        <td>
-                            @item.AttachedServices.Count
-                        </td>
-                        <td>
-                            @item.ChangeDate.ToString("d")
-                        </td>
-                        <td>
-                            <div class="btn-group" role="group">
-                                <a class="btn btn-info" asp-page="./Details" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-search"></i><span class="d-none d-md-inline"> @SharedLocalizer["Details"]</span></a>
-                                <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
-                                @if (await DataService.IsTerritoryDeletableByUser(item.Id, User.Identity))
-                                {
-                                    <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
-                                }
-                            </div>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+        <div class="records-grid">
+            @foreach (var item in Model.Territories)
+            {
+                <article class="record-card">
+                    <div class="record-heading">
+                        <div class="dashboard-symbol"><i class="bi bi-geo-alt" aria-hidden="true"></i></div>
+                        <div>
+                            <h2><a asp-page="./Details" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@item.Name</a></h2>
+                            <span>@item.Street @item.StreetNumber, @item.PostalCode @item.City</span>
+                        </div>
+                    </div>
+                    <dl class="record-fields">
+                        <div>
+                            <dt>@Html.DisplayNameFor(model => model.Territories[0].Community)</dt>
+                            <dd>@(item.Community ?? SharedLocalizer["No community"].Value)</dd>
+                        </div>
+                        <div>
+                            <dt>@Html.DisplayNameFor(model => model.Territories[0].AttachedServices)</dt>
+                            <dd>@item.AttachedServices.Count</dd>
+                        </div>
+                        <div>
+                            <dt>@Html.DisplayNameFor(model => model.Territories[0].ChangeDate)</dt>
+                            <dd>@item.ChangeDate.ToString("d")</dd>
+                        </div>
+                    </dl>
+                    <div class="portal-actions">
+                        <a class="btn btn-outline-primary" asp-page="./Edit" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
+                        <details class="record-actions">
+                            <summary>@SharedLocalizer["More actions"]</summary>
+                            <ul class="mb-0">
+                                <li><a asp-page="./Delete" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Delete"]</a></li>
+                            </ul>
+                        </details>
+                    </div>
+                </article>
+            }
+        </div>
     }
 }
 else
 {
     <div>
-        <h4>@Localizer["Community Territories"]</h4>
-        <hr />
         <div class="row">
             <div class="w-100">
                 <ejs-maps id="maps" markerClick="window.shapeSelected">
@@ -107,7 +96,7 @@ else
                     <e-maps-zoomSettings Enable="true" zoomFactor="12" toolbars="toolbar" PinchZooming="true" ZoomOnClick="false"
                                          DoubleClickZoom="false" MouseWheelZoom="true" minZoom=2 maxZoom=14></e-maps-zoomSettings>
                     <e-maps-layers>
-                        <e-maps-layer urlTemplate="http://a.tile.openstreetmap.org/level/tileX/tileY.png">
+                        <e-maps-layer urlTemplate="https://tile.openstreetmap.org/level/tileX/tileY.png">
                             <e-layersettings-markers>
                                 <e-layersettings-marker visible="true" animationDuration="0" dataSource="ViewBag.Data" height="32" width="32" shape="Balloon"
                                                         tooltipSettings="tooltip" selectionSettings="select"></e-layersettings-marker>
@@ -115,6 +104,7 @@ else
                         </e-maps-layer>
                     </e-maps-layers>
                 </ejs-maps>
+                <p class="small text-end"><a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a></p>
             </div>
         </div>
         <div class="row">
@@ -145,7 +135,7 @@ else
                             </ul>
                             <span class="card-text fw-bold">@Localizer["Hedgehogs"]</span>
                             <ul class="">
-                                @if (item.AttachedServices.Count == 0)
+                                @if (item.Hedgehogs.Count == 0)
                                 {
                                     <li class="">
                                         @Localizer["No hedgehogs"]

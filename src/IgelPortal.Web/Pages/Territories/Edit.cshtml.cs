@@ -18,7 +18,7 @@ namespace IgelPortal.Web.Pages.Territories
         [BindProperty]
         public Territory Territory { get; set; } = default!;
         [BindProperty]
-        public TerritoryAttachedService TerritoryAttachedService { get; set; } = default!;
+        public TerritoryAttachedService TerritoryAttachedService { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(Guid? id, String? filter)
         {
@@ -37,10 +37,15 @@ namespace IgelPortal.Web.Pages.Territories
             {
                 return Forbid();
             }
-            this.Territory = territory;
+            Territory = territory;
+            ViewData["KeepTerritoryCommunity"] = territory.UserName != User.Identity?.Name;
 
-            IEnumerable<Community> communities = await this.communityDataService.FindAllForUserWithRole(base.User.Identity, CommunityRoles.MEMBER);
-            base.ViewData["Communities"] = new SelectList(communities, "Id", "Name", this.Territory.CommunityId);
+            var communities = await communityDataService.FindAllForUserWithRole(User.Identity, CommunityRoles.MEMBER);
+            if (territory.CommunityId is Guid communityId && !communities.Any(community => community.Id == communityId))
+            {
+                communities.Add(new Community { Id = communityId, Name = territory.Community });
+            }
+            ViewData["Communities"] = new SelectList(communities, "Id", "Name", territory.CommunityId);
 
             IEnumerable<TerritoryService> territoryServices = await this.territoryServiceDataService.FindAll();
             base.ViewData["TerritoryServices"] = new SelectList(territoryServices, "Id", "Name");
@@ -61,6 +66,10 @@ namespace IgelPortal.Web.Pages.Territories
             {
                 return NotFound();
             }
+            if (existing.UserName != User.Identity?.Name && !ModelState.ContainsKey("Territory.CommunityId"))
+            {
+                Territory.CommunityId = existing.CommunityId;
+            }
             if (!await CanEdit(existing) ||
                 (Territory.CommunityId != existing.CommunityId &&
                  (existing.UserName != User.Identity?.Name ||
@@ -79,6 +88,7 @@ namespace IgelPortal.Web.Pages.Territories
             }
             await this.dataService.Update(this.Territory);
 
+            TempData["RecordNotice"] = "Territory updated.";
             return base.RedirectToPage("./Index", new { filter });
         }
 

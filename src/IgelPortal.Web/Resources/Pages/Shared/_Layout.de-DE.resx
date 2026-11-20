@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="Hedgehog Portal" xml:space="preserve">
-        <value>Igel Portal</value>
+        <value>Igel-Portal</value>
     </data>
   <data name="Home" xml:space="preserve">
         <value>Start</value>
@@ -33,4 +33,10 @@
   <data name="Legal Notice" xml:space="preserve">
         <value>Impressum</value>
     </data>
+  <data name="Skip to content" xml:space="preserve">
+    <value>Zum Inhalt springen</value>
+  </data>
+  <data name="Toggle navigation" xml:space="preserve">
+    <value>Menü öffnen oder schließen</value>
+  </data>
 </root>

@@ -9,15 +9,14 @@ namespace IgelPortal.Web.ViewComponents
     {
         private readonly IOptions<RequestLocalizationOptions> localizationOptions = localizationOptions;
 
-        public IViewComponentResult Invoke(Boolean showCurrentCulture = false)
+        public IViewComponentResult Invoke()
         {
-            base.ViewData["ShowCurrentCulture"] = showCurrentCulture;
             var cultureFeature = HttpContext.Features.Get<IRequestCultureFeature>();
             var model = new CultureSwitcherModel
             {
                 SupportedCultures = [.. localizationOptions.Value.SupportedUICultures ?? []],
                 CurrentUICulture = cultureFeature?.RequestCulture?.UICulture ?? new System.Globalization.CultureInfo("de-DE"),
-                ReturnUrl = string.IsNullOrEmpty(base.HttpContext.Request.Path) ? "~/" : $"~{base.HttpContext.Request.Path.Value}"
+                ReturnUrl = string.IsNullOrEmpty(base.HttpContext.Request.Path) ? "~/" : $"~{Request.Path}{Request.QueryString}"
             };
             return View(model);
         }

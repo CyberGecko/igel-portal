@@ -15,7 +15,7 @@ namespace IgelPortal.Web.Interfaces
         Task PromoteUserToCommunityModerator(Guid? communityId, String userName);
         Task DemoteUserFromCommunityModerator(Guid? communityId, String userName);
         Task RemoveUserFromCommunity(Guid? communityId, String userName);
-        Task AddUserAsApplicant(Guid? communityId, IIdentity? user);
+        Task<bool> TryAddUserAsApplicant(Guid communityId, IIdentity? user);
         Task AddUserAsOwner(Guid? communityId, IIdentity? user);
         Task AddUserAsOwner(Guid? communityId, String userName);
         Task AddUserAsMember(Guid? communityId, IIdentity? user);

@@ -18,4 +18,7 @@
   <data name="No hedgehogs" xml:space="preserve">
         <value>Keine Igel</value>
     </data>
+  <data name="My territories" xml:space="preserve">
+    <value>Meine Reviere</value>
+  </data>
 </root>

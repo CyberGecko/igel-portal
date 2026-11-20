@@ -1,78 +1,22 @@
-﻿@page "{filter?}"
+@page "{filter?}"
 @model IgelPortal.Web.Pages.Hedgehogs.EditModel
-
 @{
-    ViewData["Title"] = SharedLocalizer["Edit"];
+    ViewData["Title"] = SharedLocalizer["Edit hedgehog"];
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<h4>@Localizer["Hedgehog"]</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form method="post" asp-route-filter="@ViewBag.Filter">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Hedgehog.Id" />
-            <input type="hidden" asp-for="Hedgehog.CreationDate" />
-            <input type="hidden" asp-for="Hedgehog.ChangeDate" />
-            <input type="hidden" asp-for="Hedgehog.DeletedDate" />
-            <input type="hidden" asp-for="Hedgehog.AttachedUser" />
-            <input type="hidden" asp-for="Hedgehog.CurrentTerritoryId" />
-            <input type="hidden" asp-for="Hedgehog.UsedServiceId" />
-            <input type="hidden" asp-for="Hedgehog.BiologicalSex" />
-
-            <div class="form-group input-group mb-3">
-                <label asp-for="Hedgehog.Name" class="control-label input-group-text"></label>
-                <input asp-for="Hedgehog.Name" class="form-control" />
-                <span asp-validation-for="Hedgehog.Name" class="text-danger"></span>
-            </div>
-            <div class="mb-3 form-group btn-group input-group" role="group">
-                <label asp-for="Hedgehog.BiologicalSex" class="control-label input-group-text"></label>
-
-                <input type="radio" class="btn-check" name="options-base" id="unknown" autocomplete="off" onchange="setBiologicalSex('@BiologicalSex.Unknown')" @(Model.Hedgehog.BiologicalSex == BiologicalSex.Unknown ? "checked" : "")>
-                <label class="btn btn-outline-primary" for="unknown"><i class="bi bi-gender-ambiguous"></i> @SharedLocalizer[BiologicalSex.Unknown.ToString()]</label>
-
-                <input type="radio" class="btn-check" name="options-base" id="female" autocomplete="off" onchange="setBiologicalSex('@BiologicalSex.Female')" @(Model.Hedgehog.BiologicalSex == BiologicalSex.Female ? "checked" : "")>
-                <label class="btn btn-outline-primary" for="female"><i class="bi bi-gender-female"></i> @SharedLocalizer[BiologicalSex.Female.ToString()]</label>
-
-                <input type="radio" class="btn-check" name="options-base" id="male" autocomplete="off" onchange="setBiologicalSex('@BiologicalSex.Male')" @(Model.Hedgehog.BiologicalSex == BiologicalSex.Male ? "checked" : "")>
-                <label class="btn btn-outline-primary" for="male"><i class="bi bi-gender-male"></i> @SharedLocalizer[BiologicalSex.Male.ToString()]</label>
-
-            </div>
-            <div class="form-group input-group mb-3">
-                <label asp-for="Hedgehog.HomeTerritoryId" class="control-label input-group-text"></label>
-                <select asp-for="Hedgehog.HomeTerritoryId" class="form-control" asp-items="ViewBag.Territories">
-                    <option value="" disabled>@SharedLocalizer["Select a territory"]</option>
-                </select>
-                <span asp-validation-for="Hedgehog.HomeTerritoryId" class="text-danger"></span>
-            </div>
-            <div class="form-group input-group mb-4">
-                <label asp-for="Hedgehog.CommunityId" class="control-label input-group-text"></label>
-                <select asp-for="Hedgehog.CommunityId" class="form-control" asp-items="ViewBag.Communities">
-                    <option value="" disabled>@SharedLocalizer["Select a community"]</option>
-                </select>
-                <span asp-validation-for="Hedgehog.CommunityId" class="text-danger"></span>
-            </div>
-            <div class="form-group mb-3">
-                <input type="submit" value="@SharedLocalizer["Save"]" class="btn btn-success" />
-            </div>
-        </form>
+<div class="page-heading">
+    <h1>@ViewData["Title"]</h1>
+</div>
+<form method="post" asp-route-filter="@ViewBag.Filter" class="portal-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <input type="hidden" asp-for="Hedgehog.Id" />
+    @Html.EditorFor(model => model.Hedgehog, "HedgehogFields")
+    <div class="portal-actions">
+        <button class="btn btn-primary" type="submit">@SharedLocalizer["Save"]</button>
+        <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Cancel"]</a>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Back to List"]</a>
-</div>
+</form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-
-    <script>
-        function setBiologicalSex(selectedValue) {
-            $('#Hedgehog_BiologicalSex').val(selectedValue)
-        }
-    </script>
+    <partial name="_ValidationScriptsPartial" />
 }

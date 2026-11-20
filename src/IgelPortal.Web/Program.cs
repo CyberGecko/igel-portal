@@ -158,6 +158,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 });
 
 builder.Services.AddRazorPages()
+                .AddSessionStateTempDataProvider()
                 .AddViewLocalization()
                 .AddDataAnnotationsLocalization(options =>
                 {

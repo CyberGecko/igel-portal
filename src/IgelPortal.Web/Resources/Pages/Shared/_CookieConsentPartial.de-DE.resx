@@ -13,4 +13,13 @@
         Die Verarbeitung dient der Einbindung von Inhalten, externen Diensten und Elementen Dritter (Z.B. Anmeldung über Google). Je nach Funktion werden dabei Daten an Dritte weitergegeben und an Dritte in Ländern, 
         in denen kein angemessenes Datenschutzniveau vorliegt und von diesen verarbeitet wird, z. B. die USA.</value>
     </data>
+  <data name="Cookie settings" xml:space="preserve">
+    <value>Cookie-Einstellungen</value>
+  </data>
+  <data name="This portal uses cookies and similar technologies." xml:space="preserve">
+    <value>Dieses Portal verwendet Cookies und ähnliche Funktionen.</value>
+  </data>
+  <data name="Cookie details" xml:space="preserve">
+    <value>Details zu Cookies</value>
+  </data>
 </root>

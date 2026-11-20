@@ -18,4 +18,10 @@
   <data name="Request service" xml:space="preserve">
         <value>Dienstanfrage</value>
     </data>
+  <data name="My hedgehogs" xml:space="preserve">
+    <value>Meine Igel</value>
+  </data>
+  <data name="Community hedgehogs" xml:space="preserve">
+    <value>Igel der Gemeinschaft</value>
+  </data>
 </root>

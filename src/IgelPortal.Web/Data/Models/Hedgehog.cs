@@ -12,9 +12,6 @@ namespace IgelPortal.Web.Data.Models
         [Display(Name = "BiologicalSex")]
         public BiologicalSex BiologicalSex { get; set; }
 
-        [Display(Name = "Image")]
-        public String? Image { get; set; }
-
         [Display(Name = "Community")]
         public Guid? CommunityId { get; set; }
 

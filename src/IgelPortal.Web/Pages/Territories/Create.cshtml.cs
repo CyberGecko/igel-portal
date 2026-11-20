@@ -41,6 +41,7 @@ namespace IgelPortal.Web.Pages.Territories
             this.Territory.UserName = base.User.Identity?.Name ?? String.Empty;
             await this.dataService.Insert(this.Territory);
 
+            TempData["RecordNotice"] = "Territory added.";
             return base.RedirectToPage("./Index", new { filter });
         }
     }

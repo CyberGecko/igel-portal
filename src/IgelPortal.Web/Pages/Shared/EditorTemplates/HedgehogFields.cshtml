@@ -1,0 +1,34 @@
+@model IgelPortal.Web.Data.Models.Hedgehog
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<fieldset class="mb-3">
+    <legend>@Html.DisplayNameFor(model => model.BiologicalSex)</legend>
+    <div class="d-flex flex-wrap gap-3">
+        @foreach (var sex in Enum.GetValues<BiologicalSex>())
+        {
+            <div class="form-check">
+                <input asp-for="BiologicalSex" type="radio" id="hedgehog-sex-@sex" value="@sex" class="form-check-input" />
+                <label for="hedgehog-sex-@sex" class="form-check-label">@SharedLocalizer[sex.ToString()]</label>
+            </div>
+        }
+    </div>
+    <span asp-validation-for="BiologicalSex" class="text-danger"></span>
+</fieldset>
+<div class="mb-3">
+    <label asp-for="HomeTerritoryId" class="form-label"></label>
+    <select asp-for="HomeTerritoryId" asp-items="ViewBag.Territories" class="form-select">
+        <option value="">@SharedLocalizer["No territory"]</option>
+    </select>
+    <span asp-validation-for="HomeTerritoryId" class="text-danger"></span>
+</div>
+<div class="mb-3">
+    <label asp-for="CommunityId" class="form-label"></label>
+    <select asp-for="CommunityId" asp-items="ViewBag.Communities" class="form-select">
+        <option value="">@SharedLocalizer["No community"]</option>
+    </select>
+    <span asp-validation-for="CommunityId" class="text-danger"></span>
+</div>

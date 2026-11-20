@@ -25,7 +25,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         }
 
         [BindProperty]
-        public Hedgehog Hedgehog { get; set; } = default!;
+        public Hedgehog Hedgehog { get; set; } = new();
 
 
         public async Task<IActionResult> OnPostAsync(String? filter)
@@ -36,7 +36,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             base.ModelState.Remove("Hedgehog.CurrentTerritory");
             base.ModelState.Remove("Hedgehog.Community");
             base.ModelState.Remove("Hedgehog.UsedService");
-            if (!base.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return await OnGet(filter);
             }
@@ -62,6 +62,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
 
             await this.dataService.Insert(this.Hedgehog);
 
+            TempData["RecordNotice"] = "Hedgehog added.";
             return base.RedirectToPage("./Index", new { filter });
         }
     }

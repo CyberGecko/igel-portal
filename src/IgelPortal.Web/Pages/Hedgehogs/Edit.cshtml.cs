@@ -15,7 +15,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         private readonly ICommunityDataService communityDataService = communityDataService;
 
         [BindProperty]
-        public Hedgehog Hedgehog { get; set; } = default!;
+        public Hedgehog Hedgehog { get; set; } = new();
 
         public async Task<IActionResult> OnGetAsync(Guid? id, String? filter)
         {
@@ -37,9 +37,18 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             this.Hedgehog = hedgehog;
 
             IList<Territory> territories = await this.territoryDataService.GetAllAdministratedByUser(base.User.Identity);
-            base.ViewData["Territories"] = new SelectList(territories.OrderBy(c => c.Community).ThenBy(c => c.Name), "Id", "Name", null, "Community");
+            if (hedgehog.HomeTerritoryId is Guid territoryId && !territories.Any(territory => territory.Id == territoryId))
+            {
+                territories.Add(new Territory { Id = territoryId, Name = hedgehog.HomeTerritory });
+            }
+            ViewData["Territories"] = new SelectList(territories.OrderBy(c => c.Community).ThenBy(c => c.Name), "Id", "Name", null, "Community");
 
-            base.ViewData["Communities"] = new SelectList(await this.communityDataService.FindAllForUserWithRole(base.User.Identity, CommunityRoles.MEMBER), "Id", "Name");
+            var communities = await communityDataService.FindAllForUserWithRole(User.Identity, CommunityRoles.MEMBER);
+            if (hedgehog.CommunityId is Guid communityId && !communities.Any(community => community.Id == communityId))
+            {
+                communities.Add(new Community { Id = communityId, Name = hedgehog.Community });
+            }
+            ViewData["Communities"] = new SelectList(communities, "Id", "Name");
 
             return base.Page();
         }
@@ -80,13 +89,14 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             base.ModelState.Remove("Hedgehog.CurrentTerritory");
             base.ModelState.Remove("Hedgehog.Community");
             base.ModelState.Remove("Hedgehog.UsedService");
-            if (!base.ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return await OnGetAsync(existing.Id, filter);
             }
 
             await this.dataService.Update(this.Hedgehog);
 
+            TempData["RecordNotice"] = "Hedgehog updated.";
             return base.RedirectToPage("./Index", new { filter });
         }
     }

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <data name="A user requested to join your community {0}" xml:space="preserve">
-        <value>A user requested to join your community {0}</value>
+        <value>Neue Beitrittsanfrage für deine Gemeinschaft {0}</value>
     </data>
   <data name="Member join request body" xml:space="preserve">
-        <value>The user {0} requested to join your community {1}. Please visit &lt;a href='{2}'&gt;the member section&lt;/a&gt; of your community to accept or deny the request.</value>
+        <value>Das Konto {0} möchte deiner Gemeinschaft {1} beitreten. Du kannst die Anfrage in der &lt;a href='{2}'&gt;Mitgliederverwaltung&lt;/a&gt; annehmen oder ablehnen.</value>
     </data>
 </root>
