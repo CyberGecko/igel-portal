@@ -2,6 +2,7 @@
 using IgelPortal.Web.Data.Entities;
 using IgelPortal.Web.Data.Entities.Mappings;
 using IgelPortal.Web.Data.Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,10 +19,6 @@ namespace IgelPortal.Web.Data
         public virtual DbSet<ServiceRequest> ServiceRequests { get; set; }
         public virtual DbSet<ServiceRequestResponse> ServiceRequestResponses { get; set; }
 
-        public DbSet<AuthenticatorTransport> AuthenticatorTransports { get; set; }
-        public DbSet<DevicePublicKey> DevicePublicKeys { get; set; }
-        public DbSet<PublicKeyCredential> PublicKeyCredentials { get; set; }
-
         public DbSet<AltchaReplay> AltchaReplays { get; set; }
 
         public DbSet<CareEpisode> CareEpisodes => Set<CareEpisode>();
@@ -34,6 +31,15 @@ namespace IgelPortal.Web.Data
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.ConfigureCare();
+
+            // Enable the passkey store without narrowing columns on existing Identity accounts.
+            modelBuilder.Entity<ApplicationUser>().Property(user => user.PhoneNumber).Metadata.SetMaxLength(null);
+            var logins = modelBuilder.Entity<IdentityUserLogin<string>>();
+            logins.Property(login => login.LoginProvider).Metadata.SetMaxLength(null);
+            logins.Property(login => login.ProviderKey).Metadata.SetMaxLength(null);
+            var tokens = modelBuilder.Entity<IdentityUserToken<string>>();
+            tokens.Property(token => token.LoginProvider).Metadata.SetMaxLength(null);
+            tokens.Property(token => token.Name).Metadata.SetMaxLength(null);
 
             modelBuilder.Entity<AltchaReplay>(replay =>
             {
@@ -50,10 +56,6 @@ namespace IgelPortal.Web.Data
             modelBuilder.ApplyConfiguration<TerritoryAttachedService>(new TerritoryAttachedServiceMapping());
             modelBuilder.ApplyConfiguration<ServiceRequest>(new ServiceRequestMapping());
             modelBuilder.ApplyConfiguration<ServiceRequestResponse>(new ServiceRequestResponseMapping());
-
-            modelBuilder.ApplyConfiguration<AuthenticatorTransport>(new AuthenticatorTransportMapping());
-            modelBuilder.ApplyConfiguration<DevicePublicKey>(new DevicePublicKeyMapping());
-            modelBuilder.ApplyConfiguration<PublicKeyCredential>(new PublicKeyCredentialMapping());
         }
     }
 }

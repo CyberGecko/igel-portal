@@ -8,10 +8,10 @@ using IgelPortal.Web;
 using IgelPortal.Web.Data;
 using IgelPortal.Web.Data.Identity;
 using IgelPortal.Web.Data.Services;
-using IgelPortal.Web.Handler.Fido2;
 using IgelPortal.Web.Interfaces;
 using IgelPortal.Web.PolicyRequirements;
 using IgelPortal.Web.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
@@ -43,7 +43,12 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+                {
+                    options.SignIn.RequireConfirmedAccount = true;
+                    options.Stores.SchemaVersion = IdentitySchemaVersions.Version3;
+                })
+                .AddSignInManager<PortalSignInManager>()
                 .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
@@ -60,7 +65,7 @@ builder.Services.AddScoped<ICommunityDataService, CommunityDataService>();
 builder.Services.AddScoped<ITerritoryServiceDataService, TerritoryServiceDataService>();
 builder.Services.AddScoped<ITerritoryAttachedServiceDataService, TerritoryAttachedServiceDataService>();
 builder.Services.AddScoped<IServiceRequestDataService, ServiceRequestDataService>();
-builder.Services.AddScoped<IFido2DataService, Fido2DataService>();
+builder.Services.AddScoped<PasskeyFlow>();
 
 builder.Services.AddScoped<INominatimWebInterface, NominatimWebInterface>();
 builder.Services.AddScoped<IForwardGeocoder, ForwardGeocoder>();
@@ -87,8 +92,6 @@ builder.Services.AddHttpClient<IEmailSender, EmailSender>(client =>
 .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false })
 .RedactLoggedHeaders(["api-key"]);
 
-builder.Services.AddScoped<ModelMapping.PublicKeyCredentialMapping>();
-
 var captchaSecret = builder.Configuration["RegistrationCaptcha:HmacSecret"];
 if (builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(captchaSecret))
 {
@@ -106,17 +109,25 @@ builder.Services.AddOptions<AltchaOptions>()
     .Validate(options => options.HmacSignatureSecret is { Length: >= 32 } secret && !string.IsNullOrWhiteSpace(secret),
         "Set RegistrationCaptcha:HmacSecret to at least 32 random characters.")
     .ValidateOnStart();
-builder.Services.Replace(ServiceDescriptor.Singleton<IAltchaReplayStore, DatabaseAltchaReplayStore>());
+builder.Services.AddSingleton<DatabaseReplayStore>();
+builder.Services.Replace(ServiceDescriptor.Singleton<IAltchaReplayStore>(services =>
+    services.GetRequiredService<DatabaseReplayStore>()));
 builder.Services.AddScoped<RegistrationCaptcha>();
 
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(PasskeyFlow.RateLimitPolicy, context =>
+        HttpMethods.IsPost(context.Request.Method) &&
+        (context.Request.Path.StartsWithSegments("/Identity/Account/Manage/PasskeyAuthentication") ||
+         context.Request.Query["handler"].ToString().StartsWith("Passkey", StringComparison.OrdinalIgnoreCase))
+            ? PerAddressLimiter(context, 20)
+            : RateLimitPartition.GetNoLimiter(""));
     options.AddPolicy(RegistrationCaptcha.ChallengeRateLimit, context =>
-        RegistrationLimiter(context, 20));
+        PerAddressLimiter(context, 20));
     options.AddPolicy(RegistrationCaptcha.SubmitRateLimit, context =>
         HttpMethods.IsPost(context.Request.Method)
-            ? RegistrationLimiter(context, 5)
+            ? PerAddressLimiter(context, 5)
             : RateLimitPartition.GetNoLimiter(""));
 });
 
@@ -126,12 +137,26 @@ if (builder.Configuration["DataProtection:KeyRingPath"] is { Length: > 0 } keyRi
     builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keyRingPath));
 }
 
-builder.Services.AddFido2(options =>
+builder.Services.Configure<CookieAuthenticationOptions>(IdentityConstants.TwoFactorUserIdScheme,
+    options => options.SlidingExpiration = false);
+builder.Services.Configure<IdentityPasskeyOptions>(options =>
 {
-    options.Origins = builder.Configuration.GetSection("Fido2:Origins").Get<HashSet<string>>();
-    options.ServerDomain = builder.Configuration["Fido2:ServerDomain"];
-    options.ServerName = builder.Configuration["Fido2:ServerName"];
-    options.TimestampDriftTolerance = builder.Configuration.GetValue<int>("Fido2:TimestampDriftTolerance");
+    options.UserVerificationRequirement = "required";
+    options.ResidentKeyRequirement = "required";
+    options.AuthenticatorTimeout = TimeSpan.FromMinutes(2);
+    var domain = builder.Configuration["Passkeys:ServerDomain"];
+    if (string.IsNullOrWhiteSpace(domain) && !builder.Environment.IsDevelopment())
+    {
+        domain = "www.igel-portal.de";
+    }
+    if (!string.IsNullOrWhiteSpace(domain))
+    {
+        options.ServerDomain = domain;
+        var origin = $"https://{domain}";
+        options.ValidateOrigin = context => ValueTask.FromResult(!context.CrossOrigin &&
+            string.Equals(context.Origin, origin, StringComparison.Ordinal) &&
+            context.HttpContext.Request.Headers.Origin == origin);
+    }
 });
 
 var googleAuth = builder.Configuration.GetSection("Authentication:Google");
@@ -162,7 +187,21 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.ApplyCurrentCultureToResponseHeaders = true;
 });
 
-builder.Services.AddRazorPages()
+builder.Services.AddRazorPages(options =>
+                {
+                    // These actions can change the credentials used for a fresh sign-in.
+                    foreach (var page in new[] { "PasskeyAuthentication", "SetPassword", "Email", "ExternalLogins",
+                        "Disable2fa", "ResetAuthenticator", "GenerateRecoveryCodes" })
+                    {
+                        options.Conventions.AddAreaPageApplicationModelConvention("Identity", "/Account/Manage/" + page,
+                            model => model.Filters.Add(new RecentAuthenticationFilter()));
+                    }
+                    foreach (var page in new[] { "EnableAuthenticator", "ShowRecoveryCodes" })
+                    {
+                        options.Conventions.AddAreaPageApplicationModelConvention("Identity", "/Account/Manage/" + page,
+                            model => model.Filters.Add(new RecentAuthenticationFilter(requireOnGet: true)));
+                    }
+                })
                 .AddSessionStateTempDataProvider()
                 .AddViewLocalization()
                 .AddDataAnnotationsLocalization(options =>
@@ -282,15 +321,10 @@ app.MapGet("/registration-captcha", (HttpContext context, RegistrationCaptcha ca
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }).AllowAnonymous();
 
-app.MapPost("/fido2/createassertion", Fido2Handler.CreateAssertion);
-app.MapPost("/fido2/createassertionoptions", Fido2Handler.CreateAssertionOptions);
-app.MapPost("/fido2/createattestation", Fido2Handler.CreateAttestation).RequireAuthorization();
-app.MapPost("/fido2/createattestationoptions", Fido2Handler.CreateAttestationOptions).RequireAuthorization();
-
 app.Run();
 
 
-static RateLimitPartition<string> RegistrationLimiter(HttpContext context, int permitLimit)
+static RateLimitPartition<string> PerAddressLimiter(HttpContext context, int permitLimit)
 {
     var address = context.Connection.RemoteIpAddress;
     if (address?.IsIPv4MappedToIPv6 == true)

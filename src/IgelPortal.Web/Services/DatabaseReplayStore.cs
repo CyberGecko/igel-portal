@@ -9,7 +9,7 @@ using System.Text;
 namespace IgelPortal.Web.Services;
 
 // The primary key makes every successful claim single-use across application instances.
-public sealed class DatabaseAltchaReplayStore(IServiceScopeFactory scopeFactory) : IAltchaReplayStore
+public sealed class DatabaseReplayStore(IServiceScopeFactory scopeFactory) : IAltchaReplayStore
 {
     public async ValueTask<bool> TryClaimAsync(string key, DateTimeOffset expiresAt, CancellationToken cancellationToken)
     {

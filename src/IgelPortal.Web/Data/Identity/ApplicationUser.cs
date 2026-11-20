@@ -1,5 +1,4 @@
-﻿using IgelPortal.Web.Data.Entities;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
 
 namespace IgelPortal.Web.Data.Identity
@@ -12,8 +11,6 @@ namespace IgelPortal.Web.Data.Identity
         [Display(Name = "Last name")]
         [PersonalData]
         public string LastName { get; set; } = default!;
-
-        public ICollection<PublicKeyCredential> PublicKeyCredentials { get; } = [];
 
         public override String ToString()
         {

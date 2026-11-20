@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Passkey added." xml:space="preserve">
+    <value>Passkey hinzugefügt.</value>
+  </data>
+  <data name="Passkey removed." xml:space="preserve">
+    <value>Passkey entfernt.</value>
+  </data>
+  <data name="The passkey could not be added. Please try again." xml:space="preserve">
+    <value>Der Passkey konnte nicht hinzugefügt werden. Versuche es erneut.</value>
+  </data>
+  <data name="The passkey could not be removed." xml:space="preserve">
+    <value>Der Passkey konnte nicht entfernt werden.</value>
+  </data>
+</root>

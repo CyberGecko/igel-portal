@@ -33,4 +33,22 @@
   <data name="With Password" xml:space="preserve">
         <value>Mit Password</value>
     </data>
+  <data name="Sign in with a password" xml:space="preserve">
+    <value>Mit Passwort anmelden</value>
+  </data>
+  <data name="Sign in with a passkey" xml:space="preserve">
+    <value>Mit Passkey anmelden</value>
+  </data>
+  <data name="Sign in again to confirm changes to your account security." xml:space="preserve">
+    <value>Melde dich erneut an, um Änderungen an der Kontosicherheit zu bestätigen.</value>
+  </data>
+  <data name="Could not sign in with a passkey. Try again or use another sign-in method." xml:space="preserve">
+    <value>Die Anmeldung mit Passkey ist fehlgeschlagen. Versuche es erneut oder wähle eine andere Anmeldemethode.</value>
+  </data>
+  <data name="Use your device PIN, fingerprint, face recognition or a security key." xml:space="preserve">
+    <value>Verwende die Geräte-PIN, Fingerabdruck, Gesichtserkennung oder einen Sicherheitsschlüssel.</value>
+  </data>
+  <data name="This browser does not support passkeys." xml:space="preserve">
+    <value>Dieser Browser unterstützt keine Passkeys.</value>
+  </data>
 </root>

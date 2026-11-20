@@ -1,60 +1,73 @@
-﻿@page
+@page
+@using Microsoft.AspNetCore.WebUtilities
 @model PasskeyAuthenticationModel
 @{
-    ViewData["Title"] = Localizer["Passkey Authentication"];
+    ViewData["Title"] = Localizer["Passkeys"];
     ViewData["ActivePage"] = ManageNavPages.PasskeyAuthentication;
 }
 
-<h3>@ViewData["Title"]</h3>
-<partial name="_StatusMessage" for="StatusMessage" />
-<div class="row">
-    <div class="col-md-6">
-        @if (Model.UserFidoCredentials.Count == 0)
+<h1>@ViewData["Title"]</h1>
+
+@if (Model.Status is { } status)
+{
+    <div class="alert alert-success" role="status">@status</div>
+}
+@if (Model.Error is { } error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
+
+@if (Model.Passkeys.Count == 0)
+{
+    <p>@Localizer["You have no passkeys yet."]</p>
+}
+else
+{
+    <ul class="list-group mb-4">
+        @foreach (var key in Model.Passkeys)
         {
-            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <input id="registerEmail" name="userName" type="hidden" value="@User.Identity?.Name" />
-                <div class="form-floating mb-3">
-                    <input id="registerEmail" name="registerEmail" class="form-control" value="@User.Identity?.Name" disabled />
-                    <label for="registerUserName">@Localizer["E-Mail"]</label>
-                    <span validation-for="registerUserName" class="text-danger"></span>
+            <li class="list-group-item d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="text-break">
+                    <strong>@(key.Name ?? Localizer["Passkey"].Value)</strong>
+                    <div class="small text-body-secondary">@Localizer["Added on {0}", key.CreatedAt.ToString("d")]</div>
                 </div>
-                <button id="registerSubmit" type="submit" class="btn btn-lg btn-success w-100">@Localizer["Add"]</button>
-            </form>
+                @if (Model.RecentlyAuthenticated)
+                {
+                    <form method="post" asp-page-handler="Remove">
+                        <input type="hidden" name="keyId" value="@WebEncoders.Base64UrlEncode(key.CredentialId)" />
+                        <button type="submit" class="btn btn-outline-danger" aria-label="@Localizer["Remove passkey {0}", key.Name ?? Localizer["Passkey"].Value]">@Localizer["Remove"]</button>
+                    </form>
+                }
+            </li>
         }
-        else
-        {
-            <h4>
-                @Localizer["Registered Passkey Authenticators"]
-            </h4>
-            <form id="removePasskeyForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-                <input id="registerEmail" name="userName" type="hidden" value="@User.Identity?.Name" />
-                <div class="form-floating mb-3">
-                    <input id="registerEmail" name="registerEmail" class="form-control" value="@User.Identity?.Name" disabled />
-                    <label for="registerUserName">@Localizer["E-Mail"]</label>
-                    <span validation-for="registerUserName" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <ul class="list-group">
-                        @foreach (var authTransport in Model.UserFidoCredentials.SelectMany(c => c.AuthenticationTransports))
-                        {
-                            <li class="list-group-item">
-                                @authTransport
-                            </li>
-                        }
-                    </ul>
-                </div>
-                <button id="removePasskeySubmit" type="submit" class="btn btn-lg btn-danger w-100">@Localizer["Remove"]</button>
-            </form>
-        }
-    </div>
-</div>
+    </ul>
+}
+
+@if (Model.RecentlyAuthenticated)
+{
+    <form method="post" asp-page-handler="Create" data-passkey-form="create"
+          data-options-url="@Url.Page("./PasskeyAuthentication", "CreateOptions")"
+          data-error="@Localizer["Could not add the passkey. Try again."]">
+        <input type="hidden" name="credential" />
+        <div class="mb-3">
+            <label for="passkey-name" class="form-label">@Localizer["Passkey name"]</label>
+            <input id="passkey-name" name="name" class="form-control" required maxlength="@PasskeyAuthenticationModel.NameLength"
+                   placeholder="@Localizer["For example, my phone"]" />
+        </div>
+        <p class="text-body-secondary">@Localizer["Use your device PIN, fingerprint, face recognition or a security key. You can add a spare passkey."]</p>
+        <div class="alert alert-danger" role="alert" data-passkey-error hidden></div>
+        <button type="submit" class="btn btn-primary" disabled>@Localizer["Add passkey"]</button>
+    </form>
+    <p data-passkey-unavailable hidden>@Localizer["This browser does not support passkeys."]</p>
+    <noscript><p>@Localizer["Enable JavaScript to add a passkey."]</p></noscript>
+}
+else
+{
+    <p>@Localizer["Sign in again before adding or removing passkeys."]</p>
+    <a class="btn btn-primary" asp-page="/Account/Login"
+       asp-route-returnUrl="@Url.Page("./PasskeyAuthentication")" asp-route-confirmAccount="true">@Localizer["Sign in again"]</a>
+}
 
 @section Scripts {
-    @if (Model.UserFidoCredentials.Count == 0)
-    {
-        <script src="~/js/helpers.js" asp-append-version="true"></script>
-        <script src="~/js/register.js" asp-append-version="true"></script>
-    }
+    <script src="~/js/passkeys.js" asp-append-version="true" defer></script>
 }

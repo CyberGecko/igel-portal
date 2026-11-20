@@ -6,6 +6,7 @@ using IgelPortal.Web.Data.Identity;
 using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -74,11 +75,15 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
 
         public IActionResult OnGet() => RedirectToPage("./Login");
 
-        public IActionResult OnPost(string provider, string returnUrl = null)
+        public IActionResult OnPost(string provider, string returnUrl = null, bool confirmAccount = false)
         {
             // Request a redirect to the external login provider.
             var redirectUrl = Url.Page("./ExternalLogin", pageHandler: "Callback", values: new { returnUrl });
             var properties = _signInManager.ConfigureExternalAuthenticationProperties(provider, redirectUrl);
+            if (confirmAccount && provider == "google")
+            {
+                properties = new GoogleChallengeProperties(properties.Items) { Prompt = "select_account" };
+            }
             return new ChallengeResult(provider, properties);
         }
 

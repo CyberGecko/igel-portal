@@ -1,18 +1,48 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="Passkey Authentication" xml:space="preserve">
-        <value>Passkey Anmeldung</value>
-    </data>
-  <data name="Add" xml:space="preserve">
-        <value>Hinzufügen</value>
-    </data>
   <data name="Remove" xml:space="preserve">
-        <value>Entfernen</value>
-    </data>
-  <data name="E-Mail" xml:space="preserve">
-        <value>E-Mailadresse</value>
-    </data>
-  <data name="Registered Passkey Authenticators" xml:space="preserve">
-        <value>Registrierte Passkey Authentifikatoren</value>
-    </data>
+    <value>Entfernen</value>
+  </data>
+  <data name="Passkeys" xml:space="preserve">
+    <value>Passkeys</value>
+  </data>
+  <data name="Passkey" xml:space="preserve">
+    <value>Passkey</value>
+  </data>
+  <data name="You have no passkeys yet." xml:space="preserve">
+    <value>Du hast noch keine Passkeys eingerichtet.</value>
+  </data>
+  <data name="Added on {0}" xml:space="preserve">
+    <value>Hinzugefügt am {0}</value>
+  </data>
+  <data name="Remove passkey {0}" xml:space="preserve">
+    <value>Passkey {0} entfernen</value>
+  </data>
+  <data name="Could not add the passkey. Try again." xml:space="preserve">
+    <value>Der Passkey konnte nicht hinzugefügt werden. Versuche es erneut.</value>
+  </data>
+  <data name="Passkey name" xml:space="preserve">
+    <value>Name des Passkeys</value>
+  </data>
+  <data name="For example, my phone" xml:space="preserve">
+    <value>Zum Beispiel mein Handy</value>
+  </data>
+  <data name="Use your device PIN, fingerprint, face recognition or a security key. You can add a spare passkey." xml:space="preserve">
+    <value>Verwende die Geräte-PIN, Fingerabdruck, Gesichtserkennung oder einen Sicherheitsschlüssel. Du kannst auch einen Ersatz-Passkey hinterlegen.</value>
+  </data>
+  <data name="Add passkey" xml:space="preserve">
+    <value>Passkey hinzufügen</value>
+  </data>
+  <data name="This browser does not support passkeys." xml:space="preserve">
+    <value>Dieser Browser unterstützt keine Passkeys.</value>
+  </data>
+  <data name="Enable JavaScript to add a passkey." xml:space="preserve">
+    <value>Aktiviere JavaScript, um einen Passkey hinzuzufügen.</value>
+  </data>
+  <data name="Sign in again before adding or removing passkeys." xml:space="preserve">
+    <value>Melde dich erneut an, um Passkeys hinzuzufügen oder zu entfernen.</value>
+  </data>
+  <data name="Sign in again" xml:space="preserve">
+    <value>Erneut anmelden</value>
+  </data>
 </root>

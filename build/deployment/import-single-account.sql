@@ -63,24 +63,6 @@ BEGIN NOT ATOMIC
         FROM IgelPortal.AspNetUserTokens WHERE UserId = imported_user_id
           AND LoginProvider = '[AspNetUserStore]' AND Name IN ('AuthenticatorKey', 'RecoveryCodes');
 
-    INSERT INTO Fido2PublicKeyCredentials
-        (Id, PublicKey, SignatureCounter, IsBackupEligible, IsBackedUp, AttestationObject,
-         AttestationClientDataJson, AttestationFormat, AaGuid, UserId)
-    SELECT Id, PublicKey, SignatureCounter, IsBackupEligible, IsBackedUp, AttestationObject,
-           AttestationClientDataJson, AttestationFormat, AaGuid, UserId
-    FROM IgelPortal.Fido2PublicKeyCredentials WHERE UserId = imported_user_id;
-
-    INSERT INTO Fido2AuthenticatorTransports (PublicKeyCredentialId, Value)
-        SELECT source.PublicKeyCredentialId, source.Value
-        FROM IgelPortal.Fido2AuthenticatorTransports AS source
-        JOIN Fido2PublicKeyCredentials AS credential ON credential.Id = source.PublicKeyCredentialId
-        WHERE credential.UserId = imported_user_id;
-    INSERT INTO Fido2DevicePublicKeys (PublicKeyCredentialId, Value)
-        SELECT source.PublicKeyCredentialId, source.Value
-        FROM IgelPortal.Fido2DevicePublicKeys AS source
-        JOIN Fido2PublicKeyCredentials AS credential ON credential.Id = source.PublicKeyCredentialId
-        WHERE credential.UserId = imported_user_id;
-
     COMMIT;
 
     SELECT (SELECT COUNT(*) FROM AspNetUsers) AS Accounts,
