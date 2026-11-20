@@ -15,7 +15,7 @@ namespace IgelPortal.Web.ViewComponents
             var cultureFeature = HttpContext.Features.Get<IRequestCultureFeature>();
             var model = new CultureSwitcherModel
             {
-                SupportedCultures = [.. localizationOptions.Value.SupportedUICultures],
+                SupportedCultures = [.. localizationOptions.Value.SupportedUICultures ?? []],
                 CurrentUICulture = cultureFeature?.RequestCulture?.UICulture ?? new System.Globalization.CultureInfo("de-DE"),
                 ReturnUrl = string.IsNullOrEmpty(base.HttpContext.Request.Path) ? "~/" : $"~{base.HttpContext.Request.Path.Value}"
             };

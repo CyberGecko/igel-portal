@@ -1,0 +1,103 @@
+name: release-$(Date:yyyyMMdd).$(Rev:r)
+
+trigger:
+  branches:
+    exclude:
+      - '*'
+  tags:
+    include:
+      - 'v*.*.*'
+pr: none
+
+stages:
+  - stage: BuildRelease
+    displayName: Build and verify tagged release
+    condition: startsWith(variables['Build.SourceBranch'], 'refs/tags/v')
+    jobs:
+      - job: Build
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - checkout: self
+            clean: true
+            fetchDepth: 0
+            persistCredentials: true
+
+          - bash: |
+              set -euo pipefail
+              if [[ ! "$BUILD_SOURCEBRANCH" =~ ^refs/tags/v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$ ]]; then
+                echo 'Expected a release tag such as v1.2.3.' >&2
+                exit 1
+              fi
+              git fetch origin +refs/heads/main:refs/remotes/origin/main --no-tags
+              git merge-base --is-ancestor "$BUILD_SOURCEVERSION" refs/remotes/origin/main
+            displayName: Verify release tag and main ancestry
+
+          - template: build/azure-build-steps.yml
+
+          - bash: |
+              set -euo pipefail
+              dotnet publish src/IgelPortal.Web/IgelPortal.Web.csproj --configuration Release \
+                --no-build --no-restore --output "$AGENT_TEMPDIRECTORY/igel-web"
+              test -s "$AGENT_TEMPDIRECTORY/igel-web/IgelPortal.Web.dll"
+              test -s "$AGENT_TEMPDIRECTORY/igel-web/IgelPortal.Web.runtimeconfig.json"
+              artifact="$BUILD_ARTIFACTSTAGINGDIRECTORY/igel-web"
+              mkdir -p "$artifact"
+              tar --exclude='./appsettings*.json' -czf "$artifact/web.tar.gz" -C "$AGENT_TEMPDIRECTORY/igel-web" .
+              (cd "$artifact" && sha256sum web.tar.gz > web.tar.gz.sha256)
+              cp build/deployment/deploy-release.sh "$artifact/"
+            displayName: Package web release
+
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: $(Build.ArtifactStagingDirectory)/igel-web
+              ArtifactName: igel-web
+              publishLocation: Container
+
+  - stage: Deploy
+    displayName: Deploy to the Igel Portal Linux server
+    dependsOn: BuildRelease
+    condition: and(succeeded(), eq(dependencies.BuildRelease.result, 'Succeeded'))
+    lockBehavior: sequential
+    jobs:
+      - deployment: DeployIgelPortal
+        environment: igel-portal-production
+        pool:
+          vmImage: ubuntu-latest
+        timeoutInMinutes: 20
+        variables:
+          - group: Igel Portal - Production
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+                - checkout: self
+                  clean: true
+
+                - task: DownloadBuildArtifacts@1
+                  displayName: Download artifact from this release run
+                  inputs:
+                    buildType: current
+                    downloadType: single
+                    artifactName: igel-web
+                    downloadPath: $(Pipeline.Workspace)/igel-download
+                    checkDownloadedFiles: true
+
+                - task: DownloadSecureFile@1
+                  name: deployKey
+                  displayName: Download SSH deploy key
+                  inputs:
+                    secureFile: igel-portal-deploy-key
+
+                - bash: bash build/deployment/deploy-over-ssh.sh
+                  displayName: Verify SSH host key and activate release
+                  env:
+                    DEPLOY_HOST: $(DeployHost)
+                    DEPLOY_PORT: $(DeployPort)
+                    DEPLOY_USER: $(DeployUser)
+                    DEPLOY_KNOWN_HOSTS: $(DeployKnownHosts)
+                    DEPLOY_KEY_PATH: $(deployKey.secureFilePath)
+                    DEPLOY_ROOT: $(DeployRoot)
+                    DEPLOY_SERVICE: $(DeployService)
+                    DEPLOY_HEALTH_ORIGIN: $(DeployHealthOrigin)

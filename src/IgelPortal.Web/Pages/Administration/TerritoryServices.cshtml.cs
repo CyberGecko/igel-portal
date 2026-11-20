@@ -1,4 +1,4 @@
-using IgelPortal.Web.Data.Models;
+﻿using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -62,7 +62,7 @@ namespace IgelPortal.Web.Pages.Administration
 
         }
 
-        public async Task<IActionResult> OnGetDelete(Guid? id)
+        public async Task<IActionResult> OnPostDelete(Guid? id)
         {
             if (!id.HasValue)
             {

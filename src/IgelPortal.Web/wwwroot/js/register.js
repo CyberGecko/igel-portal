@@ -1,11 +1,11 @@
 ﻿document.getElementById("registerForm").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    const { userName, returnUrl } = Object.fromEntries(new FormData(event.target));
+    const { __RequestVerificationToken, returnUrl } = Object.fromEntries(new FormData(event.target));
 
     let response = await fetch("/fido2/createattestationoptions", {
-        body: JSON.stringify({ userName }),
-        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+        headers: { "Content-Type": "application/json", "RequestVerificationToken": __RequestVerificationToken },
         method: "POST"
     });
 
@@ -40,7 +40,7 @@
                 transports: credential.response.getTransports()
             }
         }),
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", "RequestVerificationToken": __RequestVerificationToken },
         method: "POST"
     });
 

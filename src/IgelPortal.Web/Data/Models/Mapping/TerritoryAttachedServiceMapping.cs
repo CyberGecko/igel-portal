@@ -1,22 +1,15 @@
-﻿using AutoMapper;
+namespace IgelPortal.Web.Data.Models.Mapping;
 
-namespace IgelPortal.Web.Data.Models.Mapping
+public static class TerritoryAttachedServiceMapping
 {
-    public class TerritoryAttachedServiceMapping : Profile
+    public static TerritoryAttachedService Map(Entities.TerritoryAttachedService entity) => new()
     {
-        public TerritoryAttachedServiceMapping()
-        {
-            CreateMap<Entities.TerritoryAttachedService, TerritoryAttachedService>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-                .ForMember(dest => dest.MaxCapacity, opt => opt.MapFrom(src => src.MaxCapacity))
-                .ForMember(dest => dest.CurrentCapacity, opt => opt.MapFrom(src => src.MaxCapacity - src.Hedgehogs.Count))
-
-                .ForMember(dest => dest.TerritoryId, opt => opt.MapFrom(src => src.TerritoryId))
-                .ForMember(dest => dest.TerritoryServiceId, opt => opt.MapFrom(src => src.TerritoryServiceId))
-
-                .ForMember(dest => dest.Territory, opt => opt.MapFrom((src,dst) => src.Territory?.Name))
-                .ForMember(dest => dest.TerritoryService, opt => opt.MapFrom((src, dst) => src.TerritoryService?.Name));
-        }
-    }
-
+        Id = entity.Id,
+        MaxCapacity = entity.MaxCapacity,
+        TerritoryId = entity.TerritoryId,
+        TerritoryServiceId = entity.TerritoryServiceId,
+        CurrentCapacity = entity.MaxCapacity - entity.Hedgehogs.Count,
+        Territory = (entity.Territory?.Name)!,
+        TerritoryService = (entity.TerritoryService?.Name)!
+    };
 }

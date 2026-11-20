@@ -28,10 +28,15 @@ namespace IgelPortal.Web.Pages.Territories
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync(String? filter)
         {
+            ModelState.Remove("Territory.UserName");
             ModelState.Remove("Territory.Community");
             if (!ModelState.IsValid)
             {
-                return base.Page();
+                return await OnGetAsync(filter);
+            }
+            if (Territory.CommunityId.HasValue && !await communityDataService.IsCommunityMember(Territory.CommunityId, User.Identity))
+            {
+                return Forbid();
             }
             this.Territory.UserName = base.User.Identity?.Name ?? String.Empty;
             await this.dataService.Insert(this.Territory);

@@ -4,7 +4,23 @@
     ViewData["Title"] = Localizer["Hedgehog"];
 }
 
+@if (Model.ResponseToken is Guid token)
+{
+    <h1>@Localizer["Confirm availability"]</h1>
+    <form method="post" asp-page-handler="ServiceResponse">
+        <input type="hidden" name="requestToken" value="@token" />
+        <button type="submit" class="btn btn-success">@Localizer["Confirm availability"]</button>
+    </form>
+    return;
+}
+
 <h1>@ViewData["Title"]</h1>
+@if (TempData["ServiceRequestMailFailures"] is int failures)
+{
+    <div class="alert alert-warning" role="alert">
+        @Localizer["The service request was saved. {0} email notifications could not be submitted.", failures]
+    </div>
+}
 
 <div class="row">
     <h4>@Localizer["Request service for hedgehog {0}", ViewBag.HedgehogName]</h4>
@@ -78,7 +94,7 @@
                         <td>
                             @if (!item.IsFulfilled)
                             {
-                                <a class="btn btn-success" asp-page="./RequestService" asp-route-handler="MarkAsFulfilled" asp-route-id="@item.Id"><i class="bi bi-check-lg"></i><span class="d-none d-md-inline"> @Localizer["Mark as fulfilled"]</span></a>
+                                <form method="post" asp-page-handler="MarkAsFulfilled" asp-route-id="@item.Id"><button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i><span class="d-none d-md-inline"> @Localizer["Mark as fulfilled"]</span></button></form>
                             }
                         </td>
                     </tr>
@@ -118,7 +134,7 @@
                                                                 <ul class="dropdown-menu">
                                                                     @foreach (IgelPortal.Web.Data.Models.Territory territory in ViewBag.UserTerritories[item.Id][response.RespondingUserName])
                                                                     {
-                                                                        <li><a class="dropdown-item" asp-page="./RequestService" asp-route-handler="InitiateAction" asp-route-id="@item.Id" asp-route-territoryId="@territory.Id">@territory.Name</a></li>
+                                                                        <li><form method="post" asp-page-handler="InitiateAction" asp-route-id="@item.Id" asp-route-territoryId="@territory.Id"><button type="submit" class="dropdown-item">@territory.Name</button></form></li>
                                                                     }
                                                                 </ul>
                                                             </div>

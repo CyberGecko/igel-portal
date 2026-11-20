@@ -1,13 +1,12 @@
-﻿using AutoMapper;
+using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace IgelPortal.Web.Data.Services
 {
-    public class TerritoryAttachedServiceDataService(ApplicationDbContext dbContext, IMapper mapper) : ITerritoryAttachedServiceDataService
+    public class TerritoryAttachedServiceDataService(ApplicationDbContext dbContext) : ITerritoryAttachedServiceDataService
     {
         private readonly ApplicationDbContext dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        private readonly IMapper mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
         public async Task<IList<Models.TerritoryAttachedService>> FindAll()
         {
@@ -20,7 +19,7 @@ namespace IgelPortal.Web.Data.Services
                                                                                                                     .ToListAsync();
 
 
-            var models = this.mapper.Map<IList<Models.TerritoryAttachedService>>(entities);
+            var models = entities.Select(TerritoryAttachedServiceMapping.Map).ToList();
 
             return models.Where(predicate).ToList();
         }
@@ -35,7 +34,7 @@ namespace IgelPortal.Web.Data.Services
                 return null;
             }
 
-            return this.mapper.Map<Models.TerritoryAttachedService>(entity);
+            return TerritoryAttachedServiceMapping.Map(entity);
         }
 
         public async Task<Int32> Insert(Models.TerritoryAttachedService model)

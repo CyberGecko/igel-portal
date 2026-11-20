@@ -5,8 +5,7 @@ using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Localization;
-using System.Text;
+using Microsoft.AspNetCore.Antiforgery;
 
 namespace IgelPortal.Web.Handler.Fido2
 {
@@ -22,6 +21,7 @@ namespace IgelPortal.Web.Handler.Fido2
                 return TypedResults.BadRequest();
             }
 
+            httpContext.Session.Remove("Fido2AssertionOptions");
             var options = AssertionOptions.FromJson(json);
 
             var credential = await fido2DataService.GetCredentialByAssertionResponseId(assertionResponse.Id, cancellationToken);
@@ -31,17 +31,23 @@ namespace IgelPortal.Web.Handler.Fido2
                 return TypedResults.BadRequest();
             }
 
-            (ApplicationUser? User, VerifyAssertionResult? AssertionResult)? UserAssertionResult = await fido2DataService.CreateAssertionForUser(credential, assertionResponse, options, cancellationToken);
+            try
+            {
+                var result = await fido2DataService.CreateAssertionForUser(credential, assertionResponse, options, cancellationToken);
+                if (result?.User is not { } user ||
+                    !await signInManager.CanSignInAsync(user) ||
+                    (signInManager.UserManager.SupportsUserLockout && await signInManager.UserManager.IsLockedOutAsync(user)))
+                {
+                    return TypedResults.BadRequest();
+                }
 
-            ApplicationUser? user = UserAssertionResult?.User;
-            if (user is null)
+                await signInManager.SignInAsync(user, false, "Passkey");
+                return TypedResults.Ok(result.Value.AssertionResult);
+            }
+            catch (Fido2VerificationException)
             {
                 return TypedResults.BadRequest();
             }
-
-            await signInManager.SignInAsync(user, false);
-
-            return TypedResults.Ok(UserAssertionResult?.AssertionResult);
         }
 
         public static async Task<Ok<AssertionOptions>> CreateAssertionOptions(HttpContext httpContext, [FromBody] CreateAssertionOptionsInputModel input,
@@ -54,43 +60,55 @@ namespace IgelPortal.Web.Handler.Fido2
             return TypedResults.Ok(options);
         }
 
-        public static async Task<Results<BadRequest, Ok<RegisteredPublicKeyCredential>>> CreateAttestation([FromBody] AuthenticatorAttestationRawResponse attestationResponse,
-             HttpContext httpContext, IFido2DataService fido2DataService, CancellationToken cancellationToken = default)
+        public static async Task<IResult> CreateAttestation([FromBody] AuthenticatorAttestationRawResponse response,
+            HttpContext context, UserManager<ApplicationUser> users, IAntiforgery antiforgery,
+            IFido2DataService fido2, CancellationToken cancellationToken)
         {
-            var json = httpContext.Session.GetString("Fido2AttestationOptions");
+            if (!await antiforgery.IsRequestValidAsync(context))
+            {
+                return TypedResults.BadRequest();
+            }
 
-            if (String.IsNullOrEmpty(json))
+            var user = await users.GetUserAsync(context.User);
+            var json = context.Session.GetString("Fido2AttestationOptions");
+            context.Session.Remove("Fido2AttestationOptions");
+
+            if (user is null || string.IsNullOrEmpty(json) ||
+                !Guid.TryParse(user.Id, out var userId) ||
+                !CredentialCreateOptions.FromJson(json).User.Id.SequenceEqual(userId.ToByteArray()))
             {
                 return TypedResults.BadRequest();
             }
 
             try
             {
-                RegisteredPublicKeyCredential? registeredPublicKeyCredential = await fido2DataService.MakeNewCredentials(json, attestationResponse, cancellationToken);
-
-                ApplicationUser? user = await fido2DataService.AddNewCredentialsToUser(registeredPublicKeyCredential, cancellationToken);
-
-                if (user != null)
-                {
-                    return TypedResults.Ok(registeredPublicKeyCredential);
-                }
-                else
-                {
-                    throw new Exception("User not found");
-                }
+                var credential = await fido2.MakeNewCredentials(json, response, cancellationToken);
+                return await fido2.AddNewCredentialsToUser(credential, user, cancellationToken) is null
+                    ? TypedResults.BadRequest()
+                    : TypedResults.Ok();
             }
-            catch (Exception)
+            catch (Fido2VerificationException)
             {
-                throw;
+                return TypedResults.BadRequest();
             }
         }
 
-        public static Ok<CredentialCreateOptions> CreateAttestationOptions([FromBody] CreateAttestationOptionsInputModel input, HttpContext httpContext, IFido2DataService fido2DataService)
+        public static async Task<IResult> CreateAttestationOptions([FromBody] CreateAttestationOptionsInputModel input,
+            HttpContext context, UserManager<ApplicationUser> users, IAntiforgery antiforgery, IFido2DataService fido2)
         {
-            CredentialCreateOptions? options = fido2DataService.CreateAttestationOptions(input);
+            if (!await antiforgery.IsRequestValidAsync(context))
+            {
+                return TypedResults.BadRequest();
+            }
 
-            httpContext.Session.SetString("Fido2AttestationOptions", options?.ToJson() ?? String.Empty);
+            var user = await users.GetUserAsync(context.User);
+            if (user is null || !Guid.TryParse(user.Id, out _))
+            {
+                return TypedResults.BadRequest();
+            }
 
+            var options = fido2.CreateAttestationOptions(input, user);
+            context.Session.SetString("Fido2AttestationOptions", options?.ToJson() ?? string.Empty);
             return TypedResults.Ok(options);
         }
     }

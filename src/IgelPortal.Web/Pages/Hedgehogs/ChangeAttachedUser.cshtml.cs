@@ -7,41 +7,64 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace IgelPortal.Web.Pages.Hedgehogs
 {
-    [Authorize(Roles = RoleNames.USER, Policy = PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)]
-    public class ChangeAttachedUserModel(IHedgehogDataService dataService, ICommunityDataService communityDataService) : PageModel
+    [Authorize(Roles = RoleNames.USER)]
+    public class ChangeAttachedUserModel(IHedgehogDataService dataService, ICommunityDataService communityDataService, IAuthorizationService authorization) : PageModel
     {
         private readonly IHedgehogDataService dataService = dataService;
         private readonly ICommunityDataService communityDataService = communityDataService;
 
         public SelectList AttachableUser { get; set; } = default!;
 
-        public async Task OnGet(Guid? id, Guid? hedgehogId)
+        public async Task<IActionResult> OnGet(Guid? id, Guid? hedgehogId)
         {
+            if (!await CanManage(id))
+            {
+                return Forbid();
+            }
+
+            var hedgehog = await dataService.FindOne(hedgehogId);
+            if (hedgehog is null || hedgehog.IsDeleted || hedgehog.CommunityId != id)
+            {
+                return NotFound();
+            }
+
             var communityMembers = await this.communityDataService.GetCommunityMembers(id, false);
 
-            Hedgehog? hedgehog = hedgehogId.HasValue ? await this.dataService.FindOne(hedgehogId.Value) : null;
 
             this.AttachableUser = new SelectList(communityMembers.OrderBy(c => c.DisplayName).DistinctBy(c => c.UserName), "UserName", "DisplayName");
             base.ViewData["CurrentAttachedUser"] = hedgehog?.AttachedUserDisplayName;
             base.ViewData["HedgehogId"] = hedgehogId;
             base.ViewData["CommunityId"] = id;
+            return Page();
         }
 
         public async Task<IActionResult> OnPost(Guid? hedgehogId, String? newAttachedUserName, Guid? communityId)
         {
+            if (!await CanManage(communityId))
+            {
+                return Forbid();
+            }
             if (!hedgehogId.HasValue || String.IsNullOrEmpty(newAttachedUserName))
             {
                 return base.RedirectToPage();
             }
             Hedgehog? currentHedgehog = await this.dataService.FindOne(hedgehogId.Value);
 
-            if (currentHedgehog != null)
+            if (currentHedgehog is null || currentHedgehog.IsDeleted || currentHedgehog.CommunityId != communityId)
             {
-                currentHedgehog.AttachedUser = newAttachedUserName;
-                await this.dataService.Update(currentHedgehog);
+                return NotFound();
             }
+            if (!await communityDataService.IsCommunityMember(communityId, new System.Security.Principal.GenericIdentity(newAttachedUserName)))
+            {
+                return BadRequest();
+            }
+
+            currentHedgehog.AttachedUser = newAttachedUserName;
+            await dataService.Update(currentHedgehog);
 
             return base.RedirectToPage("./Index", new { filter = communityId });
         }
+        private async Task<bool> CanManage(Guid? communityId) =>
+            communityId.HasValue && (await authorization.AuthorizeAsync(User, communityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded;
     }
 }

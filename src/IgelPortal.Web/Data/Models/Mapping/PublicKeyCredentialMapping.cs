@@ -1,22 +1,17 @@
-﻿using AutoMapper;
 using Fido2NetLib.Objects;
 using Microsoft.Extensions.Localization;
 
 namespace IgelPortal.Web.Data.Models.Mapping
 {
-    public class PublicKeyCredentialMapping : Profile
+    public class PublicKeyCredentialMapping(IStringLocalizer<PublicKeyCredentialMapping> localizer)
     {
-        private readonly IStringLocalizer<PublicKeyCredentialMapping> localizer;
-        public PublicKeyCredentialMapping(IStringLocalizer<PublicKeyCredentialMapping> localizer)
+        public PublicKeyCredential Map(Entities.PublicKeyCredential credential) => new()
         {
-            this.localizer = localizer;
-
-            CreateMap<Entities.PublicKeyCredential, PublicKeyCredential>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => Convert.ToBase64String(src.Id)))
-                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-                .ForMember(dest => dest.AuthenticationTransports, opt => opt.MapFrom(src => src.AuthenticatorTransports.Select(value => ConvertToReadable(value.Value))))
-                .ForMember(dest => dest.DevicePublicKeys, opt => opt.MapFrom(src => src.DevicePublicKeys.Select(value => Convert.ToBase64String(value.Value))));
-        }
+            Id = Convert.ToBase64String(credential.Id),
+            UserId = credential.UserId,
+            AuthenticationTransports = credential.AuthenticatorTransports.Select(value => ConvertToReadable(value.Value)).ToList(),
+            DevicePublicKeys = credential.DevicePublicKeys.Select(value => Convert.ToBase64String(value.Value)).ToList()
+        };
 
         private String ConvertToReadable(AuthenticatorTransport value)
         {

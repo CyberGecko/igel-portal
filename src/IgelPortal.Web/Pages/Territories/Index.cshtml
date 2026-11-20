@@ -186,6 +186,20 @@ else
 
 }
 
+@section Head {
+    @if (ViewBag.IsCommunityOverview)
+    {
+        <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/29.1.33/fluent.css" />
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-base/dist/global/ej2-base.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-data/dist/global/ej2-data.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-svg-base/dist/global/ej2-svg-base.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-pdf-export/dist/global/ej2-pdf-export.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-compression/dist/global/ej2-compression.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-file-utils/dist/global/ej2-file-utils.min.js"></script>
+        <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-maps/dist/global/ej2-maps.min.js"></script>
+    }
+}
+
 @section Scripts {
     <script>
         function shapeSelected(args) {
@@ -216,4 +230,9 @@ else
         }
 
     </script>
+
+    @if (ViewBag.IsCommunityOverview)
+    {
+        <ejs-scripts></ejs-scripts>
+    }
 }

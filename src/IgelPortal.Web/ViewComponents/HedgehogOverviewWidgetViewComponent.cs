@@ -11,7 +11,7 @@ namespace IgelPortal.Web.ViewComponents
 
         public async Task<IViewComponentResult> InvokeAsync()
         {
-            IEnumerable<Hedgehog> hedgehogs = await this.dataService.Query(c => c.IsDeleted == false && c.AttachedUser == User?.Identity?.Name);
+            IEnumerable<Hedgehog> hedgehogs = await this.dataService.FindAllActiveForUser(User?.Identity?.Name);
             return base.View(hedgehogs);
         }
     }

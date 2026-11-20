@@ -1,4 +1,3 @@
-using AutoMapper;
 using IgelPortal.Web;
 using IgelPortal.Web.Data;
 using IgelPortal.Web.Data.Identity;
@@ -16,16 +15,24 @@ using Microsoft.Extensions.Localization;
 using Nominatim.API.Geocoders;
 using Nominatim.API.Interfaces;
 using Nominatim.API.Web;
-using System.Globalization;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Net.Mail;
+using Microsoft.AspNetCore.DataProtection;
 using ModelMapping = IgelPortal.Web.Data.Models.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 
-Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(builder.Configuration["Syncfusion:LicenseKey"]);
+if (builder.Configuration["Syncfusion:LicenseKey"] is { Length: > 0 } syncfusionLicense)
+{
+    Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense(syncfusionLicense);
+}
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString),
+var serverVersion = new Lazy<ServerVersion>(() => ServerVersion.AutoDetect(connectionString));
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseMySql(connectionString, serverVersion.Value,
                                                     b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.GetName().Name).EnableStringComparisonTranslations()));
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
@@ -49,26 +56,34 @@ builder.Services.AddScoped<INominatimWebInterface, NominatimWebInterface>();
 builder.Services.AddScoped<IForwardGeocoder, ForwardGeocoder>();
 
 builder.Services.AddScoped<IAuthorizationHandler, CommunityRoleAuthorizationHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, CommunityOwnerAuthorizationHandler>();
-builder.Services.AddScoped<IAuthorizationHandler, CommunityModeratorAuthorizationHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, CommunityOwnerOrModeratorAuthorizationHandler>();
 
-builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.AddOptions<MailServiceOptions>()
+    .BindConfiguration("MailService")
+    .Validate(options => !options.SendMail ||
+        (!string.IsNullOrWhiteSpace(options.Brevo.ApiKey) &&
+         options.Brevo.ApiKey.All(character => !char.IsWhiteSpace(character) && !char.IsControl(character)) &&
+         !string.IsNullOrWhiteSpace(options.Sender.Name) &&
+         MailAddress.TryCreate(options.Sender.Address, out var address) &&
+         address.Address == options.Sender.Address),
+        "MailService requires a Brevo API key and a sender name and address when enabled.")
+    .ValidateOnStart();
 
-builder.Services.AddSingleton(provider => new MapperConfiguration(cfg =>
+builder.Services.AddHttpClient<IEmailSender, EmailSender>(client =>
 {
-    cfg.AddProfile(new ModelMapping.CommunityMapping());
-    cfg.AddProfile(new ModelMapping.TerritoryServiceMapping());
-    cfg.AddProfile(new ModelMapping.TerritoryAttachedServiceMapping());
-    cfg.AddProfile(new ModelMapping.CommunityMemberMapping(provider.CreateScope().ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>()));
-    cfg.AddProfile(new ModelMapping.HedgehogMapping(provider.CreateScope().ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>()));
-    cfg.AddProfile(new ModelMapping.TerritoryMapping());
-    cfg.AddProfile(new ModelMapping.ServiceRequestMapping());
-    cfg.AddProfile(new ModelMapping.ServiceRequestResponseMapping(provider.CreateScope().ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>()));
-    cfg.AddProfile(new ModelMapping.PublicKeyCredentialMapping(provider.CreateScope().ServiceProvider.GetRequiredService<IStringLocalizer<ModelMapping.PublicKeyCredentialMapping>>()));
-}).CreateMapper());
+    client.BaseAddress = new Uri("https://api.brevo.com/");
+    client.Timeout = TimeSpan.FromSeconds(15);
+})
+.ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false })
+.RedactLoggedHeaders(["api-key"]);
 
+builder.Services.AddScoped<ModelMapping.PublicKeyCredentialMapping>();
 
 builder.Services.AddDistributedMemoryCache();
+if (builder.Configuration["DataProtection:KeyRingPath"] is { Length: > 0 } keyRingPath)
+{
+    builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(keyRingPath));
+}
 
 builder.Services.AddFido2(options =>
 {
@@ -78,19 +93,23 @@ builder.Services.AddFido2(options =>
     options.TimestampDriftTolerance = builder.Configuration.GetValue<int>("Fido2:TimestampDriftTolerance");
 });
 
-builder.Services.AddAuthentication().AddGoogle("google", options =>
+var googleAuth = builder.Configuration.GetSection("Authentication:Google");
+if (!string.IsNullOrWhiteSpace(googleAuth["ClientId"]) && !string.IsNullOrWhiteSpace(googleAuth["ClientSecret"]))
 {
-    var googleAuth = builder.Configuration.GetSection("Authentication:Google");
-    if (googleAuth != null)
+    builder.Services.AddAuthentication().AddGoogle("google", options =>
     {
-        options.ClientId = googleAuth["ClientId"] ?? String.Empty;
-        options.ClientSecret = googleAuth["ClientSecret"] ?? String.Empty;
+        options.ClientId = googleAuth["ClientId"]!;
+        options.ClientSecret = googleAuth["ClientSecret"]!;
         options.SignInScheme = IdentityConstants.ExternalScheme;
-    }
-});
+    });
+}
 builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
 
-builder.Services.Configure<SmtpOptions>(builder.Configuration.GetSection("Smtp"));
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor;
+});
+builder.Services.AddHealthChecks().AddCheck<DatabaseHealthCheck>("database", tags: ["ready"]);
 
 var supportedCultures = new[] { "de-DE", "en-GB" };
 
@@ -99,6 +118,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
     options.SetDefaultCulture(supportedCultures[0])
         .AddSupportedCultures(supportedCultures)
         .AddSupportedUICultures(supportedCultures);
+    options.ApplyCurrentCultureToResponseHeaders = true;
 });
 
 builder.Services.AddRazorPages()
@@ -140,6 +160,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 builder.Services.AddSession(options =>
 {
     options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
     options.Cookie.SameSite = SameSiteMode.Strict;
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
@@ -149,44 +170,40 @@ builder.Services.Configure<DataProtectionTokenProviderOptions>(options => option
 
 var app = builder.Build();
 
-using (IServiceScope serviceScope = app.Services.CreateScope())
+await using (var scope = app.Services.CreateAsyncScope())
 {
-    ApplicationDbContext dbContext = serviceScope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    await dbContext.Database.MigrateAsync();
 
-    var pendingMigrations = dbContext.Database.GetPendingMigrations();
-    if (pendingMigrations.Any())
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    foreach (var role in new[]
     {
-        Console.WriteLine("Applying pending migrations...");
-        dbContext.Database.Migrate();
-        Console.WriteLine("Migrations applied successfully.");
-    }
-    else
+        new IdentityRole(RoleNames.ADMIN) { Id = "9d263796-50a1-4573-a57c-8afe12834e99" },
+        new IdentityRole(RoleNames.USER) { Id = "e1536d79-28f8-4981-990b-fbeb59878669" }
+    })
     {
-        Console.WriteLine("No pending migrations found.");
-    }
-
-    RoleManager<IdentityRole> roleManager = serviceScope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-    if (!roleManager.RoleExistsAsync(RoleNames.ADMIN).Result)
-    {
-        var adminRole = new IdentityRole(RoleNames.ADMIN)
+        if (!await roleManager.RoleExistsAsync(role.Name!))
         {
-            Id = "9d263796-50a1-4573-a57c-8afe12834e99"
-        };
-        roleManager.CreateAsync(adminRole).Wait();
-
-        //dbContext.Add<IdentityRole>(new IdentityRole(RoleNames.ADMIN) { Id = "9d263796-50a1-4573-a57c-8afe12834e99", NormalizedName = RoleNames.ADMIN.ToUpper() });
-    }
-    if (!roleManager.RoleExistsAsync(RoleNames.USER).Result)
-    {
-        var userRole = new IdentityRole(RoleNames.USER)
-        {
-            Id = "e1536d79-28f8-4981-990b-fbeb59878669"
-        };
-        roleManager.CreateAsync(userRole).Wait();
-        //dbContext.Add<IdentityRole>(new IdentityRole(RoleNames.USER) { Id = "e1536d79-28f8-4981-990b-fbeb59878669", NormalizedName = RoleNames.USER.ToUpper() });
+            var seededRole = await roleManager.FindByIdAsync(role.Id);
+            IdentityResult result;
+            if (seededRole is null)
+            {
+                result = await roleManager.CreateAsync(role);
+            }
+            else
+            {
+                seededRole.Name = role.Name;
+                result = await roleManager.UpdateAsync(seededRole);
+            }
+            if (!result.Succeeded && !await roleManager.RoleExistsAsync(role.Name!))
+            {
+                throw new InvalidOperationException($"Could not initialize role {role.Name}.");
+            }
+        }
     }
 }
+
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -196,19 +213,15 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-var options = new RequestLocalizationOptions
-{
-
-    DefaultRequestCulture = new RequestCulture(supportedCultures[0]),
-    SupportedCultures = supportedCultures.Select(c => new CultureInfo(c)).ToList(),
-    SupportedUICultures = supportedCultures.Select(c => new CultureInfo(c)).ToList(),
-    ApplyCurrentCultureToResponseHeaders = true,
-    FallBackToParentCultures = true,
-    FallBackToParentUICultures = true,
-};
-app.UseRequestLocalization(options);
-
+app.UseRequestLocalization();
 app.UseHttpsRedirection();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers.XContentTypeOptions = "nosniff";
+    context.Response.Headers.XFrameOptions = "DENY";
+    context.Response.Headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
+    await next(context);
+});
 app.UseStaticFiles();
 app.UseCookiePolicy();
 
@@ -220,10 +233,12 @@ app.UseAuthorization();
 app.UseSession();
 
 app.MapRazorPages();
+app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
+app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }).AllowAnonymous();
 
 app.MapPost("/fido2/createassertion", Fido2Handler.CreateAssertion);
 app.MapPost("/fido2/createassertionoptions", Fido2Handler.CreateAssertionOptions);
-app.MapPost("/fido2/createattestation", Fido2Handler.CreateAttestation);
-app.MapPost("/fido2/createattestationoptions", Fido2Handler.CreateAttestationOptions);
+app.MapPost("/fido2/createattestation", Fido2Handler.CreateAttestation).RequireAuthorization();
+app.MapPost("/fido2/createattestationoptions", Fido2Handler.CreateAttestationOptions).RequireAuthorization();
 
 app.Run();

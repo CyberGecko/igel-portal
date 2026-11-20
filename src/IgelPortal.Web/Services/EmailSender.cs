@@ -1,58 +1,38 @@
-﻿using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
-using MimeKit;
-using MimeKit.Text;
+using System.Net.Http.Json;
 
-namespace IgelPortal.Web.Services
+namespace IgelPortal.Web.Services;
+
+public sealed class EmailSender(HttpClient client, IOptions<MailServiceOptions> options, ILogger<EmailSender> logger) : IEmailSender
 {
-    public class EmailSender(IOptions<SmtpOptions> smtpOptionAccessor) : IEmailSender
+    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
     {
-        private readonly SmtpOptions smtpOption = smtpOptionAccessor.Value;
+        ArgumentException.ThrowIfNullOrWhiteSpace(email);
+        ArgumentException.ThrowIfNullOrWhiteSpace(subject);
+        ArgumentException.ThrowIfNullOrWhiteSpace(htmlMessage);
 
-        public async Task SendEmailAsync(String toEmail, String subject, String message)
+        var settings = options.Value;
+        if (!settings.SendMail)
         {
-            if (String.IsNullOrEmpty(toEmail))
-            {
-                throw new ArgumentNullException(nameof(toEmail));
-            }
-            if (String.IsNullOrEmpty(subject))
-            {
-                throw new ArgumentNullException(nameof(subject));
-            }
-            if (String.IsNullOrEmpty(message))
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            await Execute(toEmail, subject, message);
+            logger.LogInformation("Transactional email is disabled.");
+            return;
         }
 
-        public async Task Execute(String toEmail, String subject, String message)
+        using var request = new HttpRequestMessage(HttpMethod.Post, "v3/smtp/email")
         {
-            MimeMessage mailMessage = EmailSender.CreateMailItem(subject, message, toEmail);
-
-            SmtpClient smtp = new();
-            await smtp.ConnectAsync(this.smtpOption.Host, this.smtpOption.Port, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(this.smtpOption.Username, this.smtpOption.Password);
-            await smtp.SendAsync(mailMessage);
-            await smtp.DisconnectAsync(true);
-        }
-
-
-        private static MimeMessage CreateMailItem(String subject, String content, String receiverAddress)
-        {
-            MimeMessage message = new()
+            Content = JsonContent.Create(new
             {
-                Sender = new MailboxAddress("Igel Portal", "info@igel-portal.de")
-            };
-            message.From.Add(message.Sender);
-            message.To.Add(new MailboxAddress(receiverAddress, receiverAddress));
-            message.Subject = subject;
-            message.Body = new TextPart(TextFormat.Html) { Text = content };
+                sender = new { name = settings.Sender.Name, email = settings.Sender.Address },
+                to = new[] { new { email } },
+                subject,
+                htmlContent = htmlMessage,
+                tags = new[] { "igel-portal" }
+            })
+        };
+        request.Headers.Add("api-key", settings.Brevo.ApiKey);
 
-
-            return message;
-        }
+        using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+        response.EnsureSuccessStatusCode();
     }
 }

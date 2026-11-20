@@ -50,7 +50,7 @@
         </dd>
     </dl>
 
-    <form method="post">
+    <form method="post" asp-route-id="@Model.Community.Id">
         <input type="hidden" asp-for="Community.Id" />
         <div class="btn-group" role="group">
             <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></button>

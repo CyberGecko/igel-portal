@@ -53,6 +53,7 @@
                 type: "GET",
                 url: "./MoveTerritory?handler=LoadTerritoryServices",
                 data: {
+                    id: $("#communityId").val(),
                     territoryId: selectedTerritoryId
                 },
                 success: function (result) {
@@ -62,7 +63,7 @@
                     let optionTemplate = $('<option></option>');
                     $.each(result, (index, element) => {
                         let option = optionTemplate.clone();
-                        option.append(element.name);
+                        option.text(element.name);
                         option.attr('value', element.id);
                         usedServiceSelect.append(option);
                     });

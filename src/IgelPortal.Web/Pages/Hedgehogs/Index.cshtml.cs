@@ -17,10 +17,10 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         public async Task<IActionResult> OnGetAsync(String? filter)
         {
             base.ViewData["Filter"] = filter;
-            if (filter is not null and "my" && base.User.IsInRole(RoleNames.USER))
+            if (filter is null or "my")
             {
                 base.ViewData["IsCommunityView"] = false;
-                this.Hedgehogs = await this.dataService.Query(c => c.IsDeleted == false && c.AttachedUser == User?.Identity?.Name);
+                this.Hedgehogs = await this.dataService.FindAllActiveForUser(User?.Identity?.Name);
             }
             else if (Guid.TryParse(filter, out Guid communityId))
             {

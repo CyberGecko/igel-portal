@@ -1,0 +1,26 @@
+steps:
+  - task: UseDotNet@2
+    displayName: Use .NET SDK 10
+    inputs:
+      packageType: sdk
+      version: 10.0.x
+
+  - bash: |
+      set -euo pipefail
+      dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
+      dotnet build src/IgelPortal.sln --configuration Release --no-restore
+      dotnet test src/IgelPortal.sln --configuration Release --no-build --no-restore
+    displayName: Audit dependencies, build and test
+
+  - task: UseNode@1
+    displayName: Use Node.js 22
+    inputs:
+      version: 22.x
+
+  - bash: |
+      set -euo pipefail
+      npx --yes retire@5.7.0 --path src/IgelPortal.Web/wwwroot
+    displayName: Scan checked-in JavaScript dependencies
+
+  - bash: bash build/smoke-test.sh
+    displayName: Verify application startup against MariaDB

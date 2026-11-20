@@ -1,47 +1,28 @@
-﻿using IgelPortal.Web.Interfaces;
+using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 
-namespace IgelPortal.Web.PolicyRequirements
+namespace IgelPortal.Web.PolicyRequirements;
+
+public class CommunityOwnerOrModeratorRequirement : IAuthorizationRequirement;
+
+public class CommunityOwnerOrModeratorAuthorizationHandler(ICommunityDataService communities)
+    : AuthorizationHandler<CommunityOwnerOrModeratorRequirement>
 {
-    public class CommunityOwnerOrModeratorRequirement() : IAuthorizationRequirement
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CommunityOwnerOrModeratorRequirement requirement)
     {
-    }
-
-    public class CommunityOwnerAuthorizationHandler(ICommunityDataService communityDataService) : AuthorizationHandler<CommunityOwnerOrModeratorRequirement>
-    {
-        private readonly ICommunityDataService communityDataService = communityDataService;
-
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CommunityOwnerOrModeratorRequirement requirement)
+        var communityId = context.Resource switch
         {
-            if (context.Resource is DefaultHttpContext httpContext && (Guid.TryParse(httpContext.GetRouteValue("id")?.ToString(), out Guid communityId) ||
-                                                                       Guid.TryParse(httpContext?.Request?.QueryString.Value?.Remove(0, 4), out communityId)))
-            {
-                Boolean isOwner = await this.communityDataService.HasUserCommunityMemberRole(communityId, context.User.Identity, CommunityRoles.OWNER);
+            Guid id => id,
+            HttpContext httpContext when Guid.TryParse(
+                httpContext.GetRouteValue("id")?.ToString() ?? httpContext.Request.Query["id"].ToString(), out var id) => id,
+            _ => Guid.Empty
+        };
 
-                if (isOwner)
-                {
-                    context.Succeed(requirement);
-                }
-            }
-        }
-    }
-
-    public class CommunityModeratorAuthorizationHandler(ICommunityDataService communityDataService) : AuthorizationHandler<CommunityOwnerOrModeratorRequirement>
-    {
-        private readonly ICommunityDataService communityDataService = communityDataService;
-
-        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CommunityOwnerOrModeratorRequirement requirement)
+        if (communityId != Guid.Empty &&
+            (await communities.HasUserCommunityMemberRole(communityId, context.User.Identity, CommunityRoles.OWNER) ||
+             await communities.HasUserCommunityMemberRole(communityId, context.User.Identity, CommunityRoles.MODERATOR)))
         {
-            if (context.Resource is DefaultHttpContext httpContext && (Guid.TryParse(httpContext.GetRouteValue("id")?.ToString(), out Guid communityId) ||
-                                                                       Guid.TryParse(httpContext?.Request?.QueryString.Value?.Remove(0, 4), out communityId)))
-            {
-                Boolean isOwner = await this.communityDataService.HasUserCommunityMemberRole(communityId, context.User.Identity, CommunityRoles.MODERATOR);
-
-                if (isOwner)
-                {
-                    context.Succeed(requirement);
-                }
-            }
+            context.Succeed(requirement);
         }
     }
 }

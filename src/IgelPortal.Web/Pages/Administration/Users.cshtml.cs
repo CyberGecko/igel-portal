@@ -1,3 +1,4 @@
+﻿using IgelPortal.Web.Data;
 using IgelPortal.Web.Data.Identity;
 using IgelPortal.Web.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -9,10 +10,9 @@ using Microsoft.EntityFrameworkCore;
 namespace IgelPortal.Web.Pages.Administration
 {
     [Authorize(Roles = RoleNames.ADMIN)]
-    public class UsersModel(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager) : PageModel
+    public class UsersModel(UserManager<ApplicationUser> userManager, ApplicationDbContext dbContext) : PageModel
     {
         private readonly UserManager<ApplicationUser> userManager = userManager;
-        private readonly RoleManager<IdentityRole> roleManager = roleManager;
 
         public IList<UserAdministration> Users { get; set; } = default!;
 
@@ -20,7 +20,15 @@ namespace IgelPortal.Web.Pages.Administration
 
         public async Task OnGetAsync()
         {
-            var userDataList = await this.userManager.Users.ToListAsync();
+            var cancellationToken = HttpContext.RequestAborted;
+            var userDataList = await dbContext.Users.AsNoTracking().ToListAsync(cancellationToken);
+            var roles = await dbContext.Roles.AsNoTracking()
+                .Where(role => role.Name != null && role.Name != "")
+                .Select(role => new { role.Id, Name = role.Name! }).ToListAsync(cancellationToken);
+            var assignments = await dbContext.UserRoles.AsNoTracking().ToListAsync(cancellationToken);
+            var roleNames = roles.ToDictionary(role => role.Id, role => role.Name);
+            var rolesByUser = assignments.Where(assignment => roleNames.ContainsKey(assignment.RoleId))
+                .ToLookup(assignment => assignment.UserId, assignment => roleNames[assignment.RoleId]);
 
             this.Users = userDataList.Select(c => new UserAdministration()
             {
@@ -30,28 +38,36 @@ namespace IgelPortal.Web.Pages.Administration
                 AccessFailedCount = c.AccessFailedCount,
                 EmailConfirmed = c.EmailConfirmed,
                 TwoFactorEnabled = c.TwoFactorEnabled,
-                Roles = this.userManager.GetRolesAsync(c).Result
+                Roles = rolesByUser[c.Id].ToList()
             }).ToList();
 
-            this.AvailableRoles = this.roleManager.Roles?.Select(c => c.Name ?? String.Empty)?.Where(c => !String.IsNullOrEmpty(c)).ToList() ?? [];
+            this.AvailableRoles = roles.Select(role => role.Name).ToList();
         }
 
-        public async Task<IActionResult> OnGetRemoveRole(String userId, String roleName)
+        public async Task<IActionResult> OnPostRemoveRole(String userId, String roleName)
         {
             var user = await this.userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                await userManager.RemoveFromRoleAsync(user, roleName);
+                var result = await userManager.RemoveFromRoleAsync(user, roleName);
+                if (result.Succeeded)
+                {
+                    await userManager.UpdateSecurityStampAsync(user);
+                }
             }
 
             return base.RedirectToPage();
         }
-        public async Task<IActionResult> OnGetAddRole(String userId, String roleName)
+        public async Task<IActionResult> OnPostAddRole(String userId, String roleName)
         {
             var user = await this.userManager.FindByIdAsync(userId);
             if (user != null)
             {
-                await userManager.AddToRoleAsync(user, roleName);
+                var result = await userManager.AddToRoleAsync(user, roleName);
+                if (result.Succeeded)
+                {
+                    await userManager.UpdateSecurityStampAsync(user);
+                }
             }
 
             return base.RedirectToPage();

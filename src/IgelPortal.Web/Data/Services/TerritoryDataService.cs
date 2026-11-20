@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Nominatim.API.Interfaces;
@@ -7,10 +7,9 @@ using System.Security.Principal;
 
 namespace IgelPortal.Web.Data.Services
 {
-    public class TerritoryDataService(ApplicationDbContext dbContext, IMapper mapper, IForwardGeocoder forwardGeocoder) : ITerritoryDataService
+    public class TerritoryDataService(ApplicationDbContext dbContext, IForwardGeocoder forwardGeocoder) : ITerritoryDataService
     {
         private readonly ApplicationDbContext dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        private readonly IMapper mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         private readonly IForwardGeocoder forwardGeocoder = forwardGeocoder ?? throw new ArgumentNullException(nameof(forwardGeocoder));
 
         public async Task<IList<Models.Territory>> FindAll()
@@ -19,14 +18,14 @@ namespace IgelPortal.Web.Data.Services
         }
         public async Task<IList<Models.Territory>> Query(Func<Models.Territory, bool> predicate)
         {
-            IEnumerable<Entities.Territory> entities = await this.dbContext.Territories.Include(e => e.HomeHedgehogs)
+            IEnumerable<Entities.Territory> entities = await this.dbContext.Territories.AsNoTrackingWithIdentityResolution().AsSplitQuery().Include(e => e.HomeHedgehogs)
                                                                                        .Include(e => e.CurrentHedgehogs)
                                                                                        .Include(e => e.Community)
                                                                                        .Include(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
                                                                                        .OrderBy(e => e.Name)
                                                                                        .ToListAsync();
 
-            var models = this.mapper.Map<IList<Models.Territory>>(entities);
+            var models = entities.Select(TerritoryMapping.Map).ToList();
 
             return models.Where(predicate).ToList();
         }
@@ -37,7 +36,7 @@ namespace IgelPortal.Web.Data.Services
                 return null;
             }
             Entities.Territory? entity = await this.dbContext.Territories.Where(e => e.Id == id)
-                                                                         .Include(e => e.HomeHedgehogs)
+                                                                         .AsNoTrackingWithIdentityResolution().AsSplitQuery().Include(e => e.HomeHedgehogs)
                                                                          .Include(e => e.CurrentHedgehogs)
                                                                          .Include(e => e.Community)
                                                                          .Include(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
@@ -47,7 +46,7 @@ namespace IgelPortal.Web.Data.Services
                 return null;
             }
 
-            return this.mapper.Map<Models.Territory>(entity);
+            return TerritoryMapping.Map(entity);
         }
 
         public async Task<Guid> Insert(Models.Territory model)
@@ -144,14 +143,15 @@ namespace IgelPortal.Web.Data.Services
                                                                                 .Include(e => e.Community)
                                                                                 .ThenInclude(e => e.Territories)
                                                                                 .SelectMany(e => e.Community.Territories)
+                                                                                .Where(e => e.DeletedDate == null)
                                                                                 .ToListAsync();
-            var ownTerritories = await this.dbContext.Territories.Where(e => e.UserName == identity.Name)
+            var ownTerritories = await this.dbContext.Territories.Where(e => e.UserName == identity.Name && e.DeletedDate == null)
                                                     .OrderBy(e => e.Name)
                                                     .ToListAsync();
             administratedTerritories.AddRange(ownTerritories);
             administratedTerritories = administratedTerritories.DistinctBy(e => e.Id).ToList();
 
-            return this.mapper.Map<IList<Models.Territory>>(administratedTerritories);
+            return administratedTerritories.Select(TerritoryMapping.Map).ToList();
         }
 
         public async Task<Boolean> IsTerritoryDeletableByUser(Guid? territoryId, IIdentity? identity)
@@ -160,24 +160,17 @@ namespace IgelPortal.Web.Data.Services
             {
                 return false;
             }
-            var deletableTerritories = await this.dbContext.CommunityMembers.Where(e => e.UserName == identity.Name && e.CommunityRoleName == CommunityRoles.OWNER)
-                                                                                .Include(e => e.Community)
-                                                                                .ThenInclude(e => e.Territories)
-                                                                                .SelectMany(e => e.Community.Territories)
-                                                                                .ToListAsync();
-            var ownTerritories = await this.dbContext.Territories.Where(e => e.UserName == identity.Name)
-                                                    .OrderBy(e => e.Name)
-                                                    .ToListAsync();
-            deletableTerritories.AddRange(ownTerritories);
-            deletableTerritories = deletableTerritories.DistinctBy(e => e.Id).ToList();
-
-            return deletableTerritories.Count > 0;
+            return await dbContext.Territories.AnyAsync(territory => territory.Id == territoryId &&
+                territory.DeletedDate == null && (territory.UserName == identity.Name ||
+                    dbContext.CommunityMembers.Any(member => member.CommunityId == territory.CommunityId &&
+                        member.UserName == identity.Name && member.CommunityRoleName == CommunityRoles.OWNER &&
+                        member.Community.DeletedDate == null)));
         }
 
         public async Task<IList<Models.Territory>> FindAllForCommunityWithService(Guid? communityId, Guid? serviceId)
         {
             IEnumerable<Entities.Territory> entities = await this.dbContext.Territories.Where(e => e.CommunityId == communityId && e.AttachedServices.Any(c => c.TerritoryServiceId == serviceId))
-                                                                                       .Include(e => e.HomeHedgehogs)
+                                                                                       .AsNoTrackingWithIdentityResolution().AsSplitQuery().Include(e => e.HomeHedgehogs)
                                                                                        .Include(e => e.CurrentHedgehogs)
                                                                                        .Include(e => e.Community)
                                                                                        .Include(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
@@ -185,19 +178,19 @@ namespace IgelPortal.Web.Data.Services
                                                                                        .ToListAsync();
 
 
-            return this.mapper.Map<IList<Models.Territory>>(entities);
+            return entities.Select(TerritoryMapping.Map).ToList();
         }
         public async Task<IList<Models.Territory>> FindAllActiveForCommunity(Guid? communityId)
         {
             IEnumerable<Entities.Territory> entities = await this.dbContext.Territories.Where(e => e.CommunityId == communityId && !e.DeletedDate.HasValue)
-                                                                                       .Include(e => e.HomeHedgehogs)
+                                                                                       .AsNoTrackingWithIdentityResolution().AsSplitQuery().Include(e => e.HomeHedgehogs)
                                                                                        .Include(e => e.CurrentHedgehogs)
                                                                                        .Include(e => e.Community)
                                                                                        .Include(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
                                                                                        .OrderBy(e => e.Name)
                                                                                        .ToListAsync();
 
-            return this.mapper.Map<IList<Models.Territory>>(entities);
+            return entities.Select(TerritoryMapping.Map).ToList();
         }
         public async Task<IList<Models.Territory>> FindAllActiveForUser(IIdentity? identity)
         {
@@ -207,13 +200,13 @@ namespace IgelPortal.Web.Data.Services
             }
 
             var entities = await this.dbContext.Territories.Where(e => !e.DeletedDate.HasValue && e.UserName == identity.Name)
-                                                    .Include(e => e.HomeHedgehogs)
+                                                    .AsNoTrackingWithIdentityResolution().AsSplitQuery().Include(e => e.HomeHedgehogs)
                                                     .Include(e => e.CurrentHedgehogs)
                                                     .Include(e => e.Community)
                                                     .Include(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
                                                     .OrderBy(e => e.Name)
                                                     .ToListAsync();
-            return this.mapper.Map<IList<Models.Territory>>(entities);
+            return entities.Select(TerritoryMapping.Map).ToList();
         }
 
 

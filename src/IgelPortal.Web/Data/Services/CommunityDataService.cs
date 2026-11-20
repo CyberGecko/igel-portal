@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
-using ImageMagick;
 using Microsoft.EntityFrameworkCore;
 using Syncfusion.EJ2.Spreadsheet;
 using System.Data;
@@ -8,10 +7,9 @@ using System.Security.Principal;
 
 namespace IgelPortal.Web.Data.Services
 {
-    public class CommunityDataService(ApplicationDbContext dbContext, IMapper mapper) : ICommunityDataService
+    public class CommunityDataService(ApplicationDbContext dbContext) : ICommunityDataService
     {
         private readonly ApplicationDbContext dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        private readonly IMapper mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
         public async Task<IList<Models.Community>> FindAll()
         {
@@ -27,7 +25,7 @@ namespace IgelPortal.Web.Data.Services
                                                                                        .ToListAsync();
 
 
-            var models = this.mapper.Map<IList<Models.Community>>(entities);
+            var models = entities.Select(CommunityMapping.Map).ToList();
 
             return models.Where(predicate).ToList();
         }
@@ -46,9 +44,7 @@ namespace IgelPortal.Web.Data.Services
             {
                 return null;
             }
-            Models.Community model = this.mapper.Map<Models.Community>(entity);
-
-            return this.mapper.Map<Models.Community>(entity);
+            return CommunityMapping.Map(entity);
         }
 
         public async Task<Guid> Insert(Models.Community model)
@@ -115,13 +111,20 @@ namespace IgelPortal.Web.Data.Services
             }
         }
 
+        public Task<bool> IsCommunityMember(Guid? communityId, IIdentity? user) =>
+            !communityId.HasValue || string.IsNullOrWhiteSpace(user?.Name)
+                ? Task.FromResult(false)
+                : dbContext.CommunityMembers.AnyAsync(member => member.CommunityId == communityId &&
+                    member.UserName == user.Name && member.CommunityRoleName != CommunityRoles.APPLICANT &&
+                    member.Community.DeletedDate == null);
+
         public async Task<Boolean> HasUserCommunityMemberRole(Guid? communityId, IIdentity? user, String? communityRole)
         {
             if (!communityId.HasValue || String.IsNullOrWhiteSpace(user?.Name) || String.IsNullOrWhiteSpace(communityRole))
             {
                 return false;
             }
-            return await this.dbContext.CommunityMembers.AnyAsync(e => e.CommunityId == communityId && e.UserName == user.Name && e.CommunityRoleName == communityRole);
+            return await this.dbContext.CommunityMembers.AnyAsync(e => e.CommunityId == communityId && e.UserName == user.Name && e.CommunityRoleName == communityRole && e.Community.DeletedDate == null);
         }
 
         public async Task<IList<Models.Community>> FindAllForUserWithRole(IIdentity? user, String? communityRole)
@@ -133,15 +136,21 @@ namespace IgelPortal.Web.Data.Services
             var asignedCommunities = await this.dbContext.CommunityMembers.Where(e => e.UserName == user.Name && e.CommunityRoleName == communityRole)
                                                                     .Include(e => e.Community)
                                                                     .Select(c => c.Community).ToListAsync();
-            return [.. asignedCommunities.Select(this.mapper.Map<Models.Community>).Where(c => !c.IsDeleted).OrderBy(c => c.Name)];
+            return [.. asignedCommunities.Select(CommunityMapping.Map).Where(c => !c.IsDeleted).OrderBy(c => c.Name)];
         }
 
         public async Task<IList<Models.CommunityMember>> GetCommunityMembers(Guid? communityId, Boolean includeApplicant)
         {
             IQueryable<Entities.CommunityMember> entities = includeApplicant ? this.dbContext.CommunityMembers.Where(e => e.CommunityId == communityId) :
                                                                                this.dbContext.CommunityMembers.Where(e => e.CommunityId == communityId && e.CommunityRoleName != CommunityRoles.APPLICANT);
-            entities = entities.OrderBy(e => e.UserName);
-            return (await entities.ToListAsync()).Select(this.mapper.Map<Models.CommunityMember>).ToList();
+            var members = (await entities.AsNoTracking().Include(member => member.Community)
+                .OrderBy(member => member.UserName).ToListAsync()).Select(CommunityMemberMapping.Map).ToList();
+            var names = await UserDisplayNames.LoadAsync(dbContext, members.Select(member => member.UserName));
+            foreach (var member in members)
+            {
+                member.DisplayName = names.GetValueOrDefault(member.UserName, member.UserName);
+            }
+            return members;
         }
 
         public async Task AcceptCommunityApplication(Guid? communityId, String userName)
@@ -176,17 +185,12 @@ namespace IgelPortal.Web.Data.Services
 
         public async Task PromoteUserToCommunityModerator(Guid? communityId, String userName)
         {
-            if (!communityId.HasValue)
+            var roles = await dbContext.CommunityMembers.Where(member => member.CommunityId == communityId && member.UserName == userName)
+                .Select(member => member.CommunityRoleName).ToListAsync();
+            if (roles.Contains(CommunityRoles.MEMBER) && !roles.Contains(CommunityRoles.MODERATOR))
             {
-                return;
+                await AddUserAsRole(communityId, userName, CommunityRoles.MODERATOR);
             }
-
-            await this.dbContext.CommunityMembers.AddAsync(new Entities.CommunityMember()
-            {
-                CommunityId = communityId.Value,
-                UserName = userName,
-                CommunityRoleName = CommunityRoles.MODERATOR
-            });
         }
 
         public async Task DemoteUserFromCommunityModerator(Guid? communityId, String userName)
@@ -203,6 +207,11 @@ namespace IgelPortal.Web.Data.Services
         public async Task RemoveUserFromCommunity(Guid? communityId, String userName)
         {
             var communityMembers = await this.dbContext.CommunityMembers.Where(e => e.UserName == userName && e.CommunityId == communityId).ToListAsync();
+            if (communityMembers.Count == 0 || communityMembers.Any(member => member.CommunityRoleName == CommunityRoles.OWNER))
+            {
+                return;
+            }
+
             foreach (var communityMember in communityMembers)
             {
                 this.dbContext.CommunityMembers.Remove(communityMember);

@@ -18,7 +18,7 @@ namespace IgelPortal.Web.Pages.Territories
         public async Task<IActionResult> OnGetAsync(String? filter)
         {
             base.ViewData["Filter"] = filter;
-            if (filter is not null and "my" && User.IsInRole(RoleNames.USER))
+            if (filter is null or "my")
             {
                 this.Territories = await this.dataService.FindAllActiveForUser(User.Identity);
 
@@ -27,7 +27,10 @@ namespace IgelPortal.Web.Pages.Territories
             }
             else if (Guid.TryParse(filter, out Guid communityId))
             {
-                Community? community = await communityDataService.FindOne(communityId);
+                if (!User.IsInRole(RoleNames.ADMIN) && !await communityDataService.IsCommunityMember(communityId, User.Identity))
+                {
+                    return Forbid();
+                }
                 this.Territories = await this.dataService.FindAllActiveForCommunity(communityId);
 
                 base.ViewData["IsCommunityOverview"] = true;

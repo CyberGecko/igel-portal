@@ -25,14 +25,15 @@ namespace IgelPortal.Web.Pages.Territories
 
             var territory = await this.dataService.FindOne(id.Value);
 
-            if (territory == null)
+            if (territory is null || territory.IsDeleted)
             {
                 return base.NotFound();
             }
-            else
+            if (!await dataService.IsTerritoryDeletableByUser(id, User.Identity))
             {
-                this.Territory = territory;
+                return Forbid();
             }
+            this.Territory = territory;
             return base.Page();
         }
 
@@ -44,13 +45,17 @@ namespace IgelPortal.Web.Pages.Territories
                 return base.NotFound();
             }
 
-            var territory = await this.dataService.FindOne(id.Value);
-            if (territory != null)
+            var territory = await dataService.FindOne(id);
+            if (territory is null || territory.IsDeleted)
             {
-                Territory = territory;
-                await this.dataService.Delete(id.Value);
+                return NotFound();
+            }
+            if (!await dataService.IsTerritoryDeletableByUser(id, User.Identity))
+            {
+                return Forbid();
             }
 
+            await dataService.Delete(id.Value);
             return base.RedirectToPage("./Index", new { filter });
         }
     }

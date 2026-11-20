@@ -73,7 +73,7 @@ else
                                     <ul class="dropdown-menu">
                                         @foreach (var role in Model.AvailableRoles.Where(c => !item.Roles.Contains(c)))
                                         {
-                                            <li><a class="dropdown-item" asp-page-handler="AddRole" asp-route-userId="@item.Id" asp-route-roleName="@role">@role</a></li>
+                                            <li><form method="post" class="d-inline" asp-page-handler="AddRole" asp-route-userId="@item.Id" asp-route-roleName="@role"><button type="submit" class="dropdown-item">@role</button></form></li>
                                         }
                                     </ul>
                                 </div>
@@ -87,7 +87,7 @@ else
                                     <ul class="dropdown-menu">
                                         @foreach (var role in item.Roles)
                                         {
-                                            <li><a class="dropdown-item" asp-page-handler="RemoveRole" asp-route-userId="@item.Id" asp-route-roleName="@role">@role</a></li>
+                                            <li><form method="post" class="d-inline" asp-page-handler="RemoveRole" asp-route-userId="@item.Id" asp-route-roleName="@role"><button type="submit" class="dropdown-item">@role</button></form></li>
                                         }
                                     </ul>
                                 </div>
