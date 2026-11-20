@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Communities" xml:space="preserve">
+    <value>Gemeinschaften</value>
+  </data>
+  <data name="Create community" xml:space="preserve">
+    <value>Gemeinschaft gründen</value>
+  </data>
+  <data name="My communities" xml:space="preserve">
+    <value>Meine Gemeinschaften</value>
+  </data>
+  <data name="Manage" xml:space="preserve">
+    <value>Verwalten</value>
+  </data>
+  <data name="Hedgehogs" xml:space="preserve">
+    <value>Igel</value>
+  </data>
+  <data name="Territories" xml:space="preserve">
+    <value>Reviere</value>
+  </data>
+  <data name="Members" xml:space="preserve">
+    <value>Mitglieder</value>
+  </data>
+  <data name="Pending requests" xml:space="preserve">
+    <value>Offene Anfragen</value>
+  </data>
+  <data name="Join a community" xml:space="preserve">
+    <value>Gemeinschaft beitreten</value>
+  </data>
+  <data name="There are no other communities to join right now." xml:space="preserve">
+    <value>Zurzeit gibt es keine weiteren Gemeinschaften, denen du beitreten kannst.</value>
+  </data>
+  <data name="Request to join" xml:space="preserve">
+    <value>Beitritt anfragen</value>
+  </data>
+  <data name="You already belong to this community or have requested to join it." xml:space="preserve">
+    <value>Du bist bereits Mitglied oder hast den Beitritt angefragt.</value>
+  </data>
+  <data name="Your request was sent to the community." xml:space="preserve">
+    <value>Deine Beitrittsanfrage wurde gesendet.</value>
+  </data>
+  <data name="Your request was saved. The email notification could not be sent." xml:space="preserve">
+    <value>Deine Anfrage wurde gespeichert. Die E-Mail-Benachrichtigung konnte nicht gesendet werden.</value>
+  </data>
+</root>

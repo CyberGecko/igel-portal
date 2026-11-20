@@ -14,6 +14,8 @@ namespace IgelPortal.Web.Pages.Hedgehogs
 
         public IList<Hedgehog> Hedgehogs { get; set; } = default!;
 
+        public bool CanManageCommunity { get; private set; }
+
         public async Task<IActionResult> OnGetAsync(String? filter)
         {
             base.ViewData["Filter"] = filter;
@@ -26,7 +28,8 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             {
                 Boolean isCommunityModerator = await this.communityDataService.HasUserCommunityMemberRole(communityId, base.User.Identity, CommunityRoles.MODERATOR);
                 Boolean isCommunityOwner = await this.communityDataService.HasUserCommunityMemberRole(communityId, base.User.Identity, CommunityRoles.OWNER);
-                if (!base.User.IsInRole(RoleNames.ADMIN) && !isCommunityModerator && !isCommunityOwner)
+                CanManageCommunity = isCommunityModerator || isCommunityOwner;
+                if (!User.IsInRole(RoleNames.ADMIN) && !CanManageCommunity)
                 {
                     return base.RedirectToPage("/Index");
                 }

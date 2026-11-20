@@ -1,7 +1,8 @@
-﻿@using Microsoft.AspNetCore.Mvc.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
 @inject IViewLocalizer Localizer
+@using System.Globalization
 <!DOCTYPE html>
-<html lang="en">
+<html lang="@CultureInfo.CurrentUICulture.Name">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -11,53 +12,48 @@
     <link rel="stylesheet" href="~/lib/flag-icons/css/flag-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/IgelPortal.Web.styles.css" asp-append-version="true" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="~/apple-touch-icon.png" asp-append-version="true">
+    <link rel="icon" href="~/favicon.ico" sizes="any" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="32x32" href="~/favicon-32x32.png" asp-append-version="true">
+    <link rel="icon" type="image/png" sizes="16x16" href="~/favicon-16x16.png" asp-append-version="true">
+    <link rel="manifest" href="~/site.webmanifest" asp-append-version="true">
     @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
+    <a class="visually-hidden-focusable skip-link" href="#main-content">@Localizer["Skip to content"]</a>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom mb-3">
             <div class="container">
                 <a class="navbar-brand" asp-area="" asp-page="/Index">
-                    <img src="~/favicon-32x32.png" alt="@Localizer["Hedgehog Portal"]" width="30" height="24" class="d-inline-block align-text-top">
-                    <span class="d-none d-md-inline">@Localizer["Hedgehog Portal"]</span>
+                    <img src="~/images/hedgehog-avatar.webp" asp-append-version="true" alt="" width="40" height="40">
+                    <span>@Localizer["Hedgehog Portal"]</span>
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#portal-navigation" aria-controls="portal-navigation"
+                        aria-expanded="false" aria-label="@Localizer["Toggle navigation"]">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-md-inline-flex justify-content-between">
+                <div id="portal-navigation" class="navbar-collapse collapse justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">@Localizer["Home"]</a>
+                            <a class="nav-link" asp-area="" asp-page="/Index">@Localizer["Home"]</a>
                         </li>
                         @if (User.IsInRole(RoleNames.USER))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Hedgehogs/Index" asp-route-filter="my">@Localizer["My Hedgehogs"]</a>
+                                <a class="nav-link" asp-area="" asp-page="/Hedgehogs/Index" asp-route-filter="my">@Localizer["My Hedgehogs"]</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-page="/Territories/Index" asp-route-filter="my">@Localizer["My Territories"]</a>
+                                <a class="nav-link" asp-area="" asp-page="/Territories/Index" asp-route-filter="my">@Localizer["My Territories"]</a>
                             </li>
-                            <vc:community-administration-menu />
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-page="/Communities/Join">@Localizer["Communities"]</a>
+                            </li>
                         }
                         @if (User.IsInRole(RoleNames.ADMIN))
                         {
-                            <li class="nav-item dropdown d-none d-md-inline">
-                                <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Administration"]</a>
+                            <li class="nav-item dropdown">
+                                <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["Administration"]</button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Index">@Localizer["Communities"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-page="/Administration/TerritoryServices">@Localizer["Territory Services"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-page="/Administration/Users">@Localizer["User"]</a></li>
-                                    <li><a class="dropdown-item" asp-area="" asp-page="/Administration/Roles">@Localizer["Roles"]</a></li>
-                                </ul>
-                            </li>
-                            <li class="nav-item dropdown d-md-none">
-                                <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Administration"]</a>
-                                <ul class="dropdown-menu border-0">
                                     <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Index">@Localizer["Communities"]</a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-page="/Administration/TerritoryServices">@Localizer["Territory Services"]</a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-page="/Administration/Users">@Localizer["User"]</a></li>
@@ -67,14 +63,14 @@
                         }
                     </ul>
                     <partial name="_LoginPartial" />
-                    <vc:culture-switcher show-current-culture=false />
+                    <vc:culture-switcher />
                 </div>
             </div>
         </nav>
     </header>
-    <div class="container">
+    <div class="container portal-content">
         <partial name="_CookieConsentPartial" />
-        <main role="main" class="pb-3">
+        <main id="main-content" tabindex="-1" class="pb-4">
             @RenderBody()
         </main>
     </div>

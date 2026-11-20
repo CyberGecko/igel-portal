@@ -1,29 +1,27 @@
-﻿@using Microsoft.AspNetCore.Http.Features
+@using Microsoft.AspNetCore.Http.Features
 
 @{
-    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
-    var showBanner = !consentFeature?.CanTrack ?? false;
-    var cookieString = consentFeature?.CreateConsentCookie();
+    var consent = Context.Features.Get<ITrackingConsentFeature>();
 }
 
-@if (showBanner)
+@if (consent?.CanTrack == false)
 {
-    <div id="cookieConsent" class="alert alert-info alert-dismissible fade show row" role="alert">
-        <div class="col-12 mb-3">
-            @Localizer["Consent cookie content"] <a asp-page="/Privacy">@Localizer["Learn more"]</a>.
+    <aside id="cookieConsent" class="cookie-notice alert alert-dismissible fade show" aria-label="@Localizer["Cookie settings"]">
+        <div class="cookie-notice-copy">
+            <p class="mb-1">@Localizer["This portal uses cookies and similar technologies."]</p>
+            <details>
+                <summary>@Localizer["Cookie details"]</summary>
+                <p class="mt-2 mb-0">@Localizer["Consent cookie content"] <a asp-area="" asp-page="/Privacy">@Localizer["Learn more"]</a>.</p>
+            </details>
         </div>
-        <div class="col-4">
-            <button type="button" class="accept-policy close btn btn-success" data-bs-dismiss="alert" aria-label="@SharedLocalizer["Close"]" data-cookie-string="@cookieString">
-            <span aria-hidden="true">@Localizer["Accept"]</span>
-            </button>
-        </div>
-    </div>
+        <button type="button" class="btn btn-primary" data-bs-dismiss="alert" data-cookie-string="@consent.CreateConsentCookie()">
+            @Localizer["Accept"]
+        </button>
+    </aside>
     <script>
-        (function () {
-            var button = document.querySelector("#cookieConsent button[data-cookie-string]");
-            button.addEventListener("click", function (event) {
-                document.cookie = button.dataset.cookieString;
-            }, false);
-        })();
+        const acceptCookies = document.querySelector('#cookieConsent [data-cookie-string]');
+        acceptCookies.addEventListener('click', () => {
+            document.cookie = acceptCookies.dataset.cookieString;
+        });
     </script>
 }

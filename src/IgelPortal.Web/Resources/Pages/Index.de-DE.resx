@@ -6,4 +6,22 @@
   <data name="Welcome" xml:space="preserve">
         <value>Willkommen im Igel Portal</value>
     </data>
+  <data name="Your overview" xml:space="preserve">
+    <value>Deine Übersicht</value>
+  </data>
+  <data name="My communities" xml:space="preserve">
+    <value>Meine Gemeinschaften</value>
+  </data>
+  <data name="Hedgehog Portal" xml:space="preserve">
+    <value>Igel-Portal</value>
+  </data>
+  <data name="Keep track of the hedgehogs in your care, manage territories and work with others in your community." xml:space="preserve">
+    <value>Behalte deine Igel im Blick, verwalte Reviere und arbeite mit anderen in deiner Gemeinschaft zusammen.</value>
+  </data>
+  <data name="Create account" xml:space="preserve">
+    <value>Konto erstellen</value>
+  </data>
+  <data name="Log in" xml:space="preserve">
+    <value>Anmelden</value>
+  </data>
 </root>

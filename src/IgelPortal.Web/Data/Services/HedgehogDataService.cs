@@ -48,6 +48,7 @@ namespace IgelPortal.Web.Data.Services
                 Id = Guid.NewGuid(),
                 CreationDate = DateTime.UtcNow,
                 Name = model.Name,
+                BiologicalSex = model.BiologicalSex,
                 AttachedUser = model.AttachedUser,
                 CommunityId = model.CommunityId,
                 CurrentTerritoryId = model.CurrentTerritoryId,
@@ -70,6 +71,7 @@ namespace IgelPortal.Web.Data.Services
                 }
                 entity.ChangeDate = DateTime.UtcNow;
                 entity.Name = model.Name;
+                entity.BiologicalSex = model.BiologicalSex;
                 entity.AttachedUser = model.AttachedUser;
                 entity.CommunityId = model.CommunityId;
                 entity.CurrentTerritoryId = model.CurrentTerritoryId;

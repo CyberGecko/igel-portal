@@ -36,7 +36,7 @@
     </data>  
 
   <data name="No community" xml:space="preserve">
-        <value>Keine Gruppe</value>
+        <value>Keine Gemeinschaft</value>
     </data>
   <data name="No territory" xml:space="preserve">
         <value>Kein Revier</value>
@@ -53,7 +53,7 @@
     </data>
   
   <data name="Select a community" xml:space="preserve">
-        <value>Wähle eine Gruppe</value>
+        <value>Wähle eine Gemeinschaft</value>
     </data>
   <data name="Select a service" xml:space="preserve">
         <value>Wähle einen Dienst</value>
@@ -85,4 +85,43 @@
   <data name="Male" xml:space="preserve">
         <value>Männlich</value>
     </data>
+  <data name="Add hedgehog" xml:space="preserve">
+    <value>Igel erfassen</value>
+  </data>
+  <data name="Edit hedgehog" xml:space="preserve">
+    <value>Igel bearbeiten</value>
+  </data>
+  <data name="Add territory" xml:space="preserve">
+    <value>Revier anlegen</value>
+  </data>
+  <data name="Edit territory" xml:space="preserve">
+    <value>Revier bearbeiten</value>
+  </data>
+  <data name="View all" xml:space="preserve">
+    <value>Alle anzeigen</value>
+  </data>
+  <data name="More actions" xml:space="preserve">
+    <value>Weitere Aktionen</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Abbrechen</value>
+  </data>
+  <data name="Add service" xml:space="preserve">
+    <value>Dienst hinzufügen</value>
+  </data>
+  <data name="Hedgehog added." xml:space="preserve">
+    <value>Der Igel wurde erfasst.</value>
+  </data>
+  <data name="Hedgehog updated." xml:space="preserve">
+    <value>Die Änderungen am Igel wurden gespeichert.</value>
+  </data>
+  <data name="Territory added." xml:space="preserve">
+    <value>Das Revier wurde angelegt.</value>
+  </data>
+  <data name="Territory updated." xml:space="preserve">
+    <value>Die Änderungen am Revier wurden gespeichert.</value>
+  </data>
+  <data name="Change language" xml:space="preserve">
+    <value>Sprache wechseln</value>
+  </data>
 </root>

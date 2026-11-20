@@ -2,29 +2,23 @@
 @model IgelPortal.Web.Pages.Hedgehogs.DetailsModel
 
 @{
-    ViewData["Title"] = SharedLocalizer["Details"];
+    ViewData["Title"] = Model.Hedgehog.Name;
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="page-heading">
+    <div class="record-heading">
+        <img src="~/images/hedgehog-avatar.webp" asp-append-version="true" width="56" height="56" alt="" />
+        <h1>@Model.Hedgehog.Name</h1>
+    </div>
+</div>
 
-<div>
-    <h4>@Localizer["Hedgehog"]</h4>
-    <hr />
+<div class="portal-form">
     <dl class="row">
-        <dt class="col-sm-2 mb-2">
-            <label asp-for="Hedgehog.Name"></label>
-        </dt>
-        <dd class="col-sm-10 mb-2">
-            @Model.Hedgehog.Name
-        </dd>
         <dt class="col-sm-2">
             <label asp-for="Hedgehog.BiologicalSex"></label>
         </dt>
         <dd class="col-sm-10">
-            @{
-                ViewBag.DisplayText = true;
-            }
-            <partial name="_HedgehogGenderPartial" model="@Model.Hedgehog.BiologicalSex" />
+            @SharedLocalizer[Model.Hedgehog.BiologicalSex.ToString()]
         </dd>
         <dt class="col-sm-2 mb-2">
             <label asp-for="Hedgehog.HomeTerritory"></label>
@@ -52,7 +46,10 @@
         </dd>
     </dl>
 </div>
-<div class="btn-group" role="group">
-    <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@Model.Hedgehog.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
-    <a class="btn btn-info" asp-page="./Index" asp-route-filter="@ViewBag.Filter"><i class="bi bi-card-list"></i><span class="d-none d-md-inline"> @SharedLocalizer["Back to List"]</span></a>
+<div class="portal-actions mt-3">
+    @if (Model.Hedgehog.AttachedUser == User.Identity?.Name)
+    {
+        <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Hedgehog.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
+    }
+    <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Back to List"]</a>
 </div>

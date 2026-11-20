@@ -1,58 +1,21 @@
-﻿@page "{filter?}"
+@page "{filter?}"
 @model IgelPortal.Web.Pages.Territories.CreateModel
-
 @{
-    ViewData["Title"] = SharedLocalizer["Create"];
+    ViewData["Title"] = SharedLocalizer["Add territory"];
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<h4>@Localizer["Territory"]</h4>
-<hr />
-<div class="row">
-    <div class="col-md-8">
-        <form method="post" id="form" asp-route-filter="@ViewBag.Filter">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group input-group mb-3">
-                <label asp-for="Territory.Name" class="control-label input-group-text col-3"></label>
-                <input asp-for="Territory.Name" class="form-control col-9" />
-                <span asp-validation-for="Territory.Name" class="text-danger"></span>
-            </div>
-            <div class="form-group input-group mb-3">
-                <span class="input-group-text control-label col-3">@Localizer["Street name and no."]</span>
-                <input asp-for="Territory.Street" class="form-control col-7" />
-                <input asp-for="Territory.StreetNumber" class="form-control col-2" />
-                <span asp-validation-for="Territory.Street" class="text-danger"></span>
-                <span asp-validation-for="Territory.StreetNumber" class="text-danger"></span>
-            </div>
-            <div class="form-group input-group mb-3">
-                <span class="input-group-text control-label col-3">@Localizer["Postcode and city"]</span>
-                <input asp-for="Territory.PostalCode" class="form-control col-3" />
-                <input asp-for="Territory.City" class="form-control col-6" />
-                <span asp-validation-for="Territory.PostalCode" class="text-danger"></span>
-                <span asp-validation-for="Territory.City" class="text-danger"></span>
-            </div>
-            <div class="form-group input-group mb-3">
-                <label asp-for="Territory.CommunityId" class="control-label input-group-text col-3"></label>
-                <select asp-for="Territory.CommunityId" class="form-control col-9" asp-items="ViewBag.Communities">
-                    <option value="" disabled selected>@SharedLocalizer["Select a community"]</option>
-                </select>
-                <span asp-validation-for="Territory.CommunityId" class="text-danger"></span>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="@SharedLocalizer["Create"]" class="btn btn-success" />
-            </div>
-        </form>
+<div class="page-heading">
+    <h1>@ViewData["Title"]</h1>
+</div>
+<form method="post" asp-route-filter="@ViewBag.Filter" class="portal-form">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    @Html.EditorFor(model => model.Territory, "TerritoryFields")
+    <div class="portal-actions">
+        <button class="btn btn-primary" type="submit">@SharedLocalizer["Save"]</button>
+        <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Cancel"]</a>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Back to List"]</a>
-</div>
+</form>
 
 @section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
+    <partial name="_ValidationScriptsPartial" />
 }

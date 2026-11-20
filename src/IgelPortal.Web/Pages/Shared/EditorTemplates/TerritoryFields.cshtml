@@ -1,0 +1,46 @@
+@model IgelPortal.Web.Data.Models.Territory
+
+<div class="mb-3">
+    <label asp-for="Name" class="form-label"></label>
+    <input asp-for="Name" class="form-control" />
+    <span asp-validation-for="Name" class="text-danger"></span>
+</div>
+<div class="row g-3 mb-3">
+    <div class="col-8">
+        <label asp-for="Street" class="form-label"></label>
+        <input asp-for="Street" autocomplete="address-line1" class="form-control" />
+        <span asp-validation-for="Street" class="text-danger"></span>
+    </div>
+    <div class="col-4">
+        <label asp-for="StreetNumber" class="form-label"></label>
+        <input asp-for="StreetNumber" class="form-control" />
+        <span asp-validation-for="StreetNumber" class="text-danger"></span>
+    </div>
+    <div class="col-4">
+        <label asp-for="PostalCode" class="form-label"></label>
+        <input asp-for="PostalCode" autocomplete="postal-code" class="form-control" />
+        <span asp-validation-for="PostalCode" class="text-danger"></span>
+    </div>
+    <div class="col-8">
+        <label asp-for="City" class="form-label"></label>
+        <input asp-for="City" autocomplete="address-level2" class="form-control" />
+        <span asp-validation-for="City" class="text-danger"></span>
+    </div>
+</div>
+@if (ViewData["KeepTerritoryCommunity"] is true)
+{
+    <dl class="mb-3">
+        <dt>@Html.DisplayNameFor(model => model.CommunityId)</dt>
+        <dd>@(Model.Community ?? SharedLocalizer["No community"].Value)</dd>
+    </dl>
+}
+else
+{
+    <div class="mb-3">
+        <label asp-for="CommunityId" class="form-label"></label>
+        <select asp-for="CommunityId" asp-items="ViewBag.Communities" class="form-select">
+            <option value="">@SharedLocalizer["No community"]</option>
+        </select>
+        <span asp-validation-for="CommunityId" class="text-danger"></span>
+    </div>
+}

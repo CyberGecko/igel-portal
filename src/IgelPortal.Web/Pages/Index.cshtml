@@ -1,17 +1,38 @@
-﻿@page
+@page
 @model IndexModel
 @{
     ViewData["Title"] = Localizer["Home page"];
 }
 
-<div class="text-center">
-    <h1 class="display-4">@Localizer["Welcome"]</h1>
-</div>
-<div class="row">
-    <div class="col-12 col-md-6">
-        <vc:hedgehog-overview-widget />
+@if (User.IsInRole(RoleNames.USER))
+{
+    <div class="page-heading">
+        <h1>@Localizer["Your overview"]</h1>
+        <a asp-page="/Communities/Join" class="btn btn-outline-primary">@Localizer["My communities"]</a>
     </div>
-    <div class="col-12 col-md-6">
-        <vc:territory-overview-widget />
+    <div class="row g-4">
+        <section class="col-12 col-lg-6">
+            <vc:hedgehog-overview-widget />
+        </section>
+        <section class="col-12 col-lg-6">
+            <vc:territory-overview-widget />
+        </section>
     </div>
-</div>
+}
+else
+{
+    <section class="portal-welcome">
+        <div class="portal-welcome-copy">
+            <h1>@Localizer["Hedgehog Portal"]</h1>
+            <p>@Localizer["Keep track of the hedgehogs in your care, manage territories and work with others in your community."]</p>
+            @if (User.Identity?.IsAuthenticated != true)
+            {
+                <div class="portal-actions">
+                    <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-primary">@Localizer["Create account"]</a>
+                    <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary">@Localizer["Log in"]</a>
+                </div>
+            }
+        </div>
+        <img src="~/images/hedgehog-mascot.webp" asp-append-version="true" alt="" width="352" height="352" />
+    </section>
+}

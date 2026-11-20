@@ -1,39 +1,23 @@
-﻿@using IgelPortal.Web.Data.Identity
+@using IgelPortal.Web.Data.Identity
 @using Microsoft.AspNetCore.Identity
-@using Microsoft.AspNetCore.Mvc.Localization
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
-@inject IViewLocalizer Localizer
 
 <ul class="navbar-nav">
     @if (SignInManager.IsSignedIn(User))
     {
-        <li class="nav-item dropdown d-none d-md-inline">
-            <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Account"]</a>
-            <ul class="dropdown-menu">
-                <li><h6 class="dropdown-header">@Localizer["Hello {0}", (await UserManager.GetUserAsync(User))?.ToString() ?? String.Empty]</h6></li>
+        var user = await UserManager.GetUserAsync(User);
+        <li class="nav-item dropdown">
+            <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">@Localizer["Account"]</button>
+            <ul class="dropdown-menu dropdown-menu-lg-end">
+                @if (user is not null)
+                {
+                    <li><h6 class="dropdown-header">@Localizer["Hello {0}", user.ToString()]</h6></li>
+                }
+                <li><a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index">@Localizer["Manage"]</a></li>
                 <li>
-                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="@Localizer["Manage"]">@Localizer["Manage"]</a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-                        <button type="submit" class="btn btn-link text-dark dropdown-item">@Localizer["Logout"]</button>
-                    </form>
-                </li>
-            </ul>
-        </li>
-        <li class="nav-item dropdown d-md-none">
-            <a class="nav-link text-dark dropdown-toggle " data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Account"]</a>
-            <ul class="dropdown-menu border-0">
-                <li><h6 class="dropdown-header">@Localizer["Hello {0}", (await UserManager.GetUserAsync(User))?.ToString() ?? ""]</h6></li>
-                <li>
-                    <a class="dropdown-item" asp-area="Identity" asp-page="/Account/Manage/Index" title="@Localizer["Manage"]">@Localizer["Manage"]</a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
-                        <button type="submit" class="btn btn-link text-dark dropdown-item">@Localizer["Logout"]</button>
+                    <form method="post" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Page("/Index", new { area = "" })">
+                        <button type="submit" class="dropdown-item">@Localizer["Logout"]</button>
                     </form>
                 </li>
             </ul>
@@ -42,10 +26,10 @@
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">@Localizer["Register"]</a>
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Register">@Localizer["Register"]</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">@Localizer["Login"]</a>
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Login">@Localizer["Login"]</a>
         </li>
     }
 </ul>

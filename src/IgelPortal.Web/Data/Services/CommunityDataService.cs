@@ -1,6 +1,7 @@
 using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using MySqlConnector;
 using Syncfusion.EJ2.Spreadsheet;
 using System.Data;
 using System.Security.Principal;
@@ -13,7 +14,9 @@ namespace IgelPortal.Web.Data.Services
 
         public async Task<IList<Models.Community>> FindAll()
         {
-            return await this.Query(c => c.IsDeleted == false);
+            var communities = await dbContext.Communities.AsNoTracking()
+                .Where(community => community.DeletedDate == null).OrderBy(community => community.Name).ToListAsync();
+            return communities.Select(CommunityMapping.Map).ToList();
         }
         public async Task<IList<Models.Community>> Query(Func<Models.Community, bool> predicate)
         {
@@ -232,9 +235,31 @@ namespace IgelPortal.Web.Data.Services
             await this.dbContext.SaveChangesAsync();
         }
 
-        public async Task AddUserAsApplicant(Guid? communityId, IIdentity? user)
+        public async Task<bool> TryAddUserAsApplicant(Guid communityId, IIdentity? user)
         {
-            await this.AddUserAsRole(communityId, user, CommunityRoles.APPLICANT);
+            if (string.IsNullOrWhiteSpace(user?.Name) ||
+                await dbContext.CommunityMembers.AnyAsync(member => member.CommunityId == communityId && member.UserName == user.Name))
+            {
+                return false;
+            }
+
+            var applicant = new Entities.CommunityMember
+            {
+                CommunityId = communityId,
+                CommunityRoleName = CommunityRoles.APPLICANT,
+                UserName = user.Name
+            };
+            dbContext.CommunityMembers.Add(applicant);
+            try
+            {
+                await dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (DbUpdateException exception) when (exception.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry })
+            {
+                dbContext.Entry(applicant).State = EntityState.Detached;
+                return false;
+            }
         }
 
         public async Task AddUserAsOwner(Guid? communityId, String userName)

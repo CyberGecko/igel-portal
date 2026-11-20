@@ -7,7 +7,7 @@
         <value>Längengrad</value>
     </data>
   <data name="Street" xml:space="preserve">
-        <value>Strasse</value>
+        <value>Straße</value>
     </data>
   <data name="StreetNumber" xml:space="preserve">
         <value>Hausnummer</value>
@@ -19,7 +19,7 @@
         <value>Ort</value>
     </data>
   <data name="Community" xml:space="preserve">
-        <value>Gruppe</value>
+        <value>Gemeinschaft</value>
     </data>
   <data name="Attached Services" xml:space="preserve">
         <value>Dienste</value>

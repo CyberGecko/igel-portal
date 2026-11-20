@@ -1,4 +1,87 @@
-﻿@page
+@page
 @model IgelPortal.Web.Pages.Communities.JoinModel
 @{
+    ViewData["Title"] = Localizer["Communities"];
 }
+
+<div class="page-heading">
+    <h1>@ViewData["Title"]</h1>
+    <a class="btn btn-primary" asp-page="./Create">@Localizer["Create community"]</a>
+</div>
+
+@if (TempData["CommunityApplicationNotice"] is string notice)
+{
+    <p class="alert alert-info" role="status">@Localizer[notice]</p>
+}
+
+@if (Model.Managed.Count > 0 || Model.Joined.Count > 0)
+{
+    <section class="mb-4">
+        <h2 class="h4">@Localizer["My communities"]</h2>
+        <div class="records-grid">
+            @foreach (var community in Model.Managed)
+            {
+                <article class="record-card">
+                    <h3 class="h5 m-0">@community.Name</h3>
+                    <div class="portal-actions">
+                        <a class="btn btn-outline-primary" asp-page="./Details" asp-route-id="@community.Id">@Localizer["Manage"]</a>
+                        <a class="btn btn-outline-primary" asp-page="/Hedgehogs/Index" asp-route-filter="@community.Id">@Localizer["Hedgehogs"]</a>
+                        <a class="btn btn-outline-primary" asp-page="/Territories/Index" asp-route-filter="@community.Id">@Localizer["Territories"]</a>
+                        @if (Model.OwnedIds.Contains(community.Id))
+                        {
+                            <a class="btn btn-outline-primary" asp-page="./Members" asp-route-id="@community.Id">@Localizer["Members"]</a>
+                        }
+                    </div>
+                </article>
+            }
+            @foreach (var community in Model.Joined)
+            {
+                <article class="record-card">
+                    <h3 class="h5 m-0">@community.Name</h3>
+                    <div class="portal-actions">
+                        <a class="btn btn-outline-primary" asp-page="/Territories/Index" asp-route-filter="@community.Id">@Localizer["Territories"]</a>
+                    </div>
+                </article>
+            }
+        </div>
+    </section>
+}
+
+@if (Model.Pending.Count > 0)
+{
+    <section class="mb-4">
+        <h2 class="h4">@Localizer["Pending requests"]</h2>
+        <ul class="portal-empty">
+            @foreach (var community in Model.Pending)
+            {
+                <li class="ms-3">@community.Name</li>
+            }
+        </ul>
+    </section>
+}
+
+<section>
+    <h2 class="h4">@Localizer["Join a community"]</h2>
+    @if (Model.Available.Count == 0)
+    {
+        <p class="portal-empty">@Localizer["There are no other communities to join right now."]</p>
+    }
+    else
+    {
+        <div class="records-grid">
+            @foreach (var community in Model.Available)
+            {
+                <article class="record-card">
+                    <h3 class="h5 m-0">@community.Name</h3>
+                    @if (!string.IsNullOrWhiteSpace(community.Description))
+                    {
+                        <p>@community.Description</p>
+                    }
+                    <form class="portal-actions" method="post" asp-page="./Join">
+                        <button class="btn btn-outline-primary" type="submit" name="communityId" value="@community.Id">@Localizer["Request to join"]</button>
+                    </form>
+                </article>
+            }
+        </div>
+    }
+</section>
