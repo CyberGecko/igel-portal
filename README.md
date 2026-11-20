@@ -1,83 +1,19 @@
 # Igel-Portal
 
-ASP.NET-Core-Razor-Pages-Anwendung zur Organisation von Igelpflege. Benutzer verwalten Igel und Reviere, treten Gemeinschaften bei und pflegen freie Kapazitäten für angebotene Leistungen. Gemeinschaftsverantwortliche ordnen Igel und Reviere zu, verwalten Mitglieder und fragen Pflegeleistungen per E-Mail an. ASP.NET Core Identity verwaltet Konten, Rollen und Zwei-Faktor-Anmeldung. WebAuthn-Passkeys und Google-Anmeldung sind integriert. MariaDB speichert die Daten, Nominatim ermittelt Koordinaten für Revieradressen.
+Das Igel-Portal hilft Igel-Hilfsgruppen und Vereinen, die Versorgung von Igeln gemeinsam zu planen und zu organisieren. Helfende sehen, wo ein Igel untergebracht ist und welche Reviere freie Kapazitäten für die benötigte Pflege haben. Verantwortliche können Pflegeanfragen gezielt an Helfende weitergeben und Rückmeldungen im Portal einsehen.
 
-## Lokaler Start
+## Was du im Portal tun kannst
 
-Das Projekt benötigt das .NET-10-SDK und eine erreichbare MySQL- oder MariaDB-Datenbank. Die Anwendung erkennt die Datenbankversion beim Start, wendet vorhandene EF-Migrationen an und prüft die Identity-Rollen. Die bestehenden Migrationen verwenden auch mit dem Microting-Paket die vom Provider beibehaltenen Pomelo-Namespaces.
+- **Igel betreuen.** Igel erfassen, einer zuständigen Person zuordnen sowie ihr Heimatrevier und ihren aktuellen Aufenthaltsort festhalten.
+- **Reviere und Pflegeangebote planen.** Reviere anlegen, angebotene Leistungen und Kapazitäten pflegen und die Reviere einer Gemeinschaft auf einer Karte ansehen.
+- **Gemeinschaften organisieren.** Eine Gemeinschaft gründen oder den Beitritt anfragen. Verantwortliche können Anfragen bearbeiten, Mitglieder verwalten und Moderationsrechte vergeben.
+- **Hilfe koordinieren.** Für einen Igel eine Pflegeleistung anfragen. Das Portal benachrichtigt die zuständigen Helfenden per E-Mail. Sie können ihre Verfügbarkeit bestätigen, und Verantwortliche können die Anfrage anschließend als erledigt markieren.
 
-```bash
-dotnet user-secrets --project src/IgelPortal.Web set 'ConnectionStrings:DefaultConnection' '<lokale Verbindungszeichenfolge>'
-dotnet run --project src/IgelPortal.Web
-```
+## Einstieg
 
-Für einen Release-Build mit Schwachstellenprüfung der NuGet-Abhängigkeiten und einem Starttest gegen eine leere MariaDB 10.11 in Docker:
+Erstelle ein Konto und bestätige deine E-Mail-Adresse. Über **Gemeinschaften** kannst du deiner bestehenden Hilfsgruppe beitreten oder eine neue Gemeinschaft anlegen. In deiner Übersicht findest du die Aktionen **Igel erfassen** und **Revier anlegen**. [Igel-Portal öffnen](https://www.igel-portal.de/)
 
-```bash
-dotnet restore src/IgelPortal.sln -p:NuGetAuditMode=all -p:WarningsAsErrors=NU1901%3BNU1902%3BNU1903%3BNU1904
-dotnet build src/IgelPortal.sln -c Release --no-restore
-bash build/smoke-test.sh
-```
+## Technische Dokumentation
 
-## Brevo
-
-Kontobestätigung, Passwort-Reset und Pflegeanfragen nutzen die Brevo-Transaktionsmail-API über HTTPS. Entwicklung startet mit deaktiviertem Versand. Für einen Versandtest mit verifiziertem Absender folgende Einstellungen über User Secrets oder Umgebungsvariablen setzen:
-
-| Variable | Wert |
-| --- | --- |
-| `MailService__SendMail` | `true` |
-| `MailService__Brevo__ApiKey` | Brevo-API-Schlüssel für Transaktionsmails |
-| `MailService__Sender__Address` | Bei Brevo verifizierte Absenderadresse |
-| `MailService__Sender__Name` | Anzeigename, etwa `Igel Portal` |
-
-Für die Produktion benötigt der Dienst ausgehendes HTTPS zu `api.brevo.com` auf Port 443. Bei aktiviertem Versand prüft die Anwendung beim Start, ob Schlüssel und Absender konfiguriert sind. Nach erfolgreicher Umstellung können die alten `Smtp`-Einstellungen entfernt werden.
-
-## Schutz der Registrierung
-
-Die Registrierung mit Passwort und die erstmalige Kontoerstellung per Google verlangen eine lokal gehostete ALTCHA-Sicherheitsprüfung. Aufgaben sind fünf Minuten gültig, an die Browser-Sitzung gebunden und nur einmal verwendbar. Die Anwendung begrenzt pro IP Aufgaben und Formular-POSTs getrennt auf 20 beziehungsweise 5 pro Minute. Der Browser benötigt HTTPS und JavaScript. Bestehende Anmeldungen mit Passwort oder Passkey verwenden kein CAPTCHA. Eine verknüpfte Google-Anmeldung verlangt die Aufgabe nur bei der erstmaligen Kontoerstellung.
-
-In Produktion `RegistrationCaptcha__HmacSecret` über die geschützte Serverkonfiguration setzen. Ein mit `openssl rand -hex 32` erzeugter Wert ist geeignet. Die Anwendung startet nur mit einem Schlüssel von mindestens 32 Zeichen. In Development kann die Anwendung für den lokalen Test selbst einen temporären Schlüssel erzeugen. Die Startmigration legt `AltchaReplays` an, damit eine Lösung auch nach einem Neustart nur einmal verwendbar ist.
-
-## Azure DevOps
-
-| Pipeline | Auslöser und Aufgabe |
-| --- | --- |
-| [azure-pipelines.yml](azure-pipelines.yml) | Änderungen und Pull Requests für `main`. NuGet-Audit, Release-Build, Scan der mitgelieferten JavaScript-Bibliotheken und Starttest gegen MariaDB. |
-| [azure-deploy.yml](azure-deploy.yml) | Ein Tag wie `v1.2.3` auf einem Commit aus `main`. Baut und prüft denselben Commit, veröffentlicht das Webpaket, lädt es im selben Lauf und aktiviert es nach den Azure-Umgebungsprüfungen per SSH. |
-
-Beide Definitionen in Azure DevOps als getrennte YAML-Pipelines mit dem GitHub-Repository verbinden. Sie verwenden Microsoft-gehostete Linux-Agents. Bei Azure Repos zusätzlich eine Build-Validation-Branch-Policy für Pull Requests in `main` setzen.
-
-Für das Deployment die Azure-Umgebung `igel-portal-production` mit Approval und **Exclusive lock** anlegen. Den SSH-Schlüssel als Secure File `igel-portal-deploy-key` hinterlegen. Umgebung, Secure File und die Variable Group `Igel Portal - Production` für die Deploy-Pipeline autorisieren. Diese Variablen stammen aus der Servereinrichtung:
-
-| Variable | Wert |
-| --- | --- |
-| `DeployHost`, `DeployPort`, `DeployUser` | Erreichbarer SSH-Host, Port und dedizierter Benutzer |
-| `DeployKnownHosts` | Separat verifizierte OpenSSH-Hostschlüsselzeile für den Zielhost, bei Sonderport im Format `[host]:port` |
-| `DeployRoot` | Separater Pfad unter `/var/www`, zum Beispiel `/var/www/igel-portal` |
-| `DeployService` | systemd-Unit, zum Beispiel `kestrel-igel-portal.service` |
-| `DeployHealthOrigin` | Lokaler Kestrel-Endpunkt, zum Beispiel `http://127.0.0.1:5006` |
-
-### Voraussetzungen auf dem Server
-
-- ASP.NET-Core-10-Runtime bereitstellen und die systemd-Unit auf `<DeployRoot>/current/IgelPortal.Web.dll` mit `WorkingDirectory=<DeployRoot>/current` und `ASPNETCORE_ENVIRONMENT=Production` konfigurieren. Kestrel an Loopback binden und im lokalen Reverse-Proxy `Host` und `X-Forwarded-Proto` weitergeben. Bei einer bestehenden Installation den Altstand vor dem ersten Wechsel als Rückfalloption sichern.
-- Der Deployment-Benutzer benötigt Schreibzugriff auf das Release-Verzeichnis und eng begrenzte sudo-Rechte für `systemctl restart` und `systemctl stop` dieser einen Unit. Der Dienstbenutzer benötigt Leserechte für Releases und die geschützte Konfiguration. Bei einem bereits verwendeten Verzeichnis muss `current` ein Symlink auf ein Verzeichnis unter `releases` sein.
-- `<DeployRoot>/shared/appsettings.json` aus der bisherigen Serverkonfiguration und der Repository-Vorlage zusammenführen. Verbindungszeichenfolge, Brevo-Schlüssel, gegebenenfalls Google-Zugangsdaten und `Syncfusion__LicenseKey` geschützt bereitstellen. `AllowedHosts` auf öffentliche Hosts und Loopback für die Health-Probes setzen. Die FIDO2-Origins und die Relying-Party-Domain für vorhandene Passkeys beibehalten.
-- `DataProtection__KeyRingPath` auf einen dauerhaften, nur für den Dienstbenutzer zugänglichen Ort setzen. Vorhandene Data-Protection-Schlüssel für Cookies und Identity-Token übernehmen.
-- Vor dem Release ein Datenbank-Backup erstellen. Das Deployment prüft die Prüfsumme, legt ein neues Release-Verzeichnis an und wechselt `current` atomar. Bei Fehlern startet es das vorherige Release. Datenbankmigrationen bleiben bei einem Anwendungs-Rollback bestehen.
-
-Nach dem Deployment prüfen, dass `/health/live` und `/health/ready` HTTP 200 liefern. Anschließend mit einem Testkonto Anmeldung, Passkey und eine Transaktionsmail prüfen.
-
-### Neuinstallation mit einem bestehenden Konto
-
-Für den Wechsel auf eine frische Datenbank `IgelPortalNew` die Version zunächst nur über den lokalen Port mit deaktiviertem Mailversand starten, damit EF das leere Schema anlegt. Die Quell-Datenbank `IgelPortal` bleibt bis zur Umschaltung beim alten Dienst. Die vorbereitete Kopie `IgelPortalPreview` ist kein Importziel.
-
-Den neuen Dienst vor dem Import stoppen. Mit einem administrativen MariaDB-Konto `IgelPortalNew` auswählen und im selben Client die gewünschte Adresse setzen:
-
-```sql
-SET @igel_import_email = '<E-Mail des zu übernehmenden Kontos>';
-SOURCE /absoluter/pfad/build/deployment/import-single-account.sql
-```
-
-Der Import prüft die ausgewählte Zieldatenbank, ihre leeren Fachdaten und die Eindeutigkeit des Kontos. Er übernimmt die Rollendefinitionen und Rollen-Claims sowie die Zuweisungen und vorhandenen Anmeldedaten dieses Kontos in einer Transaktion. Alte Sitzungen werden erneuert. Die Ausgabe zeigt nur Anzahl der Konten, Rollen und Zuweisungen.
-
-Vor der öffentlichen Umschaltung Anmeldung, Rollen und Brevo mit dem neuen Dienst prüfen. Die alte Installation bis zum Abschluss der Prüfungen als Rückfallmöglichkeit bereithalten. Der öffentliche Host bleibt `www.igel-portal.de`, damit die Passkey-Domain erhalten bleibt.
+- [Entwicklung und lokaler Start](docs/entwicklung.md)
+- [Betrieb, Konfiguration, Deployment und Datenimport](docs/betrieb.md)
