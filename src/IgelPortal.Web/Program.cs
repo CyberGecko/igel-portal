@@ -65,6 +65,7 @@ builder.Services.AddScoped<ICommunityDataService, CommunityDataService>();
 builder.Services.AddScoped<ITerritoryServiceDataService, TerritoryServiceDataService>();
 builder.Services.AddScoped<ITerritoryAttachedServiceDataService, TerritoryAttachedServiceDataService>();
 builder.Services.AddScoped<IServiceRequestDataService, ServiceRequestDataService>();
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<PasskeyFlow>();
 
 builder.Services.AddScoped<INominatimWebInterface, NominatimWebInterface>();
@@ -109,9 +110,7 @@ builder.Services.AddOptions<AltchaOptions>()
     .Validate(options => options.HmacSignatureSecret is { Length: >= 32 } secret && !string.IsNullOrWhiteSpace(secret),
         "Set RegistrationCaptcha:HmacSecret to at least 32 random characters.")
     .ValidateOnStart();
-builder.Services.AddSingleton<DatabaseReplayStore>();
-builder.Services.Replace(ServiceDescriptor.Singleton<IAltchaReplayStore>(services =>
-    services.GetRequiredService<DatabaseReplayStore>()));
+builder.Services.Replace(ServiceDescriptor.Singleton<IAltchaReplayStore, DatabaseReplayStore>());
 builder.Services.AddScoped<RegistrationCaptcha>();
 
 builder.Services.AddRateLimiter(options =>
