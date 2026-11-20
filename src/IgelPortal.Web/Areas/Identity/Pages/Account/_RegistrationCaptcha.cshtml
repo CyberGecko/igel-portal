@@ -1,0 +1,18 @@
+@using System.Globalization
+
+<div class="mb-3">
+    <altcha-widget challenge="@Url.Content("~/registration-captcha")" name="Altcha"
+                   language="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName" auto="onfocus"></altcha-widget>
+    <noscript>
+        <p class="text-danger">
+            @if (CultureInfo.CurrentUICulture.TwoLetterISOLanguageName == "de")
+            {
+                <text>Für die Sicherheitsprüfung bei der Registrierung ist JavaScript erforderlich.</text>
+            }
+            else
+            {
+                <text>Registration requires JavaScript for the security check.</text>
+            }
+        </p>
+    </noscript>
+</div>

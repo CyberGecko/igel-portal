@@ -32,6 +32,12 @@ Kontobestätigung, Passwort-Reset und Pflegeanfragen nutzen die Brevo-Transaktio
 
 Für die Produktion benötigt der Dienst ausgehendes HTTPS zu `api.brevo.com` auf Port 443. Bei aktiviertem Versand prüft die Anwendung beim Start, ob Schlüssel und Absender konfiguriert sind. Nach erfolgreicher Umstellung können die alten `Smtp`-Einstellungen entfernt werden.
 
+## Schutz der Registrierung
+
+Die Registrierung mit Passwort und die erstmalige Kontoerstellung per Google verlangen eine lokal gehostete ALTCHA-Sicherheitsprüfung. Aufgaben sind fünf Minuten gültig, an die Browser-Sitzung gebunden und nur einmal verwendbar. Die Anwendung begrenzt pro IP Aufgaben und Formular-POSTs getrennt auf 20 beziehungsweise 5 pro Minute. Der Browser benötigt HTTPS und JavaScript. Bestehende Anmeldungen mit Passwort oder Passkey verwenden kein CAPTCHA. Eine verknüpfte Google-Anmeldung verlangt die Aufgabe nur bei der erstmaligen Kontoerstellung.
+
+In Produktion `RegistrationCaptcha__HmacSecret` über die geschützte Serverkonfiguration setzen. Ein mit `openssl rand -hex 32` erzeugter Wert ist geeignet. Die Anwendung startet nur mit einem Schlüssel von mindestens 32 Zeichen. In Development kann die Anwendung für den lokalen Test selbst einen temporären Schlüssel erzeugen. Die Startmigration legt `AltchaReplays` an, damit eine Lösung auch nach einem Neustart nur einmal verwendbar ist.
+
 ## Azure DevOps
 
 | Pipeline | Auslöser und Aufgabe |
@@ -60,3 +66,18 @@ Für das Deployment die Azure-Umgebung `igel-portal-production` mit Approval und
 - Vor dem Release ein Datenbank-Backup erstellen. Das Deployment prüft die Prüfsumme, legt ein neues Release-Verzeichnis an und wechselt `current` atomar. Bei Fehlern startet es das vorherige Release. Datenbankmigrationen bleiben bei einem Anwendungs-Rollback bestehen.
 
 Nach dem Deployment prüfen, dass `/health/live` und `/health/ready` HTTP 200 liefern. Anschließend mit einem Testkonto Anmeldung, Passkey und eine Transaktionsmail prüfen.
+
+### Neuinstallation mit einem bestehenden Konto
+
+Für den Wechsel auf eine frische Datenbank `IgelPortalNew` die Version zunächst nur über den lokalen Port mit deaktiviertem Mailversand starten, damit EF das leere Schema anlegt. Die Quell-Datenbank `IgelPortal` bleibt bis zur Umschaltung beim alten Dienst. Die vorbereitete Kopie `IgelPortalPreview` ist kein Importziel.
+
+Den neuen Dienst vor dem Import stoppen. Mit einem administrativen MariaDB-Konto `IgelPortalNew` auswählen und im selben Client die gewünschte Adresse setzen:
+
+```sql
+SET @igel_import_email = '<E-Mail des zu übernehmenden Kontos>';
+SOURCE /absoluter/pfad/build/deployment/import-single-account.sql
+```
+
+Der Import prüft die ausgewählte Zieldatenbank, ihre leeren Fachdaten und die Eindeutigkeit des Kontos. Er übernimmt die Rollendefinitionen und Rollen-Claims sowie die Zuweisungen und vorhandenen Anmeldedaten dieses Kontos in einer Transaktion. Alte Sitzungen werden erneuert. Die Ausgabe zeigt nur Anzahl der Konten, Rollen und Zuweisungen.
+
+Vor der öffentlichen Umschaltung Anmeldung, Rollen und Brevo mit dem neuen Dienst prüfen. Die alte Installation bis zum Abschluss der Prüfungen als Rückfallmöglichkeit bereithalten. Der öffentliche Host bleibt `www.igel-portal.de`, damit die Passkey-Domain erhalten bleibt.

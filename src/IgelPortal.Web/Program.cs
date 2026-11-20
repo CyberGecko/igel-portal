@@ -1,3 +1,8 @@
+using Altcha;
+using Altcha.AspNetCore;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using System.Security.Cryptography;
+using System.Threading.RateLimiting;
 using IgelPortal.Web;
 using IgelPortal.Web.Data;
 using IgelPortal.Web.Data.Identity;
@@ -78,6 +83,37 @@ builder.Services.AddHttpClient<IEmailSender, EmailSender>(client =>
 .RedactLoggedHeaders(["api-key"]);
 
 builder.Services.AddScoped<ModelMapping.PublicKeyCredentialMapping>();
+
+var captchaSecret = builder.Configuration["RegistrationCaptcha:HmacSecret"];
+if (builder.Environment.IsDevelopment() && string.IsNullOrWhiteSpace(captchaSecret))
+{
+    captchaSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+}
+builder.Services.AddAltcha(options =>
+{
+    options.HmacSignatureSecret = captchaSecret;
+    options.HmacKeySignatureSecret = string.IsNullOrWhiteSpace(captchaSecret)
+        ? null : AltchaSecrets.DeriveHmacKeySecret(captchaSecret);
+    options.Challenge.Expires = TimeSpan.FromMinutes(5);
+    options.ConfigureChallenge = (context, challenge) => challenge.Data = RegistrationCaptcha.CreateChallengeData(context);
+});
+builder.Services.AddOptions<AltchaOptions>()
+    .Validate(options => options.HmacSignatureSecret is { Length: >= 32 } secret && !string.IsNullOrWhiteSpace(secret),
+        "Set RegistrationCaptcha:HmacSecret to at least 32 random characters.")
+    .ValidateOnStart();
+builder.Services.Replace(ServiceDescriptor.Singleton<IAltchaReplayStore, DatabaseAltchaReplayStore>());
+builder.Services.AddScoped<RegistrationCaptcha>();
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.AddPolicy(RegistrationCaptcha.ChallengeRateLimit, context =>
+        RegistrationLimiter(context, 20));
+    options.AddPolicy(RegistrationCaptcha.SubmitRateLimit, context =>
+        HttpMethods.IsPost(context.Request.Method)
+            ? RegistrationLimiter(context, 5)
+            : RateLimitPartition.GetNoLimiter(""));
+});
 
 builder.Services.AddDistributedMemoryCache();
 if (builder.Configuration["DataProtection:KeyRingPath"] is { Length: > 0 } keyRingPath)
@@ -226,6 +262,7 @@ app.UseStaticFiles();
 app.UseCookiePolicy();
 
 app.UseRouting();
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
@@ -233,6 +270,9 @@ app.UseAuthorization();
 app.UseSession();
 
 app.MapRazorPages();
+app.MapGet("/registration-captcha", (HttpContext context, RegistrationCaptcha captcha) => captcha.IssueChallenge(context))
+    .AllowAnonymous()
+    .RequireRateLimiting(RegistrationCaptcha.ChallengeRateLimit);
 app.MapHealthChecks("/health/live", new HealthCheckOptions { Predicate = _ => false }).AllowAnonymous();
 app.MapHealthChecks("/health/ready", new HealthCheckOptions { Predicate = check => check.Tags.Contains("ready") }).AllowAnonymous();
 
@@ -242,3 +282,19 @@ app.MapPost("/fido2/createattestation", Fido2Handler.CreateAttestation).RequireA
 app.MapPost("/fido2/createattestationoptions", Fido2Handler.CreateAttestationOptions).RequireAuthorization();
 
 app.Run();
+
+
+static RateLimitPartition<string> RegistrationLimiter(HttpContext context, int permitLimit)
+{
+    var address = context.Connection.RemoteIpAddress;
+    if (address?.IsIPv4MappedToIPv6 == true)
+    {
+        address = address.MapToIPv4();
+    }
+    return RateLimitPartition.GetFixedWindowLimiter(address?.ToString() ?? "unknown", _ => new FixedWindowRateLimiterOptions
+    {
+        PermitLimit = permitLimit,
+        Window = TimeSpan.FromMinutes(1),
+        QueueLimit = 0
+    });
+}
