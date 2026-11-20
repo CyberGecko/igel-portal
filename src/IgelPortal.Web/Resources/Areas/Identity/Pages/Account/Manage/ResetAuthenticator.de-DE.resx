@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Reset authenticator key" xml:space="preserve">
+        <value>Authentifizierungs-Schlüssel zurücksetzen</value>
+    </data>
+  <data name="If you reset your authenticator key your authenticator app will not work until you reconfigure it." xml:space="preserve">
+        <value>Wenn Sie ihren Authentifizierungs-Schlüssel zurücksetzen, wird ihre Authentifikator-App solange nicht mehr funktionieren bis Sie sie neu konfiguriert haben.</value>
+    </data>
+  <data name="This process disables 2FA until you verify your authenticator app.&lt;br /&gt;If you do not complete your authenticator app configuration you may lose access to your account." xml:space="preserve">
+        <value>Dieser Vorgang deaktiviert 2FA bis Sie ihre Authentifikator-App verifiziert haben.&lt;br /&gt;Wenn Sie Konfiguration der Authentifikator-App nicht beenden, können Sie den Zugriff auf ihr Konto verlieren.</value>
+    </data>
+</root>

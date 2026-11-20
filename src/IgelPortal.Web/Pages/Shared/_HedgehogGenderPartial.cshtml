@@ -1,0 +1,27 @@
+﻿@model IgelPortal.Web.Data.BiologicalSex
+@{
+    switch (Model)
+    {
+        case BiologicalSex.Unknown:
+            <i class="bi bi-gender-ambiguous" title="@SharedLocalizer[BiologicalSex.Unknown.ToString()]"></i>
+            @if (ViewBag.DisplayText ?? false)
+            {
+                <span class="d-none d-md-inline"> @SharedLocalizer[BiologicalSex.Unknown.ToString()]</span>
+            }
+            break;
+        case BiologicalSex.Female:
+            <i class="bi bi-gender-female" title="@SharedLocalizer[BiologicalSex.Female.ToString()]"></i>
+            @if (ViewBag.DisplayText ?? false)
+            {
+                <span class="d-none d-md-inline"> @SharedLocalizer[BiologicalSex.Female.ToString()]</span>
+            }
+            break;
+        case BiologicalSex.Male:
+            <i class="bi bi-gender-male" title="@SharedLocalizer[BiologicalSex.Male.ToString()]"></i>
+            @if (ViewBag.DisplayText ?? false)
+            {
+                <span class="d-none d-md-inline"> @SharedLocalizer[BiologicalSex.Male.ToString()]</span>
+            }
+            break;
+    }
+}

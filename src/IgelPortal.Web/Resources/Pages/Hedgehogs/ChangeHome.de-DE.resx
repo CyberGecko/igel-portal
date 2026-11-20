@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hedgehog" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Change Home Territory" xml:space="preserve">
+        <value>Ändere Heimatrevier</value>
+    </data>
+  <data name="Current home territory:" xml:space="preserve">
+        <value>Aktuelles Heimatrevier:</value>
+    </data>
+  <data name="New home territory:" xml:space="preserve">
+        <value>Neues Heimatrevier:</value>
+    </data>
+</root>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hedgehog" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Change Attached User" xml:space="preserve">
+        <value>Ändere zugeordnete Person</value>
+    </data>
+  <data name="Current attached user:" xml:space="preserve">
+        <value>Aktuelle zugeordnete Person:</value>
+    </data>
+  <data name="New attached user:" xml:space="preserve">
+        <value>Neue zugeordnete Person:</value>
+    </data>
+  <data name="Select an attached user" xml:space="preserve">
+        <value>Wähle eine Person</value>
+    </data>
+</root>

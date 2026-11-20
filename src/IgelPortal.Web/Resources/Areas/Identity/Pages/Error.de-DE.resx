@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Error." xml:space="preserve">
+        <value>Fehler.</value>
+    </data>
+  <data name="An error occurred while processing your request" xml:space="preserve">
+        <value>Während der Anfrage ist ein Fehler aufgetreten</value>
+    </data>
+</root>

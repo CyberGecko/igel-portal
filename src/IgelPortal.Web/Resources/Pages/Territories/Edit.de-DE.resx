@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Territory" xml:space="preserve">
+        <value>Revier</value>
+    </data>
+  <data name="Street name and no." xml:space="preserve">
+        <value>Straße und Hausnr.</value>
+    </data>
+  <data name="Postcode and city" xml:space="preserve">
+        <value>PLZ und Stadt</value>
+    </data>
+  <data name="Attached Services" xml:space="preserve">
+        <value>Angebotene Dienste</value>
+    </data>
+</root>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Disable two-factor authentication (2FA)" xml:space="preserve">
+        <value>Zwei-Faktor Authentifizierung (2FA) deaktivieren</value>
+    </data>
+  <data name="This action only disables 2FA." xml:space="preserve">
+        <value>Diese Aktion deaktiviert nur die 2FA.</value>
+    </data>
+  <data name="Disabling 2FA does not change the keys used in authenticator apps. If you wish to change the key&lt;br /&gt;used in an authenticator app you should &lt;a asp-page='./ResetAuthenticator'&gt;reset your authenticator keys.&lt;/a&gt;" xml:space="preserve">
+        <value>Die Deaktivierung der 2FA ändert nicht die Schlüssel in den Authentifikator-Apps. Wenn sie den Schlüssel ändern möchten,&lt;br /&gt;der in einer Authentifikator-App verwendet wird, sollten Sie &lt;a asp-page='./ResetAuthenticator'&gt;hier den Authentifizierungs-Schlüssel zurücksetzten.&lt;/a&gt;</value>
+    </data>
+</root>

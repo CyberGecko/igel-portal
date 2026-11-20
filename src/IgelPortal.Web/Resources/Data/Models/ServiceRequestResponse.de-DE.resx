@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Username" xml:space="preserve">
+        <value>Benutzer</value>
+    </data>
+  <data name="Response date" xml:space="preserve">
+        <value>Antwortdatum</value>
+    </data>
+</root>

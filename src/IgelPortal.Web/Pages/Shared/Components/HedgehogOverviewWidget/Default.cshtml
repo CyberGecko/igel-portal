@@ -1,0 +1,38 @@
+﻿@model IEnumerable<IgelPortal.Web.Data.Models.Hedgehog>
+
+@if (Model.Count() > 0)
+{
+    <h2>@Localizer["My Hedgehogs"]</h2>
+    <div class="row row-cols-2 row-cols-md-2 g-2">
+        @foreach (var item in Model)
+        {
+            <div class="col text-start">
+                <div class="card">
+
+                    <div class="card-header">
+                        <partial name="_HedgehogNameGenderPartial" model="@item" />
+                    </div>
+                    <div class="text-center">
+                        <img src="@(item.Image??DefaultStrings.HEDGEHOG_IMAGE)" class="card-img-top img-fluid rounded d-none d-md-inline" style="max-width:192px;max-height:192px;" alt="@item.Name">
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            <strong>@Localizer["Territory"]:</strong> @item.CurrentTerritory <partial name="_HedgehogTerritoryServicePartial" model="@item" /><br />
+                            @if (!item.IsHome)
+                            {
+                                <strong>@Localizer["Home territory"]:</strong> @(item.HomeTerritory ?? SharedLocalizer["No territory"].Value)
+
+                                <br />
+                            }
+                            <strong>@Localizer["Community"]:</strong> @(item.Community ?? SharedLocalizer["No community"].Value)
+                        </p>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-body-secondary d-none d-md-inline">@Localizer["Last change: {0}", item.ChangeDate]</small>
+                        <small class="text-body-secondary d-md-none">@Localizer["Last change: {0}", item.ChangeDate.ToShortDateString()]</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

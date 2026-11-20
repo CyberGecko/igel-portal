@@ -1,0 +1,93 @@
+﻿@page "{handler?}/{id?}"
+@model IgelPortal.Web.Pages.Administration.TerritoryServicesModel
+
+@{
+    ViewData["Title"] = Localizer["Territory Services"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@SharedLocalizer["Index"]</h4>
+<hr />
+@if (Model.TerritoryServices.Count == 0)
+{
+    <p>@Localizer["No Territory services created"]</p>
+}
+else
+{
+    <div class="row">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TerritoryServices[0].Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TerritoryServices[0].CreationDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TerritoryServices[0].ChangeDate)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.TerritoryServices[0].DeletedDate)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.TerritoryServices)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Name)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreationDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.ChangeDate)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.DeletedDate)
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a asp-page-handler="Edit" asp-route-id="@item.Id" class="btn btn-secondary"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
+                                <a asp-page-handler="Delete" asp-route-id="@item.Id" class="btn btn-danger"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<h4>@Localizer["Territory Service"]</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input asp-for="TerritoryService.Id" type="hidden" class="form-control" />
+            <input asp-for="TerritoryService.CreationDate" type="hidden" class="form-control" />
+            <input asp-for="TerritoryService.ChangeDate" type="hidden" class="form-control" />
+            <input asp-for="TerritoryService.DeletedDate" type="hidden" class="form-control" />
+
+            <div class="form-group input-group mb-3">
+                <label asp-for="TerritoryService.Name" class="control-label input-group-text"></label>
+                <input asp-for="TerritoryService.Name" class="form-control" />
+                <span asp-validation-for="TerritoryService.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="@SharedLocalizer["Save"]" class="btn btn-success" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

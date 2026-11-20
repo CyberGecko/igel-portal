@@ -1,0 +1,29 @@
+﻿@using Microsoft.AspNetCore.Http.Features
+
+@{
+    var consentFeature = Context.Features.Get<ITrackingConsentFeature>();
+    var showBanner = !consentFeature?.CanTrack ?? false;
+    var cookieString = consentFeature?.CreateConsentCookie();
+}
+
+@if (showBanner)
+{
+    <div id="cookieConsent" class="alert alert-info alert-dismissible fade show row" role="alert">
+        <div class="col-12 mb-3">
+            @Localizer["Consent cookie content"] <a asp-page="/Privacy">@Localizer["Learn more"]</a>.
+        </div>
+        <div class="col-4">
+            <button type="button" class="accept-policy close btn btn-success" data-bs-dismiss="alert" aria-label="@SharedLocalizer["Close"]" data-cookie-string="@cookieString">
+            <span aria-hidden="true">@Localizer["Accept"]</span>
+            </button>
+        </div>
+    </div>
+    <script>
+        (function () {
+            var button = document.querySelector("#cookieConsent button[data-cookie-string]");
+            button.addEventListener("click", function (event) {
+                document.cookie = button.dataset.cookieString;
+            }, false);
+        })();
+    </script>
+}

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Register" xml:space="preserve">
+        <value>Registrieren</value>
+    </data>
+  <data name="Associate your {0} account." xml:space="preserve">
+        <value>Verbinden Sie ihr {0} Konto</value>
+    </data>
+  <data name="You've successfully authenticated with &lt;strong&gt;{0}&lt;/strong&gt;.&lt;br /&gt;Please enter an email address for this site below and click the Register button to finish&lt;br /&gt;logging in." xml:space="preserve">
+        <value>Sie haben sich erfolgreich mit &lt;strong&gt;{0}&lt;/strong&gt; angemeldet.&lt;br /&gt;Bitte geben Sie E-Mail Adresse für diese Seite ein und klicken auf Registrieren&lt;br /&gt;um die Anmeldung fertig zustellen.</value>
+    </data>
+  <data name="Please enter your email." xml:space="preserve">
+        <value>Bitte geben Sie ihre E-Mail Adresse ein.</value>
+    </data>
+</root>

@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Unable to load user with ID '{0}'." xml:space="preserve">
+        <value>Der Nutzer mit ID '{0}' konnte nicht geladen werden.</value>
+    </data>
+  <data name="Thank you for confirming your email." xml:space="preserve">
+        <value>Danke, dass sie ihre E-Mail bestätigt haben.</value>
+    </data>
+  <data name="Error confirming email." xml:space="preserve">
+        <value>Es trat ein Fehler beim Bestätigen ihrer E-Mail auf.</value>
+    </data>
+</root>

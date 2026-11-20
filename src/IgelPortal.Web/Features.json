@@ -1,0 +1,495 @@
+﻿[
+  {
+    "Version": "1.0.x",
+    "Features": [
+      {
+        "Name": "Hedgehogs",
+        "Features": [
+          {
+            "Name": "Details",
+            "Features": [
+              {
+                "Name": "Description",
+                "Features": null,
+                "Status": "ToDo"
+              }
+            ],
+            "Status": "ToDo"
+          },
+          {
+            "Name": "HealthLog (Weight, Injuries, Infections)",
+            "Features": [
+              {
+                "Name": "Create",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Edit",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Index",
+                "Features": null,
+                "Status": "ToDo"
+              }
+            ],
+            "Status": "ToDo"
+          }
+        ],
+        "Status": "ToDo"
+      },
+      {
+        "Name": "Communities",
+        "Features": [
+          {
+            "Name": "Materials",
+            "Features": [
+              {
+                "Name": "Type (What is it)",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Total Amount",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Current Available Amount",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Origin Location (Territory)",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Current Location (Territory)",
+                "Features": null,
+                "Status": "ToDo"
+              }
+            ],
+            "Status": "ToDo"
+          },
+          {
+            "Name": "Events",
+            "Features": [
+              {
+                "Name": "Create",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Edit",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Details",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Delete",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Index",
+                "Features": null,
+                "Status": "ToDo"
+              }
+            ],
+            "Status": "ToDo"
+          }
+        ],
+        "Status": "ToDo"
+      },
+      {
+        "Name": "Messageboard",
+        "Features": [
+          {
+            "Name": "Entries",
+            "Features": [
+              {
+                "Name": "Create",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Edit",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Delete",
+                "Features": null,
+                "Status": "ToDo"
+              },
+              {
+                "Name": "Index (List Entries)",
+                "Features": [
+                  {
+                    "Name": "Overall",
+                    "Features": null,
+                    "Status": "ToDo"
+                  },
+                  {
+                    "Name": "Community",
+                    "Features": null,
+                    "Status": "ToDo"
+                  }
+                ],
+                "Status": "ToDo"
+              }
+            ],
+            "Status": "ToDo"
+          }
+        ],
+        "Status": "ToDo"
+      }
+    ],
+    "Status": "ToDo"
+  },
+
+  {
+    "Version": "1.0.0",
+    "Features": [
+      {
+        "Name": "Hedgehogs",
+        "Features": [
+          {
+            "Name": "Create",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Edit",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Details",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Delete",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Index",
+            "Features": [
+              {
+                "Name": "Filter",
+                "Features": [
+                  {
+                    "Name": "My",
+                    "Features": null,
+                    "Status": "Done"
+                  },
+                  {
+                    "Name": "Community",
+                    "Features": [
+                      {
+                        "Name": "Move Hedgehog",
+                        "Features": [
+                          {
+                            "Name": "Change Home Territory",
+                            "Features": null,
+                            "Status": "Done"
+                          },
+                          {
+                            "Name": "Change Home Territory",
+                            "Features": null,
+                            "Status": "Done"
+                          },
+                          {
+                            "Name": "Change Attached User",
+                            "Features": null,
+                            "Status": "Done"
+                          }
+                        ],
+                        "Status": "Done"
+                      },
+                      {
+                        "Name": "Request Service for Hedgehog",
+                        "Features": null,
+                        "Status": "Done"
+                      },
+                      {
+                        "Name": "Send Mail",
+                        "Features": [
+                          {
+                            "Name": "Filter By Capacity",
+                            "Features": null,
+                            "Status": "Done"
+                          }
+                        ],
+                        "Status": "Done"
+                      }
+                    ],
+                    "Status": "Done"
+                  }
+                ],
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "Territories",
+        "Features": [
+          {
+            "Name": "Create",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Edit",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Details",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Delete",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Index",
+            "Features": [
+              {
+                "Name": "Filter",
+                "Features": [
+                  {
+                    "Name": "My",
+                    "Features": null,
+                    "Status": "Done"
+                  },
+                  {
+                    "Name": "Community",
+                    "Features": [
+                      {
+                        "Name": "Display Map",
+                        "Features": [
+                          {
+                            "Name": "Territory as Pin",
+                            "Features": null,
+                            "Status": "Done"
+                          },
+                          {
+                            "Name": "With Current Hedgehogs",
+                            "Features": null,
+                            "Status": "Done"
+                          },
+                          {
+                            "Name": "Services with Capacities",
+                            "Features": null,
+                            "Status": "Done"
+                          }
+                        ],
+                        "Status": "Done"
+                      }
+                    ],
+                    "Status": "Done"
+                  }
+                ],
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "Communities",
+        "Features": [
+          {
+            "Name": "Create",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Edit",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Details",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Delete",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Index",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Join",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "Members",
+            "Features": [
+              {
+                "Name": "Change Owner",
+                "Features": null,
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "Administration",
+        "Features": [
+          {
+            "Name": "Territory Service",
+            "Features": [
+              {
+                "Name": "Create",
+                "Features": [],
+                "Status": "Done"
+              },
+              {
+                "Name": "Edit",
+                "Features": [],
+                "Status": "Done"
+              },
+              {
+                "Name": "Delete",
+                "Features": [],
+                "Status": "Done"
+              },
+              {
+                "Name": "Index",
+                "Features": [],
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          },
+          {
+            "Name": "Roles",
+            "Features": [
+              {
+                "Name": "Assigned Count",
+                "Features": null,
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          },
+          {
+            "Name": "User",
+            "Features": [
+              {
+                "Name": "Add Roles",
+                "Features": null,
+                "Status": "Done"
+              },
+              {
+                "Name": "Remove Roles",
+                "Features": null,
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "Dashboard",
+        "Features": [
+          {
+            "Name": "My Hedgehogs",
+            "Features": [],
+            "Status": "Done"
+          },
+          {
+            "Name": "My Territories",
+            "Features": [
+              {
+                "Name": "Current Hedgehogs",
+                "Features": null,
+                "Status": "Done"
+              },
+              {
+                "Name": "Services with Capacities",
+                "Features": null,
+                "Status": "Done"
+              }
+            ],
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "Bugfix DataServices",
+        "Features": [
+          {
+            "Name": "DataServices TerritoryService",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "DataServices TerritoryAttachedService",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "DataServices Hedgehog",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "DataServices Community",
+            "Features": null,
+            "Status": "Done"
+          },
+          {
+            "Name": "DataServices Territory",
+            "Features": null,
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      },
+      {
+        "Name": "LoginPartial",
+        "Features": [
+          {
+            "Name": "Move Links to Dropdown",
+            "Features": null,
+            "Status": "Done"
+          }
+        ],
+        "Status": "Done"
+      }
+    ],
+    "Status": "Done"
+  }
+]

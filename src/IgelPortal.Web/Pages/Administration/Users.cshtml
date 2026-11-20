@@ -1,0 +1,102 @@
+﻿@page "{handler?}"
+@model IgelPortal.Web.Pages.Administration.UsersModel
+@{
+    ViewData["Title"] = Localizer["Users"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@SharedLocalizer["Index"]</h4>
+<hr />
+@if (Model.Users.Count == 0)
+{
+    <p>@Localizer["No Users registered"]</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <label asp-for="Users[0].UserName"></label>
+                </th>
+                <th>
+                    <label asp-for="Users[0].Email"></label>
+                </th>
+                <th>
+                    <label asp-for="Users[0].EmailConfirmed"></label>
+                </th>
+                <th>
+                    <label asp-for="Users[0].TwoFactorEnabled"></label>
+                </th>
+                <th>
+                    <label asp-for="Users[0].AccessFailedCount"></label>
+                </th>
+                <th>
+                    <label asp-for="Users[0].Roles"></label>
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Users)
+            {
+                <tr>
+                    <td>
+                        @item.UserName
+                    </td>
+                    <td>
+                        @item.Email
+                    </td>
+                    <td>
+                        <i class="bi @(item.EmailConfirmed?"bi-check-lg text-success":"bi-x-lg text-danger")"></i>
+                    </td>
+                    <td>
+                        <i class="bi @(item.TwoFactorEnabled?"bi-check-lg text-success":"bi-x-lg text-danger")"></i>
+                    </td>
+                    <td>
+                        @item.AccessFailedCount
+                    </td>
+                    <td>
+                        @String.Join(", ", item.Roles)
+                    </td>
+                    <td>
+                        @* @if (User.Identity.Name != item.UserName)
+                { *@
+                        <div class="btn-group" role="group" aria-label="Add or Remove Role">
+                            @if (Model.AvailableRoles.Any(c => !item.Roles.Contains(c)))
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-plus-circle"></i><span class="d-none d-md-inline"> @Localizer["Add Role"]</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var role in Model.AvailableRoles.Where(c => !item.Roles.Contains(c)))
+                                        {
+                                            <li><a class="dropdown-item" asp-page-handler="AddRole" asp-route-userId="@item.Id" asp-route-roleName="@role">@role</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                            @if (item.Roles.Any())
+                            {
+                                <div class="dropdown">
+                                    <button class="btn btn-danger dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="bi bi-x-circle"></i><span class="d-none d-md-inline"> @Localizer["Remove Role"]</span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        @foreach (var role in item.Roles)
+                                        {
+                                            <li><a class="dropdown-item" asp-page-handler="RemoveRole" asp-route-userId="@item.Id" asp-route-roleName="@role">@role</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </div>
+                        @* } *@
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

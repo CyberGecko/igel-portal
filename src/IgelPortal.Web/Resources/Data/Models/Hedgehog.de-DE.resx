@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Community" xml:space="preserve">
+        <value>Gruppe</value>
+    </data>
+  <data name="Attached User" xml:space="preserve">
+        <value>Zugeteilte Person</value>
+    </data>
+  <data name="Home Territory" xml:space="preserve">
+        <value>Heimatrevier</value>
+    </data>
+  <data name="Current Territory" xml:space="preserve">
+        <value>Aktuelles Revier</value>
+    </data>
+  <data name="Used Service" xml:space="preserve">
+        <value>Verwendeter Dienst</value>
+    </data>
+  <data name="Image" xml:space="preserve">
+        <value>Bild</value>
+    </data>
+  <data name="BiologicalSex" xml:space="preserve">
+        <value>Geschlecht</value>
+    </data>
+  <data name="Open Service Requests" xml:space="preserve">
+        <value>Offene Anfragen</value>
+    </data>
+</root>

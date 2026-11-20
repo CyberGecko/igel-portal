@@ -1,0 +1,17 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = Localizer["Home page"];
+}
+
+<div class="text-center">
+    <h1 class="display-4">@Localizer["Welcome"]</h1>
+</div>
+<div class="row">
+    <div class="col-12 col-md-6">
+        <vc:hedgehog-overview-widget />
+    </div>
+    <div class="col-12 col-md-6">
+        <vc:territory-overview-widget />
+    </div>
+</div>

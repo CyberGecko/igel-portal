@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Access denied" xml:space="preserve">
+        <value>Zugriff verweigert.</value>
+    </data>
+  <data name="You do not have access to this resource." xml:space="preserve">
+        <value>Sie haben nicht die Berechtigung auf diese Seite zuzugreifen.</value>
+    </data>
+</root>

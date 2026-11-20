@@ -1,0 +1,77 @@
+﻿@page
+@model IgelPortal.Web.Pages.Communities.IndexModel
+
+@{
+    ViewData["Title"] = $"{Localizer["Communities"].Value} {SharedLocalizer["Index"].Value}";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a class="btn btn-success" asp-page="./Create" asp-route-filter="@ViewBag.Filter"><i class="bi bi-plus-circle"></i><span class="d-none d-md-inline"> @SharedLocalizer["Create New"]</span></a>
+</p>
+@if (Model.Communities.Count == 0)
+{
+    <p>@SharedLocalizer["No Communities registered"]</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].ContactName)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].ContactMail)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].ContactPhone)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].CreationDate)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Communities[0].ChangeDate)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Communities)
+            {
+                <tr>
+                    <td>
+                        @item.Name
+                    </td>
+                    <td>
+                        @item.ContactName
+                    </td>
+                    <td>
+                        @item.ContactMail
+                    </td>
+                    <td>
+                        @item.ContactPhone
+                    </td>
+                    <td>
+                        @item.CreationDate
+                    </td>
+                    <td>
+                        @item.ChangeDate
+                    </td>
+                    <td>
+                        <div class="btn-group" role="group">
+                            <a class="btn btn-info" asp-page="./Details" asp-route-id="@item.Id"><i class="bi bi-search"></i><span class="d-none d-md-inline"> @SharedLocalizer["Details"]</span></a>
+                            <a class="btn btn-primary" asp-page="./Members" asp-route-handler="/" asp-route-id="@item.Id"><i class="bi bi-people"></i><span class="d-none d-md-inline"> @SharedLocalizer["Members"]</span></a>
+                            <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@item.Id"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
+                            <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@item.Id"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

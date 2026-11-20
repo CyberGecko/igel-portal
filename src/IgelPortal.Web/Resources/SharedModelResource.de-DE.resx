@@ -1,0 +1,47 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Name" xml:space="preserve">
+        <value>Name</value>
+    </data>
+  <data name="Creation date" xml:space="preserve">
+        <value>Erstellungsdatum</value>
+    </data>
+  <data name="Change date" xml:space="preserve">
+        <value>Änderungdatum</value>
+    </data>
+  <data name="Deleted date" xml:space="preserve">
+        <value>Löschdatum</value>
+    </data>
+  <data name="Is deleted" xml:space="preserve">
+        <value>Ist gelöscht</value>
+    </data>
+
+  <data name="Email" xml:space="preserve">
+        <value>E-Mail Adresse</value>
+    </data>
+  <data name="Password" xml:space="preserve">
+        <value>Passwort</value>
+    </data>
+  <data name="Confirm password" xml:space="preserve">
+        <value>Passwort bestätigen</value>
+    </data>
+  <data name="New password" xml:space="preserve">
+        <value>Neues Passwort</value>
+    </data>
+  <data name="Confirm new password" xml:space="preserve">
+        <value>Neues Passwort bestätigen</value>
+    </data>
+  <data name="Code" xml:space="preserve">
+        <value>Code</value>
+    </data>
+
+  <data name="The {0} must be at least {2} and at max {1} characters long." xml:space="preserve">
+        <value>{0} muss mindesetens {2} und maximal {1} Zeichen lang sein.</value>
+    </data>
+  <data name="The password and confirmation password do not match." xml:space="preserve">
+        <value>Das Passwort und die Bestätigung stimmen nicht überein.</value>
+    </data>
+  <data name="The new password and confirmation password do not match." xml:space="preserve">
+        <value>Das neue Passwort stimmt nicht mit der Bestätigung überein.</value>
+    </data>
+</root>

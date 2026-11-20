@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Profile" xml:space="preserve">
+        <value>Profil</value>
+    </data>
+  <data name="Email" xml:space="preserve">
+        <value>E-Mail</value>
+    </data>
+  <data name="Password" xml:space="preserve">
+        <value>Passwort</value>
+    </data>
+  <data name="External logins" xml:space="preserve">
+        <value>Externe Anmeldungen</value>
+    </data>
+  <data name="Passkey authentication" xml:space="preserve">
+        <value>Passkey Anmeldung</value>
+    </data>
+  <data name="Two-factor authentication" xml:space="preserve">
+        <value>Zwei-Faktor Authentifizierung</value>
+    </data>
+  <data name="Personal data" xml:space="preserve">
+        <value>Persönliche Daten</value>
+    </data>
+</root>

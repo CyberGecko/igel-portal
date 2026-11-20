@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="The external login was not removed." xml:space="preserve">
+        <value>Die externe Anmeldung wurde nicht entfernt.</value>
+    </data>
+  <data name="The external login was removed." xml:space="preserve">
+        <value>Die externe Anmeldung wurde entfernt.</value>
+    </data>
+  <data name="The external login was not added. External logins can only be associated with one account." xml:space="preserve">
+        <value>Die externe Anmeldung wurde nicht hinzugefügt. Externe Logins können nur mit einem Konto verknüpft werden.</value>
+    </data>
+  <data name="The external login was added." xml:space="preserve">
+        <value>Die externe Anmeldung wurde hinzugefügt.</value>
+    </data>
+</root>

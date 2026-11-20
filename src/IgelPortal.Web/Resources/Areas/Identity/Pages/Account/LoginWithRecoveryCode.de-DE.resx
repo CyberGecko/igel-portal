@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Recovery code verification" xml:space="preserve">
+        <value>Mit Wiederherstellungscode anmelden</value>
+    </data>
+  <data name="You have requested to log in with a recovery code. This login will not be remembered until you provide an authenticator app code at log in or disable 2FA and log in again." xml:space="preserve">
+        <value>Sie wollen sich mit einem Wiederherstellungscode anmelden. Die Anmeldung wird nicht gespeichert, bis Sie einen Code aus einer Authentifikator-Apps angeben oder 2FA deaktivieren und sich neu anmelden.</value>
+    </data>
+  <data name="RecoveryCode" xml:space="preserve">
+        <value>Wiederherstellungscode</value>
+    </data>
+  <data name="Log in" xml:space="preserve">
+        <value>Anmelden</value>
+    </data>
+</root>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Configure authenticator app" xml:space="preserve">
+        <value>Authentifikator-App konfigurieren</value>
+    </data>
+  <data name="To use an authenticator app go through the following steps:" xml:space="preserve">
+        <value>Um eine Authentifikator-App zu verwenden, führen sie folgende Schritte aus:</value>
+    </data>
+  <data name="Download a two-factor authenticator app like Microsoft Authenticator for" xml:space="preserve">
+        <value>Laden sie eine Zwei-Faktor-Authentifizierungs-App wie Microsoft Authenticator für</value>
+    </data>
+  <data name="Google Authenticator for" xml:space="preserve">
+        <value>Google Authenticator für</value>
+    </data>
+  <data name="Twilio Authy Authenticator for" xml:space="preserve">
+        <value>Twilio Authy Authenticator für</value>
+    </data>
+  <data name="and" xml:space="preserve">
+        <value>und</value>
+    </data>
+  <data name="or" xml:space="preserve">
+        <value>oder</value>
+    </data>
+  <data name="Scan the QR Code or enter this key &lt;kbd&gt;{0}&lt;/kbd&gt; into your two factor authenticator app. Spaces and casing do not matter." xml:space="preserve">
+        <value>Scannen Sie den QR-Code oder geben sie diesen Schlüssel &lt;kbd&gt;{0}&lt;/kbd&gt; in der Authentifikator-App ein. Leerzeichen und Groß-/Kleinschreibung spielen keine Rolle.</value>
+    </data>
+  <data name="Once you have scanned the QR code or input the key above, your two factor authentication app will provide you&lt;br /&gt;with a unique code. Enter the code in the confirmation box below." xml:space="preserve">
+        <value>Sobald Sie den QR-Code gescannt, oder den Schlüssel eingegeben haben, wird die Authentifikator-App ihnen einen einzigartigen Code anzeigen.&lt;br /&gt;Geben Sie diesen in dem Bestätigungsfeld unten ein.</value>
+    </data>
+  <data name="Please enter the code." xml:space="preserve">
+        <value>Bitte geben Sie den Code ein.</value>
+    </data>
+  <data name="Verification Code" xml:space="preserve">
+        <value>Bestätigunscode</value>
+    </data>
+  <data name="Verify" xml:space="preserve">
+        <value>Bestätigen</value>
+    </data>
+</root>

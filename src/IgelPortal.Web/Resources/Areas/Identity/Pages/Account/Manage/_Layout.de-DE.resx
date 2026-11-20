@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Manage your account" xml:space="preserve">
+        <value>Verwalten Sie ihr Konto</value>
+    </data>
+  <data name="Change your account settings" xml:space="preserve">
+        <value>Ändern Sie ihre Kontoeinstellungen</value>
+    </data>
+</root>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="My Hedgehogs" xml:space="preserve">
+        <value>Meine Igel</value>
+    </data>
+  <data name="Community" xml:space="preserve">
+        <value>Gruppe</value>
+    </data>
+  <data name="Territory" xml:space="preserve">
+        <value>Revier</value>
+    </data>
+  <data name="Home territory" xml:space="preserve">
+        <value>Heimatrevier</value>
+    </data>
+  <data name="Last change: {0}" xml:space="preserve">
+        <value>Letzte Änderung: {0} </value>
+    </data>
+</root>

@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="My Territories" xml:space="preserve">
+        <value>Meine Reviere</value>
+    </data>
+  <data name="Community" xml:space="preserve">
+        <value>Gruppe</value>
+    </data>
+  <data name="Hedgehogs" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Services" xml:space="preserve">
+        <value>Dienste</value>
+    </data>
+  <data name="No services" xml:space="preserve">
+        <value>Keine Dienste</value>
+    </data>
+  <data name="No hedgehogs" xml:space="preserve">
+        <value>Keine Igel</value>
+    </data>
+  <data name="Last change: {0}" xml:space="preserve">
+        <value>Letzte Änderung: {0} </value>
+    </data>
+</root>

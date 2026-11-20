@@ -1,0 +1,54 @@
+﻿@page "{filter?}"
+@model IgelPortal.Web.Pages.Territories.DeleteModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["Delete"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3>@SharedLocalizer["Are you sure you want to delete this?"]</h3>
+<div>
+    <h4>@Localizer["Territory"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Name"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.Name
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Street"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.Street @Model.Territory.StreetNumber
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.City"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.PostalCode @Model.Territory.City
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Community"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @(Model.Territory.Community ?? SharedLocalizer["No community"].Value)
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.ChangeDate"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.ChangeDate
+        </dd>
+    </dl>
+
+    <form method="post" asp-route-filter="@ViewBag.Filter">
+        <input type="hidden" asp-for="Territory.Id" />
+        <div class="btn-group" role="group">
+            <button class="btn btn-danger" type="submit"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></button>
+            <a class="btn btn-info" asp-page="./Index" asp-route-filter="@ViewBag.Filter"><i class="bi bi-card-list"></i><span class="d-none d-md-inline"> @SharedLocalizer["Back to List"]</span></a>
+        </div>
+    </form>
+</div>

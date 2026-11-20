@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Recovery codes" xml:space="preserve">
+        <value>Wiederherstellungscodes</value>
+    </data>
+  <data name="Put these codes in a safe place." xml:space="preserve">
+        <value>Verwaren Sie diese Codes an einem sicheren Ort.</value>
+    </data>
+  <data name="If you lose your device and don't have the recovery codes you will lose access to your account." xml:space="preserve">
+        <value>Wenn Sie ihr Gerät verlieren und keine Wiederherstellungscodes habe, verlieren Sie den Zugriff auf ihr Konto.</value>
+    </data>
+</root>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Your authenticator app key has been reset, you will need to configure your authenticator app using the new key." xml:space="preserve">
+        <value>Ihr Authentifikator-App-Schlüssel wurde zurückgesetzt. Sie müssen Ihre Authentifikator-App mit dem neuen Schlüssel konfigurieren.</value>
+    </data>
+</root>

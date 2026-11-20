@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Passkey Authentication" xml:space="preserve">
+        <value>Passkey Anmeldung</value>
+    </data>
+  <data name="Add" xml:space="preserve">
+        <value>Hinzufügen</value>
+    </data>
+  <data name="Remove" xml:space="preserve">
+        <value>Entfernen</value>
+    </data>
+  <data name="E-Mail" xml:space="preserve">
+        <value>E-Mailadresse</value>
+    </data>
+  <data name="Registered Passkey Authenticators" xml:space="preserve">
+        <value>Registrierte Passkey Authentifikatoren</value>
+    </data>
+</root>

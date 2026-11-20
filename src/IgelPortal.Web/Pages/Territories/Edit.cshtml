@@ -1,0 +1,142 @@
+﻿@page "{filter?}"
+@model IgelPortal.Web.Pages.Territories.EditModel
+
+@{
+    ViewData["Title"] = Localizer["Edit"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@Localizer["Territory"]</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post" id="EditForm" asp-route-filter="@ViewBag.Filter">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Territory.Id" />
+            <input type="hidden" asp-for="Territory.UserName" />
+            <input type="hidden" asp-for="Territory.CreationDate" />
+            <input type="hidden" asp-for="Territory.ChangeDate" />
+            <input type="hidden" asp-for="Territory.DeletedDate" />
+            <div class="form-group input-group mb-3">
+                <label asp-for="Territory.Name" class="control-label input-group-text col-3"></label>
+                <input asp-for="Territory.Name" class="form-control col-9" />
+                <span asp-validation-for="Territory.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <span class="input-group-text control-label col-3">@Localizer["Street name and no."]</span>
+                <input asp-for="Territory.Street" class="form-control col-7" />
+                <input asp-for="Territory.StreetNumber" class="form-control col-2" />
+                <span asp-validation-for="Territory.Street" class="text-danger"></span>
+                <span asp-validation-for="Territory.StreetNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <span class="input-group-text control-label col-3">@Localizer["Postcode and city"]</span>
+                <input asp-for="Territory.PostalCode" class="form-control col-3" />
+                <input asp-for="Territory.City" class="form-control col-6" />
+                <span asp-validation-for="Territory.PostalCode" class="text-danger"></span>
+                <span asp-validation-for="Territory.City" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <label asp-for="Territory.CommunityId" class="control-label input-group-text col-3"></label>
+                <select asp-for="Territory.CommunityId" class="form-control col-9" asp-items="ViewBag.Communities">
+                    <option value="" disabled selected>@SharedLocalizer["Select a community"]</option>
+                </select>
+                <span asp-validation-for="Territory.CommunityId" class="text-danger"></span>
+            </div>
+        </form>
+        <hr />
+        <div class="form-group mb-4">
+            <h5>@Localizer["Attached Services"]</h5>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => Model.Territory.AttachedServices[0].TerritoryService)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => Model.Territory.AttachedServices[0].MaxCapacity)
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Territory.AttachedServices)
+                    {
+                        <tr>
+                            <td>
+                                @item.TerritoryService
+                            </td>
+                            <td>
+                                @item.MaxCapacity
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn editService" data-territoryAttachedServiceId="@item.Id" data-maxCapacity="@item.MaxCapacity"
+                                            data-territoryServiceId="@item.TerritoryServiceId" data-territoryId="@item.TerritoryId">
+                                        <i class="bi bi-pencil text-primary"></i>
+                                    </button>
+                                    <form method="post" asp-page-handler="RemoveRow" asp-route-filter="@ViewBag.Filter">
+                                        <input type="hidden" name="id" asp-for="@item.Id" value="@item.Id" />
+                                        <input type="hidden" name="territoryId" asp-for="@Model.Territory.Id" value="@Model.Territory.Id" />
+                                        <button type="submit" class="btn">
+                                            <i class="bi bi-trash text-danger"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    <form method="post" asp-page-handler="AddRow" asp-route-filter="@ViewBag.Filter">
+                    <tr>
+                        <td>
+                            <div class="form-group input-group mb-3">
+                                <select asp-for="TerritoryAttachedService.TerritoryServiceId" class="form-control col-9" asp-items="ViewBag.TerritoryServices">
+                                    <option value="" disabled selected>@SharedLocalizer["Select a service"]</option>
+                                </select>
+                                <span asp-validation-for="TerritoryAttachedService.TerritoryServiceId" class="text-danger"></span>
+                            </div>
+                        </td>
+                        <td>
+                            <input asp-for="TerritoryAttachedService.MaxCapacity" class="form-control" value="0" />
+                            <span asp-validation-for="TerritoryAttachedService.MaxCapacity" class="text-danger"></span>
+                        </td>
+                        <td>
+                            <input type="hidden" name="territoryId" asp-for="@Model.Territory.Id" value="@Model.Territory.Id" />
+                            <input type="hidden" asp-for="TerritoryAttachedService.Id" value="TerritoryService.Id" />
+                            <button type="submit" class="btn">
+                                <i id="add_btn_icon" class="bi bi-plus-circle text-success"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    </form>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="form-group mb-3">
+            <input type="submit" value="@SharedLocalizer["Save"]" form="EditForm" class="btn btn-success" />
+        </div>
+    </div>
+</div>
+
+<div>
+    <a asp-page="./Index" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Back to List"]</a>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $('.editService').click(function (e) {
+            $('#TerritoryAttachedService_TerritoryServiceId').val(e.currentTarget.dataset.territoryserviceid).change();
+            $('#TerritoryAttachedService_MaxCapacity').val(e.currentTarget.dataset.maxcapacity);
+            $('#territoryId').val(e.currentTarget.dataset.territoryid);
+            $('#TerritoryAttachedService_Id').val(e.currentTarget.dataset.territoryattachedserviceid);
+
+            $('#add_btn_icon').removeClass('bi-plus-circle');
+            $('#add_btn_icon').addClass('bi-floppy');
+        })
+    </script>
+}

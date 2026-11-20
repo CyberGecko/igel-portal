@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Log out" xml:space="preserve">
+        <value>Abmelden</value>
+    </data>
+  <data name="Click here to Logout" xml:space="preserve">
+        <value>Klicken Sie hier zum abmelden</value>
+    </data>
+  <data name="You have successfully logged out of the application." xml:space="preserve">
+        <value>Sie wurden erfolgreich von der Anmeldung abgemeldet.</value>
+    </data>
+</root>

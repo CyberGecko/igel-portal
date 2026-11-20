@@ -1,0 +1,60 @@
+﻿@page
+@model PasskeyAuthenticationModel
+@{
+    ViewData["Title"] = Localizer["Passkey Authentication"];
+    ViewData["ActivePage"] = ManageNavPages.PasskeyAuthentication;
+}
+
+<h3>@ViewData["Title"]</h3>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        @if (Model.UserFidoCredentials.Count == 0)
+        {
+            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <input id="registerEmail" name="userName" type="hidden" value="@User.Identity?.Name" />
+                <div class="form-floating mb-3">
+                    <input id="registerEmail" name="registerEmail" class="form-control" value="@User.Identity?.Name" disabled />
+                    <label for="registerUserName">@Localizer["E-Mail"]</label>
+                    <span validation-for="registerUserName" class="text-danger"></span>
+                </div>
+                <button id="registerSubmit" type="submit" class="btn btn-lg btn-success w-100">@Localizer["Add"]</button>
+            </form>
+        }
+        else
+        {
+            <h4>
+                @Localizer["Registered Passkey Authenticators"]
+            </h4>
+            <form id="removePasskeyForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <input id="registerEmail" name="userName" type="hidden" value="@User.Identity?.Name" />
+                <div class="form-floating mb-3">
+                    <input id="registerEmail" name="registerEmail" class="form-control" value="@User.Identity?.Name" disabled />
+                    <label for="registerUserName">@Localizer["E-Mail"]</label>
+                    <span validation-for="registerUserName" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <ul class="list-group">
+                        @foreach (var authTransport in Model.UserFidoCredentials.SelectMany(c => c.AuthenticationTransports))
+                        {
+                            <li class="list-group-item">
+                                @authTransport
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <button id="removePasskeySubmit" type="submit" class="btn btn-lg btn-danger w-100">@Localizer["Remove"]</button>
+            </form>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    @if (Model.UserFidoCredentials.Count == 0)
+    {
+        <script src="~/js/helpers.js" asp-append-version="true"></script>
+        <script src="~/js/register.js" asp-append-version="true"></script>
+    }
+}

@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>  
+  <data name="Description" xml:space="preserve">
+        <value>Beschreibung</value>
+    </data>
+  <data name="Contact person" xml:space="preserve">
+        <value>Ansprechperson</value>
+    </data>
+  <data name="E-Mail" xml:space="preserve">
+        <value>E-Mail</value>
+    </data>
+  <data name="Phone" xml:space="preserve">
+        <value>Telefonnummer</value>
+    </data>
+</root>

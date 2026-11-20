@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Roles" xml:space="preserve">
+        <value>Rollen</value>
+    </data>
+  <data name="No Roles created" xml:space="preserve">
+        <value>Keine Rollen angelegt</value>
+    </data>  
+</root>

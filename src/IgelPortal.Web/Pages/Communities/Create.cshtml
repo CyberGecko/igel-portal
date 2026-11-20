@@ -1,0 +1,63 @@
+﻿@page
+@model IgelPortal.Web.Pages.Communities.CreateModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["Create"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@Localizer["Community"]</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group input-group mb-3">
+                <label asp-for="Community.Name" class="control-label input-group-text"></label>
+                <input asp-for="Community.Name" class="form-control" />
+                <span asp-validation-for="Community.Name" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <label asp-for="Community.Description" class="control-label input-group-text"></label>
+                <textarea asp-for="Community.Description" rows="5" class="form-control" ></textarea>
+                <span asp-validation-for="Community.Description" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <label asp-for="Community.ContactName" class="control-label input-group-text"></label>
+                <input asp-for="Community.ContactName" class="form-control" />
+                <span asp-validation-for="Community.ContactName" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-3">
+                <label asp-for="Community.ContactMail" class="control-label input-group-text"></label>
+                <input asp-for="Community.ContactMail" type="email" class="form-control" />
+                <span asp-validation-for="Community.ContactMail" class="text-danger"></span>
+            </div>
+            <div class="form-group input-group mb-4">
+                <label asp-for="Community.ContactPhone" class="control-label input-group-text"></label>
+                <input asp-for="Community.ContactPhone" type="tel" pattern="^\+?[1-9][0-9]{7,14}$" placeholder="+4912345678901" class="form-control" />
+                <span asp-validation-for="Community.ContactPhone" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <input type="submit" value="@SharedLocalizer["Create"]" class="btn btn-success" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    @if (User.IsInRole(RoleNames.ADMIN))
+    {
+        <a asp-page="./Index">@SharedLocalizer["Back to List"]</a>
+    }
+    else
+    {
+        <a asp-page="/Index">@SharedLocalizer["Back to Home"]</a>
+    }
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

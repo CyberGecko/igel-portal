@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Service" xml:space="preserve">
+        <value>Dienst</value>
+    </data>
+  <data name="Hedgehog" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Fulfillment date" xml:space="preserve">
+        <value>Erledigungsdatum</value>
+    </data>
+  <data name="Is Fulfilled" xml:space="preserve">
+        <value>Ist erledigt</value>
+    </data>
+  <data name="Responses" xml:space="preserve">
+        <value>Antworten</value>
+    </data>  
+</root>

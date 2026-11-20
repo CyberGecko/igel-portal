@@ -1,0 +1,84 @@
+﻿@page "{filter?}"
+@model IgelPortal.Web.Pages.Territories.DetailsModel
+
+@{
+    ViewData["Title"] = SharedLocalizer["Details"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div>
+    <h4>@Localizer["Territory"]</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Name" ></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.Name
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Street"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.Street @Model.Territory.StreetNumber
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.City"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.PostalCode @Model.Territory.City
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.Community"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @(Model.Territory.Community ?? SharedLocalizer["No community"].Value)
+        </dd>
+        <dt class="col-sm-2 mb-2">
+            <label asp-for="@Model.Territory.ChangeDate"></label>
+        </dt>
+        <dd class="col-sm-10 mb-2">
+            @Model.Territory.ChangeDate
+        </dd>
+    </dl>
+    <hr />
+    <div class="row">
+        <h5>@Localizer["Attached Services"]</h5>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Territory.AttachedServices[0].TerritoryService)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Territory.AttachedServices[0].CurrentCapacity)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => Model.Territory.AttachedServices[0].MaxCapacity)
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Territory.AttachedServices)
+                {
+                    <tr>
+                        <td>
+                            @item.TerritoryService
+                        </td>
+                        <td>
+                            @item.CurrentCapacity
+                        </td>
+                        <td>
+                            @item.MaxCapacity
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class ="btn-group" role="group">
+    <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@Model.Territory.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
+    <a class="btn btn-info" asp-page="./Index" asp-route-filter="@ViewBag.Filter"><i class="bi bi-card-list"></i><span class="d-none d-md-inline"> @SharedLocalizer["Back to List"]</span></a>
+</div>

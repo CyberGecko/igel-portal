@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hedgehog" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Request service for hedgehog {0}" xml:space="preserve">
+        <value>Dienstanfrage für Igel {0}</value>
+    </data>
+  <data name="Requested service:" xml:space="preserve">
+        <value>Angefragter Dienst:</value>
+    </data>
+  <data name="Request" xml:space="preserve">
+        <value>Anfragen</value>
+    </data>
+  <data name="Mark as fulfilled" xml:space="preserve">
+        <value>Anfrage abschließen</value>
+    </data>
+  <data name="Initiate Action for territory" xml:space="preserve">
+        <value>Aktion für Revier vorbereiten</value>
+    </data>
+</root>

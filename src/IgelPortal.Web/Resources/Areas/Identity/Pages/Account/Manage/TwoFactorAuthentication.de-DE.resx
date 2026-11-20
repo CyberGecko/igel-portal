@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Two-factor authentication (2FA)" xml:space="preserve">
+        <value>Zwei-Faktor Authentifizierung (2FA)</value>
+    </data>
+  <data name="You have no recovery codes left." xml:space="preserve">
+        <value>Sie haben keine Wiederherstellungscodes übrig</value>
+    </data>
+  <data name="You must generate a new set of recovery codes before you can log in with a recovery code" xml:space="preserve">
+        <value>Sie müsen neue Wiederherstellungscodes generieren, bevor Sie sich mit einem Wiederherstellungscode anmelden können</value>
+    </data>
+  <data name="You have 1 recovery code left." xml:space="preserve">
+        <value>Sie haben einen Wiederherstellungscode übrig</value>
+    </data>
+  <data name="You can generate a new set of recovery codes" xml:space="preserve">
+        <value>Sie können neue Wiederherstellungscodes generieren</value>
+    </data>
+  <data name="You have {0} recovery codes left" xml:space="preserve">
+        <value>Sie haben {0} Wiederherstellungscodes übrig</value>
+    </data>
+  <data name="You should generate a new set of recovery codes" xml:space="preserve">
+        <value>Sie sollten neue Wiederherstellungscodes generieren</value>
+    </data>
+  <data name="Forget this browser" xml:space="preserve">
+        <value>Diesen 'Browser vergessen'</value>
+    </data>
+  <data name="Disable 2FA" xml:space="preserve">
+        <value>2FA deaktivieren</value>
+    </data>
+  <data name="Reset recovery codes" xml:space="preserve">
+        <value>Wiederherstellungscodes zurücksetzen</value>
+    </data>
+  <data name="Authenticator app" xml:space="preserve">
+        <value>Authentifikator-App</value>
+    </data>
+  <data name="Add authenticator app" xml:space="preserve">
+        <value>Authentifikator-App hinzufügen</value>
+    </data>
+  <data name="Set up authenticator app" xml:space="preserve">
+        <value>Authentifikator-App einrichten</value>
+    </data>
+  <data name="Reset authenticator app" xml:space="preserve">
+        <value>Authentifikator-App zurücksetzen</value>
+    </data>
+  <data name="Privacy and cookie policy have not been accepted." xml:space="preserve">
+        <value>Datenschutz- und Cookie-Richtlinie wurden nicht aktzeptiert</value>
+    </data>
+  <data name="You must accept the policy before you can enable two factor authentication." xml:space="preserve">
+        <value>Sie müssen die Datenschutz- und Cookie-Richtlinie aktzeptieren, bevor sie die Zwei-Faktor Authentifizierung aktivieren können.</value>
+    </data>
+</root>

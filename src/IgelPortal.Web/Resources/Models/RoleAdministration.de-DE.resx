@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Role Name" xml:space="preserve">
+        <value>Rollenname</value>
+    </data>
+  <data name="Assigned Users" xml:space="preserve">
+        <value>Zugewiesene Benutzer</value>
+    </data>
+</root>

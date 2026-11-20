@@ -1,0 +1,76 @@
+﻿@page
+@model IgelPortal.Web.Pages.Hedgehogs.MoveTerritoryModel
+@{
+    ViewData["Title"] = Localizer["Hedgehog"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@Localizer["Move Territory"]</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form method="post">
+            <input id="hedgehogId" name="hedgehogId" type="hidden" value="@ViewBag.HedgehogId" />
+            <input id="communityId" name="communityId" type="hidden" value="@ViewBag.CommunityId" />
+            <div class="form-group input-group mb-3">
+                <span class="control-label input-group-text">
+                    @Localizer["Current territory:"]
+                </span>
+                <input type="text" disabled class="form-control" value="@ViewBag.CurrentTerritory" />
+            </div>
+            <div class="form-group input-group mb-3">
+                <span class="control-label input-group-text">
+                    @Localizer["New territory:"]
+                </span>
+                <select id="newTerritoryId" name="newTerritoryId" class="form-control" asp-items="Model.Territories" onchange="getTerritoryServices()">
+                    <option value="" disabled selected>@SharedLocalizer["Select a territory"]</option>
+                </select>
+            </div>
+            <div class="form-group input-group mb-3">
+                <span class="control-label input-group-text">
+                    @Localizer["Used service:"]
+                </span>
+                <select id="usedServiceId" name="usedServiceId" class="form-control">
+                    <option value="" disabled selected>@SharedLocalizer["Select a service"]</option>
+                    <option value="">@Localizer["Get home"]</option>
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <button type="submit" class="btn btn-success">@SharedLocalizer["Save"]</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        function getTerritoryServices() {
+            var selectedTerritoryId = $("#newTerritoryId").find(":selected").val();
+
+            $.ajax({
+                type: "GET",
+                url: "./MoveTerritory?handler=LoadTerritoryServices",
+                data: {
+                    territoryId: selectedTerritoryId
+                },
+                success: function (result) {
+                    $('#usedServiceId option:gt(2)').remove().end();
+                    let usedServiceSelect = $('#usedServiceId');
+
+                    let optionTemplate = $('<option></option>');
+                    $.each(result, (index, element) => {
+                        let option = optionTemplate.clone();
+                        option.append(element.name);
+                        option.attr('value', element.id);
+                        usedServiceSelect.append(option);
+                    });
+                },
+                error: function () {
+                    console.log("failure");
+                }
+            })
+        }
+    </script>
+}

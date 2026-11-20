@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Unexpected error when trying to set phone number." xml:space="preserve">
+        <value>Unerwarteter Fehler beim Versuch, die Telefonnummer zu setzen.</value>
+    </data>
+  <data name="Unexpected error when trying to set first name." xml:space="preserve">
+        <value>Unerwarteter Fehler beim Versuch, den Vornamen zu setzen</value>
+    </data>
+  <data name="Unexpected error when trying to set last name." xml:space="preserve">
+        <value>Unerwarteter Fehler beim Versuch, den Nachnamen zu setzen</value>
+    </data>
+  <data name="Your profile has been updated" xml:space="preserve">
+        <value>Ihr Profil wurde aktualisiert</value>
+    </data>
+</root>

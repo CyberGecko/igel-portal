@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Accept" xml:space="preserve">
+        <value>Accept</value>
+    </data>
+  <data name="Learn more" xml:space="preserve">
+        <value>Learn more</value>
+    </data>
+
+  <data name="Consent cookie content" xml:space="preserve">
+        <value>This website uses cookies and similar functions to process end device information and personal data.&lt;br /&gt;
+ The cookies used are of a technical nature and are required for the use of the website. No cookies are used for advertising purposes.&lt;br /&gt;
+ The processing serves to integrate content, external services and elements of third parties (e.g. login via Google). Depending on the function, data is passed on to third parties and to third parties in countries, in which there is no adequate level of data protection and is processed by them, e.g. the USA.</value>
+    </data>
+</root>

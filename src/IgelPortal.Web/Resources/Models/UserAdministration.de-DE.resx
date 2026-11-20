@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="User Name" xml:space="preserve">
+        <value>Benutzername</value>
+    </data>
+  <data name="E-Mail" xml:space="preserve">
+        <value>E-Mail Adresse</value>
+    </data>
+  <data name="E-Mail Confirmed" xml:space="preserve">
+        <value>E-Mail Adresse bestätigt</value>
+    </data>
+  <data name="2FA Enabled" xml:space="preserve">
+        <value>2FA aktiviert</value>
+    </data>
+  <data name="Failed Logins" xml:space="preserve">
+        <value>Fehlgeschlagene Anmeldungen</value>
+    </data>
+  <data name="Assigned Roles" xml:space="preserve">
+        <value>Zugewiesene Rollen</value>
+    </data>
+</root>

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Invalid recovery code entered." xml:space="preserve">
+        <value>Es wurde ein ungültiger Wiederherstellungscode eingegeben.</value>
+    </data>
+</root>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Personal Data" xml:space="preserve">
+        <value>Persönliche Daten</value>
+    </data>
+  <data name="Your account contains personal data that you have given us. This page allows you to download or delete that data." xml:space="preserve">
+        <value>Ihr Konto enthält persönliche Daten, die Sie angegeben haben. Diese Seite erlaubt das Herunterladen oder Löschen dieser Daten.</value>
+    </data>
+  <data name="Deleting this data will permanently remove your account, and this cannot be recovered." xml:space="preserve">
+        <value>Das Löschen dieser Daten wird ihr Konto dauerhaft entfernen. Dies kann nicht rückgängig gemacht werden.</value>
+    </data>
+  <data name="Download" xml:space="preserve">
+        <value>Herunterladen</value>
+    </data>
+  <data name="Delete" xml:space="preserve">
+        <value>Löschen</value>
+    </data>
+</root>

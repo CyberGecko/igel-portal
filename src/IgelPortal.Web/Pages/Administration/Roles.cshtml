@@ -1,0 +1,42 @@
+﻿@page
+@model IgelPortal.Web.Pages.Administration.RolesModel
+@{
+    ViewData["Title"] = Localizer["Roles"];
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>@SharedLocalizer["Index"]</h4>
+<hr />
+@if (Model.Roles.Count == 0)
+{
+    <p>@Localizer["No Roles created"]</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    <label asp-for="Roles[0].Name"></label>
+                </th>
+                <th>
+                    <label asp-for="Roles[0].UsersCount"></label>"
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Roles)
+            {
+                <tr>
+                    <td>
+                        @item.Name
+                    </td>
+                    <td>
+                        @item.UsersCount
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

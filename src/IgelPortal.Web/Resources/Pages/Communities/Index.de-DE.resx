@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Communities" xml:space="preserve">
+        <value>Gruppen</value>
+    </data>
+  <data name="Members" xml:space="preserve">
+        <value>Mitglieder</value>
+    </data>
+</root>

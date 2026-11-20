@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Users" xml:space="preserve">
+        <value>Benutzer</value>
+    </data>
+  <data name="No Users registered" xml:space="preserve">
+        <value>Keine Benutzer registriert</value>
+    </data>
+  <data name="Add Role" xml:space="preserve">
+        <value>Rolle hinzufügen</value>
+    </data>
+  <data name="Remove Role" xml:space="preserve">
+        <value>Rolle entfernen</value>
+    </data>
+</root>

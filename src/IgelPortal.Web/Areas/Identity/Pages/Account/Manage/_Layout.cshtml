@@ -1,0 +1,36 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        Layout = "/Pages/Shared/_Layout.cshtml";
+    }
+}
+@if (User?.Identity?.IsAuthenticated ?? false)
+{
+    <h1>@Localizer["Manage your account"]</h1>
+
+    <div>
+        <h2>@Localizer["Change your account settings"]</h2>
+        <hr />
+        <div class="row">
+            <div class="col-md-3">
+                @* <partial name="/Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml" /> *@
+                <partial name="/Areas/Identity/Pages/Account/Manage/_ManageNav.cshtml" />
+            </div>
+            <div class="col-md-9">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    @RenderBody()
+}
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

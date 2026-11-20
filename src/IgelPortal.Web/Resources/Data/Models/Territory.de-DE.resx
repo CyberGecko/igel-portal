@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>  
+  <data name="Latitude" xml:space="preserve">
+        <value>Breitengrad</value>
+    </data>
+  <data name="Longitude" xml:space="preserve">
+        <value>Längengrad</value>
+    </data>
+  <data name="Street" xml:space="preserve">
+        <value>Strasse</value>
+    </data>
+  <data name="StreetNumber" xml:space="preserve">
+        <value>Hausnummer</value>
+    </data>
+  <data name="Postal code" xml:space="preserve">
+        <value>Postleitzahl</value>
+    </data>
+  <data name="City" xml:space="preserve">
+        <value>Ort</value>
+    </data>
+  <data name="Community" xml:space="preserve">
+        <value>Gruppe</value>
+    </data>
+  <data name="Attached Services" xml:space="preserve">
+        <value>Dienste</value>
+    </data>
+</root>

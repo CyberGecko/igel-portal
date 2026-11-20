@@ -1,0 +1,219 @@
+﻿@page "{filter?}"
+@using Syncfusion.EJ2.Maps
+@model IgelPortal.Web.Pages.Territories.IndexModel
+@inject IgelPortal.Web.Interfaces.ITerritoryDataService DataService
+
+
+@{
+    ViewData["Title"] = $"{Localizer["Territories"].Value} {SharedLocalizer["Index"].Value}";
+    var toolbar = new string[] { "Zoom", "ZoomIn", "ZoomOut", "Pan", "Reset" };
+
+    var tooltip = new MapsTooltipSettings
+            {
+                Visible = true,
+                ValuePath = "Name"
+            };
+    var select = new Syncfusion.EJ2.Maps.MapsSelectionSettings
+            {
+                Enable = true,
+                Fill = "green",
+                Border = new Syncfusion.EJ2.Maps.MapsBorder
+                {
+                    Color = "white",
+                    Width = 2,
+                    Opacity = 1
+                }
+            };
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (!ViewBag.IsCommunityOverview)
+{
+    <p>
+        <a class="btn btn-success" asp-page="./Create" asp-route-filter="@ViewBag.Filter"><i class="bi bi-plus-circle"></i><span class="d-none d-md-inline"> @SharedLocalizer["Create New"]</span></a>
+    </p>
+    @if (Model.Territories.Count == 0)
+    {
+        <p>@SharedLocalizer["No Territories registered"]</p>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Territories[0].Name)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Territories[0].City)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Territories[0].Community)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Territories[0].AttachedServices)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Territories[0].ChangeDate)
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Territories)
+                {
+                    <tr>
+                        <td>
+                            @item.Name
+                        </td>
+                        <td>
+                            @item.City
+                        </td>
+                        <td>
+                            @(item.Community ?? SharedLocalizer["No community"].Value)
+                        </td>
+                        <td>
+                            @item.AttachedServices.Count
+                        </td>
+                        <td>
+                            @item.ChangeDate.ToString("d")
+                        </td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a class="btn btn-info" asp-page="./Details" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-search"></i><span class="d-none d-md-inline"> @SharedLocalizer["Details"]</span></a>
+                                <a class="btn btn-secondary" asp-page="./Edit" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
+                                @if (await DataService.IsTerritoryDeletableByUser(item.Id, User.Identity))
+                                {
+                                    <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+else
+{
+    <div>
+        <h4>@Localizer["Community Territories"]</h4>
+        <hr />
+        <div class="row">
+            <div class="w-100">
+                <ejs-maps id="maps" markerClick="window.shapeSelected">
+                    <e-maps-centerposition latitude="ViewBag.MiddleLat" longitude="ViewBag.MiddleLon"></e-maps-centerposition>
+                    <e-maps-zoomSettings Enable="true" zoomFactor="12" toolbars="toolbar" PinchZooming="true" ZoomOnClick="false"
+                                         DoubleClickZoom="false" MouseWheelZoom="true" minZoom=2 maxZoom=14></e-maps-zoomSettings>
+                    <e-maps-layers>
+                        <e-maps-layer urlTemplate="http://a.tile.openstreetmap.org/level/tileX/tileY.png">
+                            <e-layersettings-markers>
+                                <e-layersettings-marker visible="true" animationDuration="0" dataSource="ViewBag.Data" height="32" width="32" shape="Balloon"
+                                                        tooltipSettings="tooltip" selectionSettings="select"></e-layersettings-marker>
+                            </e-layersettings-markers>
+                        </e-maps-layer>
+                    </e-maps-layers>
+                </ejs-maps>
+            </div>
+        </div>
+        <div class="row">
+            <div class="card-group">
+                @foreach (var item in Model.Territories)
+                {
+                    <div class="card" style="width: 18rem;">
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">@item.Street @item.StreetNumber, @item.PostalCode @item.City</h6>
+                            <span class="card-text fw-bold">@Localizer["Services"]</span>
+                            <ul class="">
+                                @if (item.AttachedServices.Count == 0)
+                                {
+                                    <li class="">
+                                        @Localizer["No services"]
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var service in item.AttachedServices)
+                                    {
+                                        <li class="">
+                                            @service.TerritoryService
+                                            <span class="badge bg-primary rounded-pill">@service.CurrentCapacity/@service.MaxCapacity</span>
+                                        </li>
+                                    }}
+                            </ul>
+                            <span class="card-text fw-bold">@Localizer["Hedgehogs"]</span>
+                            <ul class="">
+                                @if (item.AttachedServices.Count == 0)
+                                {
+                                    <li class="">
+                                        @Localizer["No hedgehogs"]
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var hedgehog in item.Hedgehogs)
+                                    {
+                                        <li class="">
+                                            <partial name="_TerritoryHedgehogShortInfoPartial" model="@hedgehog" />
+                                        </li>
+                                    }}
+                            </ul>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="toast-header">
+                <span class="fw-bold me-auto" id="territoryName"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="@SharedLocalizer["Close"]"></button>
+            </div>
+            <div class="toast-body">
+                <span class="fw-bold">@Localizer["Services"]</span>
+                <ul class="list-group" id="servicesList">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary rounded-pill"></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+}
+
+@section Scripts {
+    <script>
+        function shapeSelected(args) {
+            var territoryData = args.data;
+            var serviceList = territoryData.services;
+
+            $('#territoryName').text(territoryData.name);
+            var servicesList = $('#servicesList');
+            servicesList.empty();
+
+            for (var i = 0; i < serviceList.length; i++) {
+                var service = serviceList[i];
+                var listItem = $('<li/>')
+                listItem.text(service.name);
+                listItem.addClass('list-group-item d-flex justify-content-between align-items-center');
+
+                var spanItem = $('<span/>')
+                spanItem.text(service.currentCapacity + '/' + service.maxCapacity);
+                spanItem.addClass('badge bg-primary rounded-pill');
+
+                listItem.append(spanItem);
+                servicesList.append(listItem);
+            }
+
+            const toastLiveExample = document.getElementById('liveToast');
+            const toast = new bootstrap.Toast(toastLiveExample);
+            toast.show();
+        }
+
+    </script>
+}

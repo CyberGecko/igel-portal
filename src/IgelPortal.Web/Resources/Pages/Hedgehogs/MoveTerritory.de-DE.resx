@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hedgehog" xml:space="preserve">
+        <value>Igel</value>
+    </data>
+  <data name="Move Territory" xml:space="preserve">
+        <value>Ändere Revier</value>
+    </data>
+  <data name="Current territory:" xml:space="preserve">
+        <value>Aktuelles Revier:</value>
+    </data>
+  <data name="New territory:" xml:space="preserve">
+        <value>Neues Revier:</value>
+    </data>
+  <data name="Used service:" xml:space="preserve">
+        <value>Verwendeter Dienst:</value>
+    </data>
+  <data name="Get home" xml:space="preserve">
+        <value>Zurück ins Heimatrevier</value>
+    </data>
+</root>

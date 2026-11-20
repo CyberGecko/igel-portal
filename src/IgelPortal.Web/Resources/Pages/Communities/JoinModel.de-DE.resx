@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="A user requested to join your community {0}" xml:space="preserve">
+        <value>A user requested to join your community {0}</value>
+    </data>
+  <data name="Member join request body" xml:space="preserve">
+        <value>The user {0} requested to join your community {1}. Please visit &lt;a href='{2}'&gt;the member section&lt;/a&gt; of your community to accept or deny the request.</value>
+    </data>
+</root>

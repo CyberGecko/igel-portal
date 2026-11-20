@@ -1,0 +1,2 @@
+﻿@model IgelPortal.Web.Data.Models.TerritoryHedgehog
+@(Model.IsHome ? Html.Raw(" <i class='bi bi-house'></i>") : "") @(String.IsNullOrEmpty(Model.UsedService) ? "" : $" ({Model.UsedService})")

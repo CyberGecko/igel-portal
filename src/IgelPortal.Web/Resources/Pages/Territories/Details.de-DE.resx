@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Territory" xml:space="preserve">
+        <value>Revier</value>
+    </data>
+  <data name="Attached Services" xml:space="preserve">
+        <value>Angebotene Dienste</value>
+    </data>
+</root>

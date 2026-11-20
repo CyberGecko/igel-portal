@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Delete Personal Data" xml:space="preserve">
+        <value>Persönliche Daten löschen</value>
+    </data>
+  <data name="Deleting this data will permanently remove your account, and this cannot be recovered." xml:space="preserve">
+        <value>Das Löschen dieser Daten wird ihr Konto dauerhaft entfernen. Dies kann nicht rückgängig gemacht werden.</value>
+    </data>
+  <data name="Please enter your password." xml:space="preserve">
+        <value>Bitte geben Sie ihr Passwort ein.</value>
+    </data>
+  <data name="Delete data and close my account" xml:space="preserve">
+        <value>Daten löschen und Konto schließen</value>
+    </data>
+</root>

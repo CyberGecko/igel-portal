@@ -1,0 +1,80 @@
+﻿@model IEnumerable<IgelPortal.Web.Data.Models.Territory>
+
+@if (Model.Count() > 0)
+{
+    <h2>@Localizer["My Territories"]</h2>
+    <div class="row row-cols-2 row-cols-md-2 g-2">
+        @foreach (var item in Model)
+        {
+            <div class="col text-start">
+                <div class="card">
+                    <div class="card-header">
+                        @item.Name
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">
+                            @item.Street @item.StreetNumber<br />@item.PostalCode @item.City<br />
+                            <strong>@Localizer["Community"]:</strong> @item.Community
+                        </p>
+                        <div class="card-text">
+                            <div class="d-none md-inline">
+                                <h4>@Localizer["Services"]:</h4>
+                                <ul class="list-group list-group-flush">
+                                    @if (item.AttachedServices.Count == 0)
+                                    {
+                                        <li class="list-group-item">
+                                            @Localizer["No services"]
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var service in item.AttachedServices)
+                                        {
+                                            <li class="list-group-item">
+                                                @service.TerritoryService
+                                                <span class="badge bg-primary rounded-pill">@service.CurrentCapacity/@service.MaxCapacity</span>
+                                            </li>
+                                        }}
+                                </ul>
+                            </div>
+                            <div class="d-md-none">
+                                <strong>@Localizer["Services"]:</strong>
+                                <span class="badge bg-primary rounded-pill">@item.AttachedServices.Count</span>
+                            </div>
+                        </div>
+                        <div class="card-text">
+                            <div class="d-none md-inline">
+                                <h4>@Localizer["Hedgehogs"]:</h4>
+                                <ul class="list-group list-group-flush">
+                                    @if (item.AttachedServices.Count == 0)
+                                    {
+                                        <li class="list-group-item">
+                                            @Localizer["No hedgehogs"]
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var hedgehog in item.Hedgehogs)
+                                        {
+                                            <li class="list-group-item">
+                                                <partial name="_TerritoryHedgehogShortInfoPartial" model="@hedgehog" />
+                                            </li>
+                                        }
+                                    }
+                                </ul>
+                            </div>
+                            <div class="d-md-none">
+                                <strong>@Localizer["Hedgehogs"]:</strong>
+                                <span class="badge bg-primary rounded-pill">@item.Hedgehogs.Count</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <small class="text-body-secondary d-none d-md-inline">@Localizer["Last change: {0}", item.ChangeDate]</small>
+                        <small class="text-body-secondary d-md-none">@Localizer["Last change: {0}", item.ChangeDate.ToShortDateString()]</small>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}

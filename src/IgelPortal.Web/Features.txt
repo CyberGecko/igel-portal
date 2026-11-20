@@ -1,0 +1,99 @@
+﻿Release	|	Features										|	Status		|
+--------+---------------------------------------------------+---------------+
+1.0.x	|	Hedgehogs										|	ToDo		|
+		|		Details										|	ToDo		|
+		|			Description								|	ToDo		|
+		|		HealthLog (Weight, Injuries, Infections)	|	ToDo		|
+		|			Create									|	ToDo		|
+		|			Edit									|	ToDo		|
+		|			Index									|	ToDo		|
+		|	Communities										|	ToDo		|
+		|		Materials									|	ToDo		|
+		|			Type (What is it)						|	ToDo		|
+		|			Total Amount							|	ToDo		|
+		|			Current Amount							|	ToDo		|
+		|			Origin Location							|	ToDo		|
+		|			Current Location						|	ToDo		|
+		|		Events										|	ToDo		|
+		|			Create									|	ToDo		|
+		|			Edit									|	ToDo		|
+		|			Details									|	ToDo		|
+		|			Delete									|	ToDo		|
+		|			Index									|	ToDo		|
+		|	Messageboard (Forum)							|	ToDo		|
+		|		Entries										|	ToDo		|
+		|			Create									|	ToDo		|
+		|			Edit									|	ToDo		|
+		|			Delete									|	ToDo		|
+		|			Index (List Entries)					|	ToDo		|
+		|				Overall								|	ToDo		|
+		|				Community							|	ToDo		|
+		|	Messages										|	ToDo		|
+		|			Create									|	Done		|
+		|			Inbox									|	ToDo		|
+		|			Sent									|	ToDo		|
+--------+---------------------------------------------------+---------------+
+1.0.0	|	Hedgehogs										|	Done		|
+		|		Create										|	Done		|
+		|		Edit										|	Done		|
+		|		Details										|	Done		|
+		|		Delete										|	Done		|
+		|		Index										|	Done		|
+		|			Filter									|	Done		|
+		|			My										|	Done		|
+		|			Community								|	Done		|
+		|				Move Hedgehog						|	Done		|
+		|					Change Home	Territory			|	Done		|
+		|					Move to Territory				|	Done		|
+		|					Change Attached User			|	Done		|
+		|				Request Service for Hedgehog		|	Done		|
+		|			    Send Mail							|	Done		|
+		|			      Filter By Capacity				|	Done		|
+		|	Territories										|	Done		|
+		|		Create										|	Done		|
+		|		Edit										|	Done		|
+		|		Details										|	Done		|
+		|		Delete										|	Done		|
+		|		Index										|	Done		|
+		|			Filter									|	Done		|
+		|				My									|	Done		|
+		|			Community								|	Done		|
+		|				Display Map							|	Done		|
+		|					Territory as Pin				|	Done		|
+		|					With Current Hedgehogs			|	Done		|
+		|					Services with Capacities		|	Done		|
+		|	Communities										|	Done		|
+		|		Create										|	Done		|
+		|		Edit										|	Done		|
+		|		Details										|	Done		|
+		|		Delete										|	Done		|
+		|		Index										|	Done		|
+		|		Join										|	Done		|
+		|		Members										|	Done		|
+		|			Change Owner							|	Done		|
+		|	Administration									|	Done		|
+		|		Territory Service							|	Done		|
+		|			Create									|	Done		|
+		|			Edit									|	Done		|
+		|			Delete									|	Done		|
+		|			Index									|	Done		|
+		|		Roles										|	Done		|
+		|			Assigned Count							|	Done		|
+		|		User										|	Done		|
+		|			Add Roles								|	Done		|
+		|			Remove Roles							|	Done		|
+		|	Dashboard										|	Done		|
+		|		My Hedgehogs								|	Done		|
+		|		My Territories								|	Done		|
+		|			Current Hedgehogs						|	Done		|
+		|			Services with Capacities				|	Done		|
+		|	Bugfix DataServices								|	Done		|
+		|		DataServices TerritoryService				|	Done		|
+		|		DataServices TerritoryAttachedService		|	Done		|
+		|		DataServices Hedgehog						|	Done		|
+		|		DataServices Community						|	Done		|
+		|		DataServices Territory						|	Done		|
+		|	LoginPartial									|	Done		|
+		|		Move Links to Dropdown						|	Done		|
+		|	Passkey Login									|	Done		|
+--------+---------------------------------------------------+---------------+

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="2fa has been disabled. You can reenable 2fa when you setup an authenticator app." xml:space="preserve">
+        <value>2FA wurde deaktiviert. Sie können 2FA wieder aktivieren, wenn Sie eine Authentifikator-App einrichten.</value>
+    </data>
+</root>

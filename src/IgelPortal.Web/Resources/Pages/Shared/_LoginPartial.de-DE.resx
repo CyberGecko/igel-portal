@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hello {0}" xml:space="preserve">
+        <value>Hallo {0}</value>
+    </data>
+  <data name="Logout" xml:space="preserve">
+        <value>Abmelden</value>
+    </data>
+  <data name="Register" xml:space="preserve">
+        <value>Registrieren</value>
+    </data>
+  <data name="Login" xml:space="preserve">
+        <value>Anmelden</value>
+    </data>
+  <data name="Manage" xml:space="preserve">
+        <value>Verwalten</value>
+    </data>
+  <data name="Account" xml:space="preserve">
+        <value>Konto</value>
+    </data>
+</root>

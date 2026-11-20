@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="First Name" xml:space="preserve">
+        <value>Vorname</value>
+    </data>
+  <data name="Last Name" xml:space="preserve">
+        <value>Nachname</value>
+    </data>
+</root>

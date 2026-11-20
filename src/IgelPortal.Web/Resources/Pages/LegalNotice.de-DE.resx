@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Legal Notice" xml:space="preserve">
+        <value>Impressum</value>
+    </data>
+  <data name="Legal Notice Content" xml:space="preserve">
+        <value>&lt;p>Bastian Puls&lt;br /&gt;
+Rupperburg 7&lt;br /&gt;
+50181 Bedburg&lt;/p&gt;
+
+&lt;h2&gt;Kontakt&lt;/h2&gt;
+E-Mail: info@igel-portal.de&lt;/p&gt;
+
+&lt;p&gt;Quelle: &lt;a href="https://www.e-recht24.de"&gt;eRecht24&lt;/a&gt;&lt;/p&gt;</value>
+    </data>
+</root>

@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Manage Email" xml:space="preserve">
+        <value>E-Mail verwalten</value>
+    </data>
+  <data name="Please enter your email." xml:space="preserve">
+        <value>Bitte geben Sie ihre E-Mail Adresse ein.</value>
+    </data>
+  <data name="Send verification email" xml:space="preserve">
+        <value>Bestätigungsmail senden.</value>
+    </data>
+  <data name="Please enter new email." xml:space="preserve">
+        <value>Bitte geben Sie eine neue E-Mail Adresse ein</value>
+    </data>
+  <data name="Change email" xml:space="preserve">
+        <value> E-Mail Adresse ändern</value>
+    </data>
+</root>

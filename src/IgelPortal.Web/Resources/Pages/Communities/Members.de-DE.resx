@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Members" xml:space="preserve">
+        <value>Mitglieder</value>
+    </data>
+  <data name="No Members registered" xml:space="preserve">
+        <value>Keine Mitglieder registriert</value>
+    </data>
+  <data name="Accept" xml:space="preserve">
+        <value>Annehmen</value>
+    </data>
+  <data name="Reject" xml:space="preserve">
+        <value>Ablehnen</value>
+    </data>
+  <data name="Promote" xml:space="preserve">
+        <value>Hochstufen</value>
+    </data>
+  <data name="Demote" xml:space="preserve">
+        <value>Herabstufen</value>
+    </data>
+  <data name="Make Owner" xml:space="preserve">
+        <value>Zu Besitzer machen</value>
+    </data>
+</root>

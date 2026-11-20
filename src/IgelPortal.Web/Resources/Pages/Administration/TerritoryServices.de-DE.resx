@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Territory Services" xml:space="preserve">
+        <value>Revierdienste</value>
+    </data>
+  <data name="No Territory services created" xml:space="preserve">
+        <value>Keine Revierdienste erstellt</value>
+    </data>
+  <data name="Territory Service" xml:space="preserve">
+        <value>Revierdienst</value>
+    </data>
+</root>

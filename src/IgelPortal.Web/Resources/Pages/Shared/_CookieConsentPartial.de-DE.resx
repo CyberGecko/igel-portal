@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Accept" xml:space="preserve">
+        <value>Zustimmen</value>
+    </data>
+  <data name="Learn more" xml:space="preserve">
+        <value>Mehr erfahren</value>
+    </data>
+
+  <data name="Consent cookie content" xml:space="preserve">
+        <value>Diese Website nutzt Cookies und vergleichbare Funktionen zur Verarbeitung von Endgeräteinformationen und personenbezogenen Daten.&lt;br /&gt;
+        Die verwendeten Cookies sind hierbei von technischer Art und für die Verwendung der Website benötigt. Es werden keine Cookies für Werbezwecke verwendet.&lt;br /&gt;
+        Die Verarbeitung dient der Einbindung von Inhalten, externen Diensten und Elementen Dritter (Z.B. Anmeldung über Google). Je nach Funktion werden dabei Daten an Dritte weitergegeben und an Dritte in Ländern, 
+        in denen kein angemessenes Datenschutzniveau vorliegt und von diesen verarbeitet wird, z. B. die USA.</value>
+    </data>
+</root>

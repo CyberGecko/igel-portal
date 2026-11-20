@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Profile" xml:space="preserve">
+        <value>Profil</value>
+    </data>
+  <data name="Please choose your username." xml:space="preserve">
+        <value>Bitte geben Sie ihren Benutzernamen an.</value>
+    </data>
+  <data name="Please enter your first name." xml:space="preserve">
+        <value>Bitte geben Sie ihren Vorname an.</value>
+    </data>
+  <data name="Please enter your last name." xml:space="preserve">
+        <value>Bitte geben Sie ihren Nachname an.</value>
+    </data>
+  <data name="Please enter your phone number." xml:space="preserve">
+        <value>Bitte geben Sie ihre Telefonnummer an.</value>
+    </data>
+  <data name="Save" xml:space="preserve">
+        <value>Speichern</value>
+    </data>
+</root>

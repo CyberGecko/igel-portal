@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Manage your external logins" xml:space="preserve">
+        <value>Verwalten Sie ihre externen Anmeldungen</value>
+    </data>
+  <data name="Registered Logins" xml:space="preserve">
+        <value>Registrierte Anmeldungen</value>
+    </data>
+  <data name="Remove this {0} login from your account" xml:space="preserve">
+        <value>Entfernen Sie diese {0} Anmeldung von ihrem Konto</value>
+    </data>
+  <data name="Remove" xml:space="preserve">
+        <value>Entfernen</value>
+    </data>
+  <data name="Add another service to log in." xml:space="preserve">
+        <value>Fügen Sie einen weiteren Dienst zum Anmelden hinzu</value>
+    </data>
+  <data name="Log in using your {0} account" xml:space="preserve">
+        <value>Melden Sie sich mit ihrem {0} Konto an</value>
+    </data>
+</root>

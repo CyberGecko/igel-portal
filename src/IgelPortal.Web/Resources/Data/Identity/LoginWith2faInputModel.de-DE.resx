@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Authenticator code" xml:space="preserve">
+        <value>Authentifizierungscode</value>
+    </data>
+  <data name="Remember this machine" xml:space="preserve">
+        <value>Dieses Gerät merken</value>
+    </data>
+</root>

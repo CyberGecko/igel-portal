@@ -1,0 +1,26 @@
+﻿@model IgelPortal.Web.Models.CultureSwitcherModel
+
+<div>
+    <form id="selectLanguage" asp-page="/Index" asp-page-handler="SetLanguage" asp-route-returnUrl="@Model.ReturnUrl" method="post" class="form-horizontal" role="form">
+        <input id="culture" name="culture" type="hidden" />
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" onclick="event.stopPropagation();">
+                <span class="fi fi-@(new System.Globalization.RegionInfo(Model.CurrentUICulture.Name).TwoLetterISORegionName.ToLower())"></span> @(ViewBag.ShowCurrentCulture ? Model.CurrentUICulture.NativeName : "")
+            </button>
+            <ul class="dropdown-menu">
+                @foreach (var culture in Model.SupportedCultures)
+                {
+                    <li><a class="dropdown-item" href="#" onclick="submitForm('@culture.Name');"><span class="fi fi-@(new System.Globalization.RegionInfo(culture.Name).TwoLetterISORegionName.ToLower())"></span> @culture.NativeName</a></li>
+                }
+            </ul>
+        </div>
+    </form>
+</div>
+
+
+<script>
+    function submitForm(culture) {
+        $("#culture").val(culture);
+        $("#selectLanguage").submit();
+    }
+</script>

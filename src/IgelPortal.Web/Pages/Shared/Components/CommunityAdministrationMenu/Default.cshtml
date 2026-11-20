@@ -1,0 +1,126 @@
+﻿@using IgelPortal.Web.Models
+@using Microsoft.AspNetCore.Mvc.Localization
+@inject IgelPortal.Web.Interfaces.ICommunityDataService CommunityDataService
+@model CommunityAdministrationMenuModel
+
+<li class="nav-item dropdown d-none d-md-inline">
+    <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Communities"]</a>
+    <ul class="dropdown-menu">
+        @if (Model.AdministratedCommunities.Count > 0)
+        {
+            @foreach (var item in Model.AdministratedCommunities)
+            {
+                <li class="nav-item">
+                    <div class="dropend">
+                        <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" onclick="event.stopPropagation();">@item.Name</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Details" asp-route-id="@item.Id">@Localizer["Administration"]</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Hedgehogs/Index" asp-route-filter="@item.Id">@Localizer["Hedgehogs"]</a></li>
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Territories/Index" asp-route-filter="@item.Id">@Localizer["Territories"]</a></li>
+                            @if ((await CommunityDataService.HasUserCommunityMemberRole(item.Id, User.Identity, CommunityRoles.OWNER)))
+                            {
+                                <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Members" asp-route-id="@item.Id">@Localizer["Members"]</a></li>
+                            }
+                        </ul>
+                    </div>
+                </li>
+            }
+            <li><hr class="dropdown-divider"></li>
+        }
+        <li>
+            <a class="nav-link text-dark" asp-area="" asp-page="/Communities/Create">@Localizer["Create Community"]</a>
+        </li>
+        @if (Model.JoinedCommunities.Count > 0)
+        {
+            <li><hr class="dropdown-divider"></li>
+            @foreach (var item in Model.JoinedCommunities)
+            {
+                <li class="dropdown-item">
+                    <span class="text-dark">@item.Name</span>
+                </li>
+            }
+        }
+        @if (Model.JoinableCommunities.Any())
+        {
+            <li><hr class="dropdown-divider"></li>
+            <li class="nav-item dropdown dropend">
+                <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" onclick="event.stopPropagation();">@Localizer["Join Community"]</a>
+                <div class="row">
+                    <form id="JoinCommunityForm" class="dropdown-menu p-2" asp-page="/Communities/Join">
+                        <div class="form-group input-group mb-3">
+                            <select id="CommunityId" name="CommunityId" class="form-select" asp-items="Model.JoinableCommunities">
+                                <option value="" selected disabled>@SharedLocalizer["Select a community"]</option>
+                            </select>
+                        </div>
+                        <button id="JoinCommunityButton" type="button" class="btn btn-success" onclick="submitJoinForm();">@Localizer["Join"]</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+</li>
+<li class="nav-item dropdown d-md-none">
+    <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false">@Localizer["Communities"]</a>
+    <ul class="dropdown-menu border-0">
+        @if (Model.AdministratedCommunities.Count > 0)
+        {
+            @foreach (var item in Model.AdministratedCommunities)
+            {
+                <li class="nav-item dropend d-md-none">
+                    <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" onclick="event.stopPropagation();">@item.Name</a>
+                    <ul class="dropdown-menu border-0">
+                        <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Details" asp-route-id="@item.Id">@Localizer["Administration"]</a></li>
+                        <li><a class="dropdown-item" asp-area="" asp-page="/Hedgehogs/Index" asp-route-filter="@item.Id">@Localizer["Hedgehogs"]</a></li>
+                        <li><a class="dropdown-item" asp-area="" asp-page="/Territories/Index" asp-route-filter="@item.Id">@Localizer["Territories"]</a></li>
+                        @if ((await CommunityDataService.HasUserCommunityMemberRole(item.Id, User.Identity, CommunityRoles.OWNER)))
+                        {
+                            <li><a class="dropdown-item" asp-area="" asp-page="/Communities/Members" asp-route-handler="/" asp-route-id="@item.Id">@Localizer["Members"]</a></li>
+                        }
+                    </ul>
+                </li>
+            }
+            <li><hr class="dropdown-divider"></li>
+        }
+        <li>
+            <a class="nav-link text-dark" asp-area="" asp-page="/Communities/Create">@Localizer["Create Community"]</a>
+        </li>
+        @if (Model.JoinedCommunities.Count > 0)
+        {
+            <li><hr class="dropdown-divider"></li>
+            @foreach (var item in Model.JoinedCommunities)
+            {
+                <li class="dropdown-item">
+                    <span class="text-dark">@item.Name</span>
+                </li>
+            }
+        }
+        @if (Model.JoinableCommunities.Any())
+        {
+            <li><hr class="dropdown-divider"></li>
+            <li class="nav-item dropdown dropend">
+                <a class="nav-link text-dark dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button" aria-expanded="false" onclick="event.stopPropagation();">@Localizer["Join Community"]</a>
+                <div class="row">
+                    <form id="JoinCommunityForm" class="dropdown-menu p-2" asp-page="/Communities/Join">
+                        <div class="form-group input-group mb-3">
+                            <select id="CommunityId" name="CommunityId" class="form-select" asp-items="Model.JoinableCommunities">
+                                <option value="" selected disabled>@SharedLocalizer["Select a community"]</option>
+                            </select>
+                        </div>
+                        <button id="JoinCommunityButton" type="button" class="btn btn-success" onclick="submitJoinForm();">@Localizer["Join"]</button>
+                    </form>
+                </div>
+            </li>
+        }
+    </ul>
+</li>
+
+<script>
+    function submitJoinForm() {
+        $.ajax({
+            type: "POST",
+            url: '/Communities/Join',
+            data: $('#JoinCommunityForm').serialize(),
+            headers: { "RequestVerificationToken": $('input[name="__RequestVerificationToken"]').val() }
+        })
+    };
+</script>

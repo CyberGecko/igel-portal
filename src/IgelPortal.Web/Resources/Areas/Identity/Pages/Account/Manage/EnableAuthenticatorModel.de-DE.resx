@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Verification code is invalid." xml:space="preserve">
+        <value>Der Verifizierungscode ist ungültig.</value>
+    </data>
+  <data name="Your authenticator app has been verified." xml:space="preserve">
+        <value>Ihre Authentifikator-App wurde verifiziert.</value>
+    </data>
+</root>

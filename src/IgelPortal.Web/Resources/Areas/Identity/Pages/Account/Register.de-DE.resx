@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Register" xml:space="preserve">
+        <value>Registrieren</value>
+    </data>
+  <data name="Create a new account." xml:space="preserve">
+        <value>Neues Konto anlegen</value>
+    </data>
+  <data name="password" xml:space="preserve">
+        <value>Passwort</value>
+    </data>
+  <data name="First Name" xml:space="preserve">
+        <value>Vorname</value>
+    </data>
+  <data name="Last Name" xml:space="preserve">
+        <value>Nachname</value>
+    </data>
+  <data name="Without Password" xml:space="preserve">
+        <value>Ohne Password</value>
+    </data>
+  <data name="With Password" xml:space="preserve">
+        <value>Mit Password</value>
+    </data>
+  <data name="Use another service to register" xml:space="preserve">
+        <value>Einen anderen Dienst zum Registrieren nutzen.</value>
+    </data>
+  <data name="Log in using your {0} account" xml:space="preserve">
+        <value>Mit einem {0} Konto anmelden</value>
+    </data>
+</root>

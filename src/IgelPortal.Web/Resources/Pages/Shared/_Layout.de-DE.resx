@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Hedgehog Portal" xml:space="preserve">
+        <value>Igel Portal</value>
+    </data>
+  <data name="Home" xml:space="preserve">
+        <value>Start</value>
+    </data>
+  <data name="My Hedgehogs" xml:space="preserve">
+        <value>Meine Igel</value>
+    </data>
+  <data name="My Territories" xml:space="preserve">
+        <value>Meine Reviere</value>
+    </data>
+  <data name="Administration" xml:space="preserve">
+        <value>Verwaltung</value>
+    </data>
+  <data name="Communities" xml:space="preserve">
+        <value>Gruppen</value>
+    </data>
+  <data name="Territory Services" xml:space="preserve">
+        <value>Revierdienste</value>
+    </data>
+  <data name="User" xml:space="preserve">
+        <value>Benutzer</value>
+    </data>
+  <data name="Roles" xml:space="preserve">
+        <value>Rollen</value>
+    </data>
+  <data name="Privacy" xml:space="preserve">
+        <value>Datenschutz</value>
+    </data>
+  <data name="Legal Notice" xml:space="preserve">
+        <value>Impressum</value>
+    </data>
+</root>
