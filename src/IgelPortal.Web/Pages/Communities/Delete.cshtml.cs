@@ -39,7 +39,7 @@ namespace IgelPortal.Web.Pages.Communities
             return base.Page();
         }
 
-        public async Task<IActionResult> OnPostAsync(Guid? id)
+        public async Task<IActionResult> OnPostAsync([FromQuery] Guid? id)
         {
             if (!id.HasValue)
             {

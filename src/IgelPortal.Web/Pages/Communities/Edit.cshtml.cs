@@ -43,13 +43,23 @@ namespace IgelPortal.Web.Pages.Communities
 
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more information, see https://aka.ms/RazorPagesCRUD.
-        public async Task<IActionResult> OnPostAsync()
+        public async Task<IActionResult> OnPostAsync([FromQuery] Guid? id)
         {
+            if (!id.HasValue || id != Community?.Id)
+            {
+                return BadRequest();
+            }
             if (!base.ModelState.IsValid)
             {
                 return base.Page();
             }
 
+            var existing = await dataService.FindOne(id);
+            if (existing is null || existing.IsDeleted)
+            {
+                return NotFound();
+            }
+            Community.UserName = existing.UserName;
             await this.dataService.Update(this.Community);
 
             return base.RedirectToPage("/Index");

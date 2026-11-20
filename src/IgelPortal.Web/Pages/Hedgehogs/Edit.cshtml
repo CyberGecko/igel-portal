@@ -54,11 +54,6 @@
                 </select>
                 <span asp-validation-for="Hedgehog.CommunityId" class="text-danger"></span>
             </div>
-            <div class="form-group input-group mb-3">
-                <label asp-for="Hedgehog.Image" class="control-label input-group-text"></label>
-                <input asp-for="Hedgehog.Image" class="form-control" type="file" />
-                <span asp-validation-for="Hedgehog.Image" class="text-danger"></span>
-            </div>
             <div class="form-group mb-3">
                 <input type="submit" value="@SharedLocalizer["Save"]" class="btn btn-success" />
             </div>

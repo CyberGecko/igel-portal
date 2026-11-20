@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 namespace IgelPortal.Web.Pages.Hedgehogs
 {
     [Authorize(Roles = RoleNames.USER)]
-    public class DetailsModel(IHedgehogDataService dataService) : PageModel
+    public class DetailsModel(IHedgehogDataService dataService, IAuthorizationService authorization) : PageModel
     {
         private readonly IHedgehogDataService dataService = dataService;
 
@@ -22,14 +22,16 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             }
 
             var hedgehog = await this.dataService.FindOne(id.Value);
-            if (hedgehog == null)
+            if (hedgehog is null || hedgehog.IsDeleted)
             {
                 return base.NotFound();
             }
-            else
+            if (hedgehog.AttachedUser != User.Identity?.Name && !User.IsInRole(RoleNames.ADMIN) &&
+                (!hedgehog.CommunityId.HasValue || !(await authorization.AuthorizeAsync(User, hedgehog.CommunityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded))
             {
-                this.Hedgehog = hedgehog;
+                return Forbid();
             }
+            this.Hedgehog = hedgehog;
             return base.Page();
         }
     }

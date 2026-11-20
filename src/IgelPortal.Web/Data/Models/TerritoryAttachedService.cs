@@ -16,7 +16,7 @@ namespace IgelPortal.Web.Data.Models
         public Int32 MaxCapacity { get; set; }
 
         [Display(Name = "Current Capacity")]
-        public Int32 CurrentCapacity { get; private set; }
+        public Int32 CurrentCapacity { get; internal init; }
 
         [Display(Name = "Territory")]
         public String Territory { get; set; } = default!;

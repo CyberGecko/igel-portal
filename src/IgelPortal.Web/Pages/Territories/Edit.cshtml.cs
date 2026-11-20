@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 namespace IgelPortal.Web.Pages.Territories
 {
     [Authorize(Roles = RoleNames.USER)]
-    public class EditModel(ITerritoryDataService dataService, ICommunityDataService communityDataService, ITerritoryServiceDataService territoryServiceDataService, ITerritoryAttachedServiceDataService territoryAttachedServiceDataService) : PageModel
+    public class EditModel(ITerritoryDataService dataService, ICommunityDataService communityDataService, ITerritoryServiceDataService territoryServiceDataService, ITerritoryAttachedServiceDataService territoryAttachedServiceDataService, IAuthorizationService authorization) : PageModel
     {
         private readonly ITerritoryDataService dataService = dataService;
         private readonly ICommunityDataService communityDataService = communityDataService;
@@ -29,9 +29,13 @@ namespace IgelPortal.Web.Pages.Territories
             }
 
             var territory = await this.dataService.FindOne(id.Value);
-            if (territory == null)
+            if (territory is null || territory.IsDeleted)
             {
                 return base.NotFound();
+            }
+            if (!await CanEdit(territory))
+            {
+                return Forbid();
             }
             this.Territory = territory;
 
@@ -48,12 +52,30 @@ namespace IgelPortal.Web.Pages.Territories
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync(String? filter)
         {
+            if (Territory is null)
+            {
+                return BadRequest();
+            }
+            var existing = await dataService.FindOne(Territory.Id);
+            if (existing is null || existing.IsDeleted)
+            {
+                return NotFound();
+            }
+            if (!await CanEdit(existing) ||
+                (Territory.CommunityId != existing.CommunityId &&
+                 (existing.UserName != User.Identity?.Name ||
+                  (Territory.CommunityId.HasValue && !await communityDataService.IsCommunityMember(Territory.CommunityId, User.Identity)))))
+            {
+                return Forbid();
+            }
+            Territory.UserName = existing.UserName;
+            ModelState.Remove("Territory.UserName");
             ModelState.Remove("Territory");
             ModelState.Remove("TerritoryService");
             ModelState.Remove("Territory.Community");
             if (!base.ModelState.IsValid)
             {
-                return base.Page();
+                return await OnGetAsync(existing.Id, filter);
             }
             await this.dataService.Update(this.Territory);
 
@@ -62,29 +84,64 @@ namespace IgelPortal.Web.Pages.Territories
 
         public async Task<IActionResult> OnPostAddRow(Guid territoryId, String? filter)
         {
-            Territory? territory = await this.dataService.FindOne(territoryId);
-            if (territory != null)
+            var territory = await dataService.FindOne(territoryId);
+            if (territory is null || territory.IsDeleted)
             {
-                this.TerritoryAttachedService.TerritoryId = territoryId;
-                if (this.TerritoryAttachedService.Id == default)
-                {
-                    await this.territoryAttachedServiceDataService.Insert(this.TerritoryAttachedService);
-                }
-                else
-                {
-                    await this.territoryAttachedServiceDataService.Update(this.TerritoryAttachedService);
-                }
+                return NotFound();
             }
-            return base.RedirectToPage(new { id = territoryId, filter });
+            if (!await CanEdit(territory))
+            {
+                return Forbid();
+            }
+
+            var attached = TerritoryAttachedService;
+            if (attached is null || attached.MaxCapacity < 0)
+            {
+                return BadRequest();
+            }
+
+            var service = await territoryServiceDataService.FindOne(attached.TerritoryServiceId);
+            if (service is null || service.IsDeleted)
+            {
+                return BadRequest();
+            }
+
+            attached.TerritoryId = territoryId;
+            if (attached.Id == default)
+            {
+                await territoryAttachedServiceDataService.Insert(attached);
+            }
+            else if (territory.AttachedServices.Any(item => item.Id == attached.Id))
+            {
+                await territoryAttachedServiceDataService.Update(attached);
+            }
+            else
+            {
+                return NotFound();
+            }
+
+            return RedirectToPage(new { id = territoryId, filter });
         }
-        public async Task<IActionResult> OnPostRemoveRow(Guid territoryId, Guid id, String? filter)
+
+        public async Task<IActionResult> OnPostRemoveRow(Guid territoryId, Guid id, string? filter)
         {
-            Territory? territory = await this.dataService.FindOne(territoryId);
-            if (territory != null)
+            var territory = await dataService.FindOne(territoryId);
+            if (territory is null || territory.IsDeleted || !territory.AttachedServices.Any(item => item.Id == id))
             {
-                await this.territoryAttachedServiceDataService.Delete(id);
+                return NotFound();
             }
-            return base.RedirectToPage(new { id = territoryId ,filter});
+            if (!await CanEdit(territory))
+            {
+                return Forbid();
+            }
+
+            await territoryAttachedServiceDataService.Delete(id);
+            return RedirectToPage(new { id = territoryId, filter });
         }
+
+        private async Task<bool> CanEdit(Territory territory) =>
+            territory.UserName == User.Identity?.Name ||
+            (territory.CommunityId.HasValue &&
+             (await authorization.AuthorizeAsync(User, territory.CommunityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded);
     }
 }

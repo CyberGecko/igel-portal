@@ -1,18 +1,15 @@
-using IgelPortal.Web.Data.Identity;
-using IgelPortal.Web.Interfaces;
+﻿using IgelPortal.Web.Interfaces;
 using IgelPortal.Web.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 namespace IgelPortal.Web.Pages.Communities
 {
     [Authorize(Roles = $"{RoleNames.USER},{RoleNames.ADMIN}", Policy = PolicyNames.COMMUNITY_OWNER)]
-    public class MembersModel(ICommunityDataService dataService, UserManager<ApplicationUser> userManager) : PageModel
+    public class MembersModel(ICommunityDataService dataService) : PageModel
     {
         private readonly ICommunityDataService dataService = dataService;
-        private readonly UserManager<ApplicationUser> userManager = userManager;
 
         public IList<CommunityMembersModel> CommunityMembers { get; set; } = default!;
 
@@ -37,7 +34,7 @@ namespace IgelPortal.Web.Pages.Communities
 
         }
 
-        public async Task<IActionResult> OnGetAccept(Guid? id, String? username)
+        public async Task<IActionResult> OnPostAccept([FromRoute] Guid? id, [FromRoute] String? username)
         {
             if (!id.HasValue || String.IsNullOrEmpty(username))
             {
@@ -46,10 +43,9 @@ namespace IgelPortal.Web.Pages.Communities
 
             await this.dataService.AcceptCommunityApplication(id, username);
 
-            await GetCommunityMemberList(id.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
-        public async Task<IActionResult> OnGetReject(Guid? id, String? username)
+        public async Task<IActionResult> OnPostReject([FromRoute] Guid? id, [FromRoute] String? username)
         {
             if (!id.HasValue || String.IsNullOrEmpty(username))
             {
@@ -58,10 +54,9 @@ namespace IgelPortal.Web.Pages.Communities
 
             await this.dataService.RejectCommunityApplication(id, username);
 
-            await GetCommunityMemberList(id.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
-        public async Task<IActionResult> OnGetPromote(Guid? id, String? username)
+        public async Task<IActionResult> OnPostPromote([FromRoute] Guid? id, [FromRoute] String? username)
         {
             if (!id.HasValue || String.IsNullOrEmpty(username))
             {
@@ -70,11 +65,14 @@ namespace IgelPortal.Web.Pages.Communities
 
             await this.dataService.PromoteUserToCommunityModerator(id, username);
 
-            await GetCommunityMemberList(id.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
-        public async Task<IActionResult> OnGetMakeOwner(Guid? id, String? username)
+        public async Task<IActionResult> OnPostMakeOwner([FromRoute] Guid? id, [FromRoute] String? username)
         {
+            if (!User.IsInRole(RoleNames.ADMIN))
+            {
+                return Forbid();
+            }
             if (!id.HasValue || String.IsNullOrEmpty(username))
             {
                 return base.RedirectToPage("/Index");
@@ -82,10 +80,9 @@ namespace IgelPortal.Web.Pages.Communities
 
             await this.dataService.AddUserAsOwner(id, username);
 
-            await GetCommunityMemberList(id.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
-        public async Task<IActionResult> OnGetDemote(Guid? id, String? username)
+        public async Task<IActionResult> OnPostDemote([FromRoute] Guid? id, [FromRoute] String? username)
         {
             if (!id.HasValue || String.IsNullOrEmpty(username))
             {
@@ -94,20 +91,18 @@ namespace IgelPortal.Web.Pages.Communities
 
             await this.dataService.DemoteUserFromCommunityModerator(id, username);
 
-            await GetCommunityMemberList(id.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
-        public async Task<IActionResult> OnPost(Guid? communityId, String? username)
+        public async Task<IActionResult> OnPostRemove([FromRoute] Guid? id, [FromRoute] String? username)
         {
-            if (!communityId.HasValue || String.IsNullOrEmpty(username))
+            if (!id.HasValue || String.IsNullOrEmpty(username))
             {
                 return base.RedirectToPage("/Index");
             }
 
-            await this.dataService.RemoveUserFromCommunity(communityId, username);
+            await this.dataService.RemoveUserFromCommunity(id, username);
 
-            await GetCommunityMemberList(communityId.Value);
-            return base.Page();
+            return RedirectToPage(new { id });
         }
 
         private async Task GetCommunityMemberList(Guid id)
@@ -122,11 +117,10 @@ namespace IgelPortal.Web.Pages.Communities
             var groupedCommunityMembersList = communityMembersList.GroupBy(key => key.UserName).ToDictionary(key => key.Key, value => value.ToList());
             foreach (var communityMember in groupedCommunityMembersList)
             {
-                ApplicationUser? user = this.userManager.Users.FirstOrDefault(c => c.UserName == communityMember.Key);
                 CommunityMembersModel modelItem = new()
                 {
                     UserName = communityMember.Key,
-                    DisplayName = user?.ToString() ?? communityMember.Key,
+                    DisplayName = communityMember.Value[0].DisplayName,
                     CommunityId = communityMember.Value.First().CommunityId,
                     CommunityRoles = communityMember.Value.Select(c => c.CommunityRoleName).ToList()
                 };

@@ -14,7 +14,7 @@ namespace IgelPortal.Web.PolicyRequirements
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, CommunityRoleRequirement requirement)
         {
-            if (context.Resource is DefaultHttpContext httpContext && Guid.TryParse(httpContext.GetRouteValue("id")?.ToString(), out Guid communityId) && !String.IsNullOrEmpty(requirement.CommunityRole))
+            if (context.Resource is HttpContext httpContext && Guid.TryParse(httpContext.GetRouteValue("id")?.ToString() ?? httpContext.Request.Query["id"].ToString(), out Guid communityId) && !String.IsNullOrEmpty(requirement.CommunityRole))
             {
                 Boolean isOwner = await this.communityDataService.HasUserCommunityMemberRole(communityId, context.User.Identity, requirement.CommunityRole);
 

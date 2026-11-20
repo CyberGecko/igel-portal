@@ -40,20 +40,20 @@ else
                             <div class="btn-group" role="group">
                                 @if (item.CommunityRoles.Contains(CommunityRoles.APPLICANT))
                                 {
-                                    <a class="btn btn-success" asp-page-handler="Accept" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><i class="bi bi-person-check"></i><span class="d-none d-md-inline"> @Localizer["Accept"]</span></a>
-                                    <a class="btn btn-danger" asp-page-handler="Reject" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><i class="bi bi-person-dash"></i><span class="d-none d-md-inline"> @Localizer["Reject"]</span></a>
+                                    <form method="post" class="d-inline" asp-page-handler="Accept" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-success"><i class="bi bi-person-check"></i><span class="d-none d-md-inline"> @Localizer["Accept"]</span></button></form>
+                                    <form method="post" class="d-inline" asp-page-handler="Reject" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-danger"><i class="bi bi-person-dash"></i><span class="d-none d-md-inline"> @Localizer["Reject"]</span></button></form>
                                 }
                                 @if (item.CommunityRoles.Contains(CommunityRoles.MEMBER) && !item.CommunityRoles.Contains(CommunityRoles.OWNER))
                                 {
-                                    <a class="btn btn-success" asp-page-handler="Promote" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><i class="bi bi-person-up-circle"></i><span class="d-none d-md-inline"> @Localizer["Promote"]</span></a>
+                                    <form method="post" class="d-inline" asp-page-handler="Promote" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-success"><i class="bi bi-person-up-circle"></i><span class="d-none d-md-inline"> @Localizer["Promote"]</span></button></form>
                                 }
                                 @if (item.CommunityRoles.Contains(CommunityRoles.MODERATOR) && !item.CommunityRoles.Contains(CommunityRoles.OWNER))
                                 {
-                                    <a class="btn btn-danger" asp-page-handler="Demote" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><i class="bi bi-person-down-circle"></i><span class="d-none d-md-inline"> @Localizer["Demote"]</span></a>
+                                    <form method="post" class="d-inline" asp-page-handler="Demote" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-danger"><i class="bi bi-person-down-circle"></i><span class="d-none d-md-inline"> @Localizer["Demote"]</span></button></form>
                                 }
                                 @if (!item.CommunityRoles.Contains(CommunityRoles.APPLICANT) && !item.CommunityRoles.Contains(CommunityRoles.OWNER))
                                 {
-                                    <form method="post" id="Remove_@(item.UserName.Replace("@", "").Replace(".", ""))" asp-route-communityId="@item.CommunityId" asp-route-username="@item.UserName">
+                                    <form method="post" id="Remove_@(item.UserName.Replace("@", "").Replace(".", ""))" asp-page-handler="Remove" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName">
                                         <input asp-for="@item.CommunityId" type="hidden" class="form-control" />
                                         <input asp-for="@item.UserName" type="hidden" class="form-control" />
                                         <a class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#confirm-delete" data-formId="Remove_@(item.UserName.Replace("@", "").Replace(".", ""))"><i class="bi bi-person-x"></i><span class="d-none d-md-inline"> @Localizer["Remove Member"]</span></a>
@@ -61,7 +61,7 @@ else
                                 }
                                 @if (User.IsInRole(RoleNames.ADMIN) && !item.CommunityRoles.Contains(CommunityRoles.OWNER))
                                 {
-                                    <a class="btn btn-info" asp-page-handler="MakeOwner" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><i class="bi bi-person-badge"></i><span class="d-none d-md-inline"> @Localizer["Make Owner"]</span></a>
+                                    <form method="post" class="d-inline" asp-page-handler="MakeOwner" asp-route-id="@item.CommunityId" asp-route-username="@item.UserName"><button type="submit" class="btn btn-info"><i class="bi bi-person-badge"></i><span class="d-none d-md-inline"> @Localizer["Make Owner"]</span></button></form>
                                 }
                             </div>
                         </td>

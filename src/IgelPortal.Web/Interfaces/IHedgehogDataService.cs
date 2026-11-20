@@ -5,6 +5,7 @@ namespace IgelPortal.Web.Interfaces
 {
     public interface IHedgehogDataService : IDataService<Entity.Hedgehog, Model.Hedgehog>
     {
+        Task<IList<Model.Hedgehog>> FindAllActiveForUser(string? userName);
         Task<IList<Model.Hedgehog>> FindAllActiveForCommunity(Guid? communityId);
     }
 }

@@ -1,6 +1,5 @@
 ﻿using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
-using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,13 +30,15 @@ namespace IgelPortal.Web.Pages.Hedgehogs
 
         public async Task<IActionResult> OnPostAsync(String? filter)
         {
+            ModelState.Remove("Hedgehog.AttachedUser");
+            ModelState.Remove("Hedgehog.AttachedUserDisplayName");
             base.ModelState.Remove("Hedgehog.HomeTerritory");
             base.ModelState.Remove("Hedgehog.CurrentTerritory");
             base.ModelState.Remove("Hedgehog.Community");
             base.ModelState.Remove("Hedgehog.UsedService");
             if (!base.ModelState.IsValid)
             {
-                return base.Page();
+                return await OnGet(filter);
             }
 
             if (String.IsNullOrWhiteSpace(base.User?.Identity?.Name))
@@ -45,22 +46,19 @@ namespace IgelPortal.Web.Pages.Hedgehogs
                 return base.RedirectToPage("./Index", new { filter });
             }
 
+            if (Hedgehog.CommunityId.HasValue && !await communityDataService.IsCommunityMember(Hedgehog.CommunityId, User.Identity))
+            {
+                return Forbid();
+            }
+            if (Hedgehog.HomeTerritoryId.HasValue &&
+                !(await territoryDataService.GetAllAdministratedByUser(User.Identity)).Any(item => item.Id == Hedgehog.HomeTerritoryId))
+            {
+                return Forbid();
+            }
+
+            Hedgehog.UsedServiceId = null;
             this.Hedgehog.AttachedUser = base.User.Identity.Name;
             this.Hedgehog.CurrentTerritoryId = this.Hedgehog.HomeTerritoryId;
-
-            if (!String.IsNullOrEmpty(this.Hedgehog.Image))
-            {
-                String imageString = this.Hedgehog.Image.Replace("data:image/png;base64,", "");
-                using MagickImage image = new(Convert.FromBase64String(imageString));
-                if (image.Width > 192 || image.Height > 192)
-                {
-                    MagickGeometry size = new(192, 192);
-                    image.Resize(size);
-                    using MemoryStream ms = new();
-                    image.Write(ms);
-                    this.Hedgehog.Image = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
-                }
-            }
 
             await this.dataService.Insert(this.Hedgehog);
 

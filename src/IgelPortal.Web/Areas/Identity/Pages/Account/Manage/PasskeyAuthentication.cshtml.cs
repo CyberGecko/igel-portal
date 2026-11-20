@@ -18,13 +18,13 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account.Manage
 
         public async Task OnGet(string returnUrl = null)
         {
-            ReturnUrl = returnUrl ?? Url.Content("~/Identity/Account/Manage/PasskeyAuthentication");
+            ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/Identity/Account/Manage/PasskeyAuthentication");
             UserFidoCredentials = await fido2DataService.GetUserFidoCredentials(User.Identity);
         }
 
         public async Task<IActionResult> OnPost(string returnUrl = null)
         {
-            ReturnUrl = returnUrl ?? Url.Content("~/Identity/Account/Manage/PasskeyAuthentication");
+            ReturnUrl = Url.IsLocalUrl(returnUrl) ? returnUrl : Url.Content("~/Identity/Account/Manage/PasskeyAuthentication");
             await fido2DataService.RemoveAuthentication(User.Identity);
 
             return RedirectToPage(new { ReturnUrl });

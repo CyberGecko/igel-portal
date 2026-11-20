@@ -1,15 +1,13 @@
-﻿using AutoMapper;
-using IgelPortal.Web.Extensions;
+namespace IgelPortal.Web.Data.Models.Mapping;
 
-namespace IgelPortal.Web.Data.Models.Mapping
+public static class TerritoryServiceMapping
 {
-    public class TerritoryServiceMapping : Profile
+    public static TerritoryService Map(Entities.TerritoryService entity) => new()
     {
-        public TerritoryServiceMapping()
-        {
-            CreateMap<Entities.TerritoryService, TerritoryService>()
-                .BaseMapping();
-        }
-    }
-
+        Id = entity.Id,
+        Name = entity.Name,
+        ChangeDate = entity.ChangeDate,
+        CreationDate = entity.CreationDate,
+        DeletedDate = entity.DeletedDate
+    };
 }

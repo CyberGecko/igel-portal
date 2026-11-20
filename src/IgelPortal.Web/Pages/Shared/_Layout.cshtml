@@ -8,21 +8,14 @@
     <title>@ViewData["Title"] - @Localizer["Hedgehog Portal"]</title>
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
-    <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/29.1.33/fluent.css" />
     <link rel="stylesheet" href="~/lib/flag-icons/css/flag-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/IgelPortal.Web.styles.css" asp-append-version="true" />
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-base/dist/global/ej2-base.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-data/dist/global/ej2-data.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-svg-base/dist/global/ej2-svg-base.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-pdf-export/dist/global/ej2-pdf-export.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-compression/dist/global/ej2-compression.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-file-utils/dist/global/ej2-file-utils.min.js"></script>
-    <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-maps/dist/global/ej2-maps.min.js"></script>
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     <link rel="manifest" href="/site.webmanifest">
+    @await RenderSectionAsync("Head", required: false)
 </head>
 <body>
     <header>
@@ -96,6 +89,5 @@
     <script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
-    <ejs-scripts></ejs-scripts>
 </body>
 </html>

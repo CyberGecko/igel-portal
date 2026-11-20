@@ -10,9 +10,9 @@ namespace IgelPortal.Web.Interfaces
 {
     public interface IFido2DataService
     {
-        Task<ApplicationUser?> AddNewCredentialsToUser(RegisteredPublicKeyCredential? registeredPublicKeyCredential, CancellationToken cancellationToken = default);
+        Task<ApplicationUser?> AddNewCredentialsToUser(RegisteredPublicKeyCredential? registeredPublicKeyCredential, ApplicationUser user, CancellationToken cancellationToken = default);
         Task<AssertionOptions?> CreateAssertionOptions(String userName, UserVerificationRequirement userVerification, CancellationToken cancellationToken = default);
-        CredentialCreateOptions? CreateAttestationOptions(Fido2Handler.CreateAttestationOptionsInputModel input);
+        CredentialCreateOptions? CreateAttestationOptions(Fido2Handler.CreateAttestationOptionsInputModel input, ApplicationUser account);
         Task<(ApplicationUser? User, VerifyAssertionResult? AssertionResult)?> CreateAssertionForUser(Entities.PublicKeyCredential credential, AuthenticatorAssertionRawResponse assertionResponse, AssertionOptions options, CancellationToken cancellationToken = default);
         Task<Entities.PublicKeyCredential?> GetCredentialByAssertionResponseId(Byte[] assertionResponseId, CancellationToken cancellationToken = default);
         Task<RegisteredPublicKeyCredential?> MakeNewCredentials(String json, AuthenticatorAttestationRawResponse attestationResponse, CancellationToken cancellationToken = default);

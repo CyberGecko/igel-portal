@@ -1,20 +1,18 @@
-﻿using AutoMapper;
-using IgelPortal.Web.Extensions;
+namespace IgelPortal.Web.Data.Models.Mapping;
 
-namespace IgelPortal.Web.Data.Models.Mapping
+public static class CommunityMapping
 {
-    public class CommunityMapping : Profile
+    public static Community Map(Entities.Community entity) => new()
     {
-        public CommunityMapping()
-        {
-            CreateMap<Entities.Community, Community>()
-                .BaseMapping()
-
-                .ForMember(dest => dest.ContactName, opt => opt.MapFrom(src => src.ContactName))
-                .ForMember(dest => dest.ContactMail, opt => opt.MapFrom(src => src.ContactMail))
-                .ForMember(dest => dest.ContactPhone, opt => opt.MapFrom(src => src.ContactPhone))
-                .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
-                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName));
-        }
-    }
+        Id = entity.Id,
+        Name = entity.Name,
+        ChangeDate = entity.ChangeDate,
+        CreationDate = entity.CreationDate,
+        DeletedDate = entity.DeletedDate,
+        ContactName = entity.ContactName,
+        ContactMail = entity.ContactMail!,
+        ContactPhone = entity.ContactPhone,
+        Description = entity.Description,
+        UserName = entity.UserName
+    };
 }

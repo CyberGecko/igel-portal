@@ -1,4 +1,4 @@
-using IgelPortal.Web.Data.Identity;
+﻿using IgelPortal.Web.Data.Identity;
 using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -9,12 +9,14 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Localization;
 using Syncfusion.EJ2.Linq;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Pages.Hedgehogs
 {
-    [Authorize(Roles = RoleNames.USER, Policy = PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)]
+    [Authorize(Roles = RoleNames.USER)]
     public class RequestServiceModel(IHedgehogDataService dataService, ICommunityDataService communityDataService, ITerritoryDataService territoryDataService, ITerritoryServiceDataService territoryServiceDataService,
-                                     IServiceRequestDataService serviceRequestDataService, UserManager<ApplicationUser> userManager, IStringLocalizer<RequestServiceModel> localizer, IEmailSender emailSender) : PageModel
+                                     IServiceRequestDataService serviceRequestDataService, UserManager<ApplicationUser> userManager, IStringLocalizer<RequestServiceModel> localizer, IEmailSender emailSender, IAuthorizationService authorization, ILogger<RequestServiceModel> logger) : PageModel
     {
         private readonly IHedgehogDataService dataService = dataService;
         private readonly ICommunityDataService communityDataService = communityDataService;
@@ -27,14 +29,25 @@ namespace IgelPortal.Web.Pages.Hedgehogs
 
         public IList<ServiceRequest> ServiceRequests { get; set; } = default!;
 
-        public async Task OnGet(Guid? id, Guid? hedgehogId)
+        public Guid? ResponseToken { get; private set; }
+
+        public async Task<IActionResult> OnGet(Guid? id, Guid? hedgehogId)
         {
+            if (!await CanManage(id))
+            {
+                return Forbid();
+            }
+
+            var hedgehog = await this.dataService.FindOne(hedgehogId);
+            if (hedgehog is null || hedgehog.IsDeleted || hedgehog.CommunityId != id)
+            {
+                return NotFound();
+            }
+
             this.ServiceRequests = await this.serviceRequestDataService.FindAllActiveForCommunityAndHedgehog(id, hedgehogId);
 
             var territories = await this.territoryDataService.FindAllActiveForCommunity(id);
             var communityServices = territories.SelectMany(c => c.AttachedServices.Where(s => s.CurrentCapacity > 0));
-
-            var hedgehog = await this.dataService.FindOne(hedgehogId);
 
             Dictionary<Guid, Dictionary<String, List<Territory>>> availableServiceTerritories = [];
             this.ServiceRequests.ForEach(request =>
@@ -55,95 +68,164 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             base.ViewData["HedgehogName"] = hedgehog?.Name ?? "n.a.";
             base.ViewData["CommunityId"] = id;
             base.ViewData["UserTerritories"] = availableServiceTerritories;
+            return Page();
         }
 
         public async Task<IActionResult> OnGetServiceResponse(Guid? requestToken)
         {
-            var serviceRequest = await this.serviceRequestDataService.FindOneByToken(requestToken);
-            if (serviceRequest != null)
+            if (await FindRespondableRequest(requestToken) is null)
             {
-                await this.serviceRequestDataService.AddResponseToRequest(serviceRequest.Id, base.User.Identity);
+                return NotFound();
             }
 
-            return base.RedirectToPage("/");
+            Response.Headers["Referrer-Policy"] = "no-referrer";
+            ResponseToken = requestToken;
+            return Page();
         }
 
-        public async Task<IActionResult> OnGetMarkAsFulfilled(Guid? id)
+        public async Task<IActionResult> OnPostServiceResponse(Guid? requestToken)
         {
-            var serviceRequest = await this.serviceRequestDataService.FindOne(id);
-            if (serviceRequest == null)
+            var request = await FindRespondableRequest(requestToken);
+            if (request is null)
             {
-                return base.RedirectToPage("/");
+                return NotFound();
             }
-            serviceRequest.FulfillmentDate = DateTime.UtcNow;
 
-            await this.serviceRequestDataService.Update(serviceRequest);
-            return base.RedirectToPage(new { id = serviceRequest.CommunityId, serviceRequest.HedgehogId });
-
+            await serviceRequestDataService.AddResponseToRequest(request.Id, User.Identity);
+            return RedirectToPage("/Index");
         }
 
-        public async Task<IActionResult> OnGetInitiateAction(Guid? id, Guid? territoryId)
+        private async Task<ServiceRequest?> FindRespondableRequest(Guid? token)
         {
-            ServiceRequest? serviceRequest = await this.serviceRequestDataService.FindOne(id);
-            Territory? territory = await this.territoryDataService.FindOne(territoryId);
-            if (serviceRequest == null || territory == null)
+            if (token is null)
             {
-                return base.RedirectToPage("/");
-            }
-            Guid communityId = serviceRequest.CommunityId;
-            Guid hedgehogId = serviceRequest.HedgehogId;
-            Guid serviceId = serviceRequest.ServiceId;
-
-            TerritoryAttachedService? attachedService = territory.AttachedServices.FirstOrDefault(c => c.TerritoryServiceId == serviceId);
-            Hedgehog? currentHedgehog = await this.dataService.FindOne(hedgehogId);
-            if (currentHedgehog != null && attachedService != null)
-            {
-                currentHedgehog.CurrentTerritoryId = territoryId;
-                currentHedgehog.UsedServiceId = attachedService.Id;
-                await this.dataService.Update(currentHedgehog);
+                return null;
             }
 
-            return base.RedirectToPage(new { id = serviceRequest.CommunityId, serviceRequest.HedgehogId });
+            var request = await serviceRequestDataService.FindOneByToken(token);
+            if (request is null || request.IsDeleted || request.IsFulfilled)
+            {
+                return null;
+            }
+
+            return await communityDataService.IsCommunityMember(request.CommunityId, User.Identity) ? request : null;
         }
 
-        public async Task<IActionResult> OnPost(Guid? hedgehogId, Guid? communityId, Guid? requestServiceId)
+        public async Task<IActionResult> OnPostMarkAsFulfilled(Guid? id)
         {
-            if (hedgehogId.HasValue && communityId.HasValue && requestServiceId.HasValue)
+            var request = await serviceRequestDataService.FindOne(id);
+            if (request is null || request.IsDeleted)
             {
-                var community = await this.communityDataService.FindOne(communityId.Value);
-                var hedgehog = await this.dataService.FindOne(hedgehogId.Value);
-                var service = await this.territoryServiceDataService.FindOne(requestServiceId.Value);
-                var territories = await this.territoryDataService.FindAllForCommunityWithService(communityId.Value, requestServiceId.Value);
+                return NotFound();
+            }
+            if (!await CanManage(request.CommunityId))
+            {
+                return Forbid();
+            }
 
-                if (hedgehog != null && community != null && service != null && territories.Count > 0)
+            if (!request.IsFulfilled)
+            {
+                request.FulfillmentDate = DateTime.UtcNow;
+                await serviceRequestDataService.Update(request);
+            }
+            return RedirectToPage(new { id = request.CommunityId, request.HedgehogId });
+        }
+
+        public async Task<IActionResult> OnPostInitiateAction(Guid? id, Guid? territoryId)
+        {
+            var request = await serviceRequestDataService.FindOne(id);
+            if (request is null || request.IsDeleted || request.IsFulfilled)
+            {
+                return NotFound();
+            }
+            if (!await CanManage(request.CommunityId))
+            {
+                return Forbid();
+            }
+
+            var territory = await territoryDataService.FindOne(territoryId);
+            var hedgehog = await dataService.FindOne(request.HedgehogId);
+            if (territory is null || territory.IsDeleted || territory.CommunityId != request.CommunityId ||
+                hedgehog is null || hedgehog.IsDeleted || hedgehog.CommunityId != request.CommunityId ||
+                !request.Responses.Any(response => response.RespondingUserName == territory.UserName))
+            {
+                return NotFound();
+            }
+
+            var service = territory.AttachedServices.FirstOrDefault(item => item.TerritoryServiceId == request.ServiceId && item.CurrentCapacity > 0);
+            if (service is null)
+            {
+                return BadRequest();
+            }
+
+            hedgehog.CurrentTerritoryId = territory.Id;
+            hedgehog.UsedServiceId = service.Id;
+            await dataService.Update(hedgehog);
+            return RedirectToPage(new { id = request.CommunityId, request.HedgehogId });
+        }
+
+        public async Task<IActionResult> OnPostRequestService(Guid? hedgehogId, Guid? communityId, Guid? requestServiceId)
+        {
+            if (!await CanManage(communityId))
+            {
+                return Forbid();
+            }
+            if (!hedgehogId.HasValue || !communityId.HasValue || !requestServiceId.HasValue)
+            {
+                return BadRequest();
+            }
+
+            var community = await communityDataService.FindOne(communityId);
+            var hedgehog = await dataService.FindOne(hedgehogId);
+            var service = await territoryServiceDataService.FindOne(requestServiceId);
+            if (community is null || community.IsDeleted ||
+                hedgehog is null || hedgehog.IsDeleted || hedgehog.CommunityId != communityId ||
+                service is null || service.IsDeleted)
+            {
+                return NotFound();
+            }
+
+            var territories = await territoryDataService.FindAllForCommunityWithService(communityId.Value, requestServiceId.Value);
+            var userNames = territories.Where(territory => !territory.IsDeleted).Select(territory => territory.UserName).Distinct().ToArray();
+            var emails = await userManager.Users.AsNoTracking()
+                .Where(user => user.UserName != null && userNames.Contains(user.UserName) && user.EmailConfirmed &&
+                               user.Email != null && user.Email != "")
+                .Select(user => user.Email!).Distinct().ToListAsync(HttpContext.RequestAborted);
+            if (emails.Count == 0)
+            {
+                return RedirectToPage(new { id = communityId, hedgehogId });
+            }
+
+            var request = new ServiceRequest { CommunityId = communityId.Value, ServiceId = requestServiceId.Value, HedgehogId = hedgehogId.Value };
+            var responseUrl = Url.PageLink("/Hedgehogs/RequestService", "ServiceResponse", protocol: Request.Scheme)
+                ?? throw new InvalidOperationException("Could not generate the service-response URL.");
+            var encode = HtmlEncoder.Default;
+            var subject = localizer.GetString("Hedgehog Portal service request");
+            var body = localizer.GetString("Service Request Mail Text", encode.Encode(community.Name), encode.Encode(service.Name),
+                encode.Encode(hedgehog.Name), encode.Encode(responseUrl), request.RequestToken);
+
+            var requestId = await serviceRequestDataService.Insert(request);
+            var failures = 0;
+            await Parallel.ForEachAsync(emails, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (email, _) =>
+            {
+                try
                 {
-                    ServiceRequest serviceRequest = new()
-                    {
-                        CommunityId = communityId.Value,
-                        ServiceId = requestServiceId.Value,
-                        HedgehogId = hedgehogId.Value,
-                    };
-
-                    await this.serviceRequestDataService.Insert(serviceRequest);
-
-                    String serviceResponseUrl = $"{this.Request.Scheme}://{this.Request.Host}{this.Request.RouteValues["page"]}/ServiceResponse";
-                    String subject = this.localizer.GetString("Hedgehog Portal service request");
-                    String body = this.localizer.GetString("Service Request Mail Text", community.Name, service.Name, hedgehog.Name, serviceResponseUrl, serviceRequest.RequestToken);
-                    List<Task> tasks = [];
-
-                    List<String?> mailAddresses = territories.SelectMany(c => userManager.Users.Where(c => c.UserName == territories[0].UserName)).Select(c => c.Email).Distinct().ToList();
-                    foreach (var mailAddress in mailAddresses.Where(c => c != null))
-                    {
-                        if (mailAddress != null)
-                        {
-                            tasks.Add(Task.Run(() => emailSender.SendEmailAsync(mailAddress, subject, body)));
-                        }
-                    }
-
-                    await Task.WhenAll(tasks);
+                    await emailSender.SendEmailAsync(email, subject, body);
                 }
+                catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
+                {
+                    Interlocked.Increment(ref failures);
+                }
+            });
+            if (failures > 0)
+            {
+                logger.LogWarning("Could not submit {FailedCount} email notifications for service request {RequestId}.", failures, requestId);
+                TempData["ServiceRequestMailFailures"] = failures;
             }
-            return base.RedirectToPage(new { id = communityId, hedgehogId });
+            return RedirectToPage(new { id = communityId, hedgehogId });
         }
+
+        private async Task<bool> CanManage(Guid? communityId) =>
+            communityId.HasValue && (await authorization.AuthorizeAsync(User, communityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded;
     }
 }

@@ -8,6 +8,7 @@ namespace IgelPortal.Web.Interfaces
     {
         Task<IList<Model.Community>> FindAllForUserWithRole(IIdentity? user, String? communityRole);
         Task<IList<Model.CommunityMember>> GetCommunityMembers(Guid? communityId, Boolean includeApplicant);
+        Task<bool> IsCommunityMember(Guid? communityId, IIdentity? user);
         Task<Boolean> HasUserCommunityMemberRole(Guid? communityId, IIdentity? user, String? communityRole);
         Task AcceptCommunityApplication(Guid? communityId, String userName);
         Task RejectCommunityApplication(Guid? communityId, String userName);

@@ -23,14 +23,16 @@ namespace IgelPortal.Web.Pages.Territories
             }
 
             var territory = await this.dataService.FindOne(id.Value);
-            if (territory == null)
+            if (territory is null || territory.IsDeleted)
             {
                 return base.NotFound();
             }
-            else
+            if (territory.UserName != User.Identity?.Name && !User.IsInRole(RoleNames.ADMIN) &&
+                !await communityDataService.IsCommunityMember(territory.CommunityId, User.Identity))
             {
-                this.Territory = territory;
+                return Forbid();
             }
+            this.Territory = territory;
             return base.Page();
         }
     }

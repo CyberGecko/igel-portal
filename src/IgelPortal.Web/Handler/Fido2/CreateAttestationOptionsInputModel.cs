@@ -6,8 +6,6 @@ namespace IgelPortal.Web.Handler.Fido2
     {
         public class CreateAttestationOptionsInputModel
         {
-            public required string UserName { get; set; }
-
             public string AttestationType { get; set; } = "none";
 
             public AuthenticatorAttachment? AuthenticatorAttachment { get; set; }

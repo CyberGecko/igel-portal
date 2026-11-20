@@ -24,14 +24,15 @@ namespace IgelPortal.Web.Pages.Hedgehogs
 
             Hedgehog? hedgehog = await this.dataService.FindOne(id.Value);
 
-            if (hedgehog == null)
+            if (hedgehog is null || hedgehog.IsDeleted)
             {
                 return base.NotFound();
             }
-            else
+            if (hedgehog.AttachedUser != User.Identity?.Name)
             {
-                this.Hedgehog = hedgehog;
+                return Forbid();
             }
+            this.Hedgehog = hedgehog;
             return base.Page();
         }
 
@@ -43,13 +44,17 @@ namespace IgelPortal.Web.Pages.Hedgehogs
                 return base.NotFound();
             }
 
-            var hedgehog = await this.dataService.FindOne(id.Value);
-            if (hedgehog != null && !hedgehog.IsDeleted)
+            var hedgehog = await dataService.FindOne(id);
+            if (hedgehog is null || hedgehog.IsDeleted)
             {
-                this.Hedgehog = hedgehog;
-                await this.dataService.Delete(id.Value);
+                return NotFound();
+            }
+            if (hedgehog.AttachedUser != User.Identity?.Name)
+            {
+                return Forbid();
             }
 
+            await dataService.Delete(id.Value);
             return base.RedirectToPage("./Index", new { filter });
         }
     }

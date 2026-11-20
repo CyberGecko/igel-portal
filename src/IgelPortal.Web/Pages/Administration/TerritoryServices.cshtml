@@ -53,7 +53,7 @@ else
                         <td>
                             <div class="btn-group" role="group">
                                 <a asp-page-handler="Edit" asp-route-id="@item.Id" class="btn btn-secondary"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
-                                <a asp-page-handler="Delete" asp-route-id="@item.Id" class="btn btn-danger"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
+                                <form method="post" class="d-inline" asp-page-handler="Delete" asp-route-id="@item.Id"><button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></button></form>
                             </div>
                         </td>
                     </tr>

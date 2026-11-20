@@ -1,11 +1,9 @@
 ﻿using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
-using ImageMagick;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text;
 
 namespace IgelPortal.Web.Pages.Hedgehogs
 {
@@ -28,9 +26,13 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             }
 
             var hedgehog = await this.dataService.FindOne(id.Value);
-            if (hedgehog == null)
+            if (hedgehog is null || hedgehog.IsDeleted)
             {
                 return base.NotFound();
+            }
+            if (hedgehog.AttachedUser != User.Identity?.Name)
+            {
+                return Forbid();
             }
             this.Hedgehog = hedgehog;
 
@@ -46,28 +48,43 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync(String? filter)
         {
+            if (Hedgehog is null)
+            {
+                return BadRequest();
+            }
+            var existing = await dataService.FindOne(Hedgehog.Id);
+            if (existing is null || existing.IsDeleted)
+            {
+                return NotFound();
+            }
+            if (existing.AttachedUser != User.Identity?.Name)
+            {
+                return Forbid();
+            }
+            Hedgehog.AttachedUser = existing.AttachedUser;
+            Hedgehog.CurrentTerritoryId = existing.CurrentTerritoryId;
+            Hedgehog.UsedServiceId = existing.UsedServiceId;
+            if (Hedgehog.CommunityId != existing.CommunityId && Hedgehog.CommunityId.HasValue &&
+                !await communityDataService.IsCommunityMember(Hedgehog.CommunityId, User.Identity))
+            {
+                return Forbid();
+            }
+            if (Hedgehog.HomeTerritoryId != existing.HomeTerritoryId && Hedgehog.HomeTerritoryId.HasValue &&
+                !(await territoryDataService.GetAllAdministratedByUser(User.Identity)).Any(item => item.Id == Hedgehog.HomeTerritoryId))
+            {
+                return Forbid();
+            }
+            ModelState.Remove("Hedgehog.AttachedUser");
+            ModelState.Remove("Hedgehog.AttachedUserDisplayName");
             base.ModelState.Remove("Hedgehog.HomeTerritory");
             base.ModelState.Remove("Hedgehog.CurrentTerritory");
             base.ModelState.Remove("Hedgehog.Community");
             base.ModelState.Remove("Hedgehog.UsedService");
             if (!base.ModelState.IsValid)
             {
-                return base.Page();
+                return await OnGetAsync(existing.Id, filter);
             }
 
-            if (!String.IsNullOrEmpty(this.Hedgehog.Image))
-            {
-                String imageString = this.Hedgehog.Image.Replace("data:image/png;base64,", "");
-                using MagickImage image = new(Convert.FromBase64String(imageString));
-                if (image.Width > 192 || image.Height > 192)
-                {
-                    MagickGeometry size = new(192, 192);
-                    image.Resize(size);
-                    using MemoryStream ms = new();
-                    image.Write(ms);
-                    this.Hedgehog.Image = $"data:image/png;base64,{Convert.ToBase64String(ms.ToArray())}";
-                }
-            }
             await this.dataService.Update(this.Hedgehog);
 
             return base.RedirectToPage("./Index", new { filter });

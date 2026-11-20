@@ -1,52 +1,44 @@
-﻿using AutoMapper;
+using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace IgelPortal.Web.Data.Services
 {
-    public class HedgehogDataService(ApplicationDbContext dbContext, IMapper mapper) : IHedgehogDataService
+    public class HedgehogDataService(ApplicationDbContext dbContext) : IHedgehogDataService
     {
         private readonly ApplicationDbContext dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
-        private readonly IMapper mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
 
-        public async Task<IList<Models.Hedgehog>> FindAll()
-        {
-            return await this.Query(c => c.IsDeleted == false);
-        }
-        public async Task<IList<Models.Hedgehog>> Query(Func<Models.Hedgehog, bool> predicate)
-        {
-            IEnumerable<Entities.Hedgehog> entities = await this.dbContext.Hedgehogs.Include(e => e.HomeTerritory)
-                                                                                    .Include(e => e.CurrentTerritory)
-#nullable disable
-                                                                                    .ThenInclude(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
-#nullable restore
-                                                                                    .Include(e => e.Community)
-                                                                                    .OrderBy(e => e.Name)
-                                                                                    .ToListAsync();
-            var models = this.mapper.Map<IList<Models.Hedgehog>>(entities);
+        public Task<IList<Hedgehog>> FindAll() => ReadAsync(dbContext.Hedgehogs.Where(entity => entity.DeletedDate == null));
 
-            return models.Where(predicate).ToList();
-        }
-        public async Task<Models.Hedgehog?> FindOne(Guid? id)
+        public Task<IList<Hedgehog>> FindAllActiveForUser(string? userName) =>
+            ReadAsync(dbContext.Hedgehogs.Where(entity => entity.DeletedDate == null && entity.AttachedUser == userName));
+
+        public Task<IList<Hedgehog>> FindAllActiveForCommunity(Guid? communityId) =>
+            ReadAsync(dbContext.Hedgehogs.Where(entity => entity.DeletedDate == null && entity.CommunityId == communityId));
+
+        public async Task<IList<Hedgehog>> Query(Func<Hedgehog, bool> predicate) =>
+            (await ReadAsync(dbContext.Hedgehogs)).Where(predicate).ToList();
+
+        public async Task<Hedgehog?> FindOne(Guid? id) =>
+            id.HasValue ? (await ReadAsync(dbContext.Hedgehogs.Where(entity => entity.Id == id))).SingleOrDefault() : null;
+
+        private async Task<IList<Hedgehog>> ReadAsync(IQueryable<Entities.Hedgehog> query)
         {
-            if (!id.HasValue)
-            {
-                return null;
-            }
-            Entities.Hedgehog? entity = await this.dbContext.Hedgehogs.Where(e => e.Id == id)
-                                                                      .Include(e => e.HomeTerritory)
-                                                                      .Include(e => e.CurrentTerritory)
-#nullable disable
-                                                                      .ThenInclude(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
-#nullable restore
-                                                                      .Include(e => e.Community)
-                                                                      .FirstOrDefaultAsync(x => x.Id == id);
-            if (entity == null)
-            {
-                return null;
-            }
-            return this.mapper.Map<Models.Hedgehog>(entity);
+            var rows = await query.AsNoTracking()
+                .OrderBy(entity => entity.Name)
+                .Select(entity => new
+                {
+                    Entity = entity,
+                    Home = entity.HomeTerritory != null ? entity.HomeTerritory.Name : null,
+                    Current = entity.CurrentTerritory != null ? entity.CurrentTerritory.Name : null,
+                    Community = entity.Community != null ? entity.Community.Name : null,
+                    Service = entity.UsedService != null && entity.UsedService.TerritoryService != null ? entity.UsedService.TerritoryService.Name : null,
+                    OpenRequests = entity.ServiceRequests.Count(request => request.FulfillmentDate == null && request.DeletedDate == null)
+                }).ToListAsync();
+            var displayNames = await UserDisplayNames.LoadAsync(dbContext, rows.Select(row => row.Entity.AttachedUser));
+            return rows.Select(row => HedgehogMapping.Map(row.Entity, row.Home, row.Current, row.Community, row.Service,
+                row.OpenRequests, row.Entity.AttachedUser is { } userName ? displayNames.GetValueOrDefault(userName) : null)).ToList();
         }
 
         public async Task<Guid> Insert(Models.Hedgehog model)
@@ -108,20 +100,6 @@ namespace IgelPortal.Web.Data.Services
             {
                 return 0;
             }
-        }
-
-        public async Task<IList<Hedgehog>> FindAllActiveForCommunity(Guid? communityId)
-        {
-            IEnumerable<Entities.Hedgehog> entities = await this.dbContext.Hedgehogs.Where(e => e.CommunityId == communityId && !e.DeletedDate.HasValue)
-                                                                                    .Include(e => e.HomeTerritory)
-                                                                                    .Include(e => e.CurrentTerritory)
-#nullable disable
-                                                                      .ThenInclude(e => e.AttachedServices).ThenInclude(e => e.TerritoryService)
-#nullable restore
-                                                                                    .Include(e => e.Community)
-                                                                                    .OrderBy(e => e.Name)
-                                                                                    .ToListAsync();
-            return this.mapper.Map<IList<Models.Hedgehog>>(entities);
         }
     }
 }

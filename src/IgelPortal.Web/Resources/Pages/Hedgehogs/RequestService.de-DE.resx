@@ -18,4 +18,10 @@
   <data name="Initiate Action for territory" xml:space="preserve">
         <value>Aktion für Revier vorbereiten</value>
     </data>
+  <data name="Confirm availability" xml:space="preserve">
+    <value>Verfügbarkeit bestätigen</value>
+  </data>
+  <data name="The service request was saved. {0} email notifications could not be submitted." xml:space="preserve">
+    <value>Die Anfrage wurde gespeichert. {0} E-Mail-Benachrichtigungen konnten nicht an Brevo übermittelt werden.</value>
+  </data>
 </root>

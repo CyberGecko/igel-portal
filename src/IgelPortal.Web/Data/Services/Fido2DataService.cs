@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using IgelPortal.Web.Data.Models.Mapping;
 using Fido2NetLib;
 using Fido2NetLib.Objects;
 using IgelPortal.Web.Data.Models;
@@ -12,9 +12,9 @@ using AuthenticatorTransport = IgelPortal.Web.Data.Entities.AuthenticatorTranspo
 
 namespace IgelPortal.Web.Data.Services
 {
-    public class Fido2DataService(IFido2 fido2, UserManager<ApplicationUser> userManager, ApplicationDbContext applicationDbContext, IMapper mapper) : IFido2DataService
+    public class Fido2DataService(IFido2 fido2, UserManager<ApplicationUser> userManager, ApplicationDbContext applicationDbContext, PublicKeyCredentialMapping credentialMapping) : IFido2DataService
     {
-        public async Task<ApplicationUser?> AddNewCredentialsToUser(RegisteredPublicKeyCredential? registeredPublicKeyCredential, CancellationToken cancellationToken = default)
+        public async Task<ApplicationUser?> AddNewCredentialsToUser(RegisteredPublicKeyCredential? registeredPublicKeyCredential, ApplicationUser user, CancellationToken cancellationToken = default)
         {
             if (registeredPublicKeyCredential == null)
             {
@@ -31,7 +31,7 @@ namespace IgelPortal.Web.Data.Services
                 AttestationClientDataJson = registeredPublicKeyCredential.AttestationClientDataJson,
                 AttestationFormat = registeredPublicKeyCredential.AttestationFormat,
                 AaGuid = registeredPublicKeyCredential.AaGuid,
-                UserId = new Guid(registeredPublicKeyCredential.User.Id).ToString()
+                UserId = user.Id
             };
 
             foreach (var authenticatorTransport in registeredPublicKeyCredential.Transports)
@@ -52,24 +52,9 @@ namespace IgelPortal.Web.Data.Services
                 });
             }
 
-            var user = await userManager.FindByEmailAsync(registeredPublicKeyCredential.User.Name);
-            if (user == null)
-            {
-                return null;
-            }
-            else
-            {
-                user.PublicKeyCredentials.Add(credential);
-
-                var identityResult = await userManager.UpdateAsync(user);
-
-                if (!identityResult.Succeeded)
-                {
-                    throw new Exception(identityResult.ToString());
-                }
-
-                return user;
-            }
+            user.PublicKeyCredentials.Add(credential);
+            var result = await userManager.UpdateAsync(user);
+            return result.Succeeded ? user : null;
         }
 
         public async Task<AssertionOptions?> CreateAssertionOptions(String userName, UserVerificationRequirement userVerification, CancellationToken cancellationToken = default)
@@ -93,13 +78,13 @@ namespace IgelPortal.Web.Data.Services
             return fido2.GetAssertionOptions(allowedCredentials, userVerification, extensions);
         }
 
-        public CredentialCreateOptions? CreateAttestationOptions(Fido2Handler.CreateAttestationOptionsInputModel input)
+        public CredentialCreateOptions? CreateAttestationOptions(Fido2Handler.CreateAttestationOptionsInputModel input, ApplicationUser account)
         {
             var user = new Fido2User
             {
-                Name = input.UserName,
-                Id = Guid.NewGuid().ToByteArray(),
-                DisplayName = input.UserName
+                Name = account.UserName!,
+                Id = Guid.Parse(account.Id).ToByteArray(),
+                DisplayName = account.ToString()
             };
 
             var authenticatorSelection = new AuthenticatorSelection
@@ -177,10 +162,6 @@ namespace IgelPortal.Web.Data.Services
                                                                       cancellationToken);
 
 
-            if (credentialResult.Result is null)
-            {
-                throw new Exception(credentialResult.ErrorMessage);
-            }
             return credentialResult.Result;
         }
 
@@ -218,7 +199,7 @@ namespace IgelPortal.Web.Data.Services
                                           .Include(c => c.DevicePublicKeys)
                                           .Include(c => c.AuthenticatorTransports)
                                           .ToListAsync();
-            return mapper.Map<IList<PublicKeyCredential>>(entities);
+            return entities.Select(credentialMapping.Map).ToList();
 
         }
 
