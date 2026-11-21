@@ -12,4 +12,9 @@
   <data name="Attached Services" xml:space="preserve">
         <value>Angebotene Dienste</value>
     </data>
+  <data name="My offers" xml:space="preserve"><value>Meine Angebote</value></data>
+  <data name="{0} of {1} places free" xml:space="preserve"><value>{0} von {1} Plätzen frei</value></data>
+  <data name="Paused" xml:space="preserve"><value>Pausiert</value></data>
+  <data name="Pause this offer" xml:space="preserve"><value>Angebot pausieren</value></data>
+  <data name="Paused offers are excluded from new requests and assignments." xml:space="preserve"><value>Pausierte Angebote werden bei neuen Anfragen und Zuweisungen nicht berücksichtigt.</value></data>
 </root>

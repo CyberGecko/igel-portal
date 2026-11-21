@@ -48,7 +48,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             {
                 return NotFound();
             }
-            return new JsonResult(territory.AttachedServices.Where(service => service.CurrentCapacity > 0)
+            return new JsonResult(territory.AttachedServices.Where(service => !service.IsPaused && service.CurrentCapacity > 0)
                 .Select(service => new { id = service.Id, name = service.TerritoryService }));
         }
 
@@ -72,7 +72,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             {
                 var territory = await territoryDataService.FindOne(newTerritoryId);
                 if (territory is null || territory.IsDeleted || territory.CommunityId != communityId ||
-                    !territory.AttachedServices.Any(service => service.Id == usedServiceId && service.CurrentCapacity > 0))
+                    !territory.AttachedServices.Any(service => service.Id == usedServiceId && !service.IsPaused && service.CurrentCapacity > 0))
                 {
                     return BadRequest();
                 }

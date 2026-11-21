@@ -8,6 +8,12 @@
         public Guid HedgehogId { get; set; }
         public Guid RequestToken { get; set; }
         public DateTime? FulfillmentDate { get; set; }
+        public DateOnly? NeededFrom { get; set; }
+        public DateOnly? NeededUntil { get; set; }
+        public string? RequestNote { get; set; }
+        public Guid? AssignedTerritoryServiceId { get; set; }
+        public string? AssignedTerritoryName { get; set; }
+        public string? AssignedUserName { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime ChangeDate { get; set; }
         public DateTime? DeletedDate { get; set; }

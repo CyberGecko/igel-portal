@@ -161,22 +161,16 @@ for path in '/Hedgehogs?filter=my' '/Territories?filter=my'; do
     status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' "$origin$path")
     [[ "$status" == 200 ]]
 done
-map='/Territories?filter=10000000-0000-0000-0000-000000000001'
-"${browser[@]}" --fail --output "$html" "$origin$map"
+group_territories='/Territories?filter=10000000-0000-0000-0000-000000000001'
+"${browser[@]}" --fail --output "$html" "$origin$group_territories"
+if grep -q 'ej2-maps.min.js' "$html"; then
+    echo 'The offers list loaded external map scripts.' >&2
+    exit 1
+fi
+"${browser[@]}" --fail --output "$html" "$origin$group_territories&map=true"
 grep -q 'ej2-maps.min.js' "$html"
 
-response='/Hedgehogs/RequestService/ServiceResponse'
-request_token='10000000-0000-0000-0000-000000000005'
-token=$(read_csrf "$response?requestToken=$request_token")
-test -n "$token"
-[[ "$(db <<< 'SELECT COUNT(*) FROM ServiceRequestResponses;')" == 0 ]]
-for attempt in 1 2; do
-    status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' \
-        --data-urlencode "__RequestVerificationToken=$token" --data-urlencode "requestToken=$request_token" "$origin$response")
-    [[ "$status" == 302 ]]
-done
-[[ "$(db <<< 'SELECT COUNT(*) FROM ServiceRequestResponses;')" == 1 ]]
-echo 'MariaDB migrations, health, registration CAPTCHA, login, authenticated lists, map, service response and passkey authorization verified.'
+echo 'MariaDB startup, registration, login, territories and passkey authorization verified.'
 
 # Exercise medication permissions and the once-only recording against MariaDB.
 db <<'SQL'
@@ -251,3 +245,76 @@ dose_form=(--data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" --dat
     --data-urlencode 'given=false' --data-urlencode 'note=duplicate fixture')" == 302 ]]
 [[ "$(db <<< "SELECT COUNT(*) FROM MedicationDoses WHERE Status=1 AND RecordedById='care-helper-fixture' AND Note IS NULL;")" == 1 ]]
 echo 'Care permissions, plan acceptance and once-only medication recording verified.'
+
+# Exercise a placement request from a group leader to an offer provider.
+db <<'SQL'
+UPDATE ServiceRequests SET FulfillmentDate = UTC_TIMESTAMP();
+INSERT INTO Territories (Id, Name, UserName, CommunityId, Street, StreetNumber, PostalCode, City,
+    Latitude, Longitude, CreationDate, ChangeDate)
+VALUES ('20000000-0000-0000-0000-000000000001', 'Wintering site', 'helper-ci@example.invalid',
+    '10000000-0000-0000-0000-000000000001', 'Musterweg', '1', '50181', 'Teststadt', 50, 6, NOW(), NOW());
+INSERT INTO TerritoryAttachedServices (Id, TerritoryId, TerritoryServiceId, MaxCapacity, IsPaused)
+VALUES ('20000000-0000-0000-0000-000000000002', '20000000-0000-0000-0000-000000000001',
+    '10000000-0000-0000-0000-000000000003', 1, 0);
+SQL
+cp "$cookies" "$temporary/helper.cookies"
+rm -- "$cookies"
+token=$(read_csrf "$login")
+[[ "$("${browser[@]}" --output /dev/null --write-out '%{http_code}' --data-urlencode "__RequestVerificationToken=$token" \
+    --data-urlencode "Input.Email=$email" --data-urlencode "Input.Password=$password" "$origin$login")" == 302 ]]
+group_id='10000000-0000-0000-0000-000000000001'
+hedgehog_id='10000000-0000-0000-0000-000000000002'
+service_id='10000000-0000-0000-0000-000000000003'
+offer_id='20000000-0000-0000-0000-000000000002'
+request_page='/Hedgehogs/RequestService'
+manager="$request_page?id=$group_id&hedgehogId=$hedgehog_id"
+
+placement_post() {
+    local handler=$1
+    shift
+    "${browser[@]}" --output /dev/null --write-out '%{http_code}' \
+        --data-urlencode "__RequestVerificationToken=$token" "$@" "$origin$request_page/$handler"
+}
+
+token=$(read_csrf "$manager")
+grep -q "value=\"$service_id\"" "$html"
+[[ "$(placement_post RequestService --data-urlencode "communityId=$group_id" --data-urlencode "hedgehogId=$hedgehog_id" \
+    --data-urlencode "ServiceId=$service_id" --data-urlencode "NeededFrom=$today" --data-urlencode 'Note=Wintering fixture')" == 302 ]]
+request_id=$(db <<< 'SELECT Id FROM ServiceRequests WHERE FulfillmentDate IS NULL;')
+test -n "$request_id"
+request_token=$(db <<< "SELECT RequestToken FROM ServiceRequests WHERE Id='$request_id';")
+test -n "$request_token"
+mv "$cookies" "$temporary/owner.cookies"
+cp "$temporary/helper.cookies" "$cookies"
+"${browser[@]}" --fail --output "$html" "$origin/"
+grep -q "requestToken=$request_token" "$html"
+token=$(read_csrf "$request_page/ServiceResponse?requestToken=$request_token")
+grep -q 'Wintering fixture' "$html"
+for action in Declined Withdraw Available Available; do
+    [[ "$(placement_post ServiceResponse --data-urlencode "requestToken=$request_token" \
+        --data-urlencode "reply=$action" --data-urlencode "offerId=$offer_id")" == 302 ]]
+    case "$action" in
+        Declined) [[ "$(db <<< "SELECT IsAvailable FROM ServiceRequestResponses WHERE ServiceRequestId='$request_id';")" == 0 ]] ;;
+        Withdraw) [[ "$(db <<< "SELECT COUNT(*) FROM ServiceRequestResponses WHERE ServiceRequestId='$request_id';")" == 0 ]] ;;
+        Available) [[ "$(db <<< "SELECT OfferedTerritoryServiceId FROM ServiceRequestResponses WHERE ServiceRequestId='$request_id' AND IsAvailable=1;")" == "$offer_id" ]] ;;
+    esac
+done
+mv "$temporary/owner.cookies" "$cookies"
+"${browser[@]}" --fail --output "$html" "$origin/"
+grep -q "#request-$request_id" "$html"
+token=$(read_csrf "$manager")
+grep -q 'Wintering site' "$html"
+db <<< "UPDATE TerritoryAttachedServices SET IsPaused=1 WHERE Id='$offer_id';"
+[[ "$(placement_post Assign --data-urlencode "id=$request_id" --data-urlencode "offerId=$offer_id")" == 302 ]]
+[[ "$(db <<< "SELECT COUNT(*) FROM ServiceRequests WHERE Id='$request_id' AND FulfillmentDate IS NULL;")" == 1 ]]
+db <<< "UPDATE TerritoryAttachedServices SET IsPaused=0 WHERE Id='$offer_id';"
+for attempt in 1 2; do
+    [[ "$(placement_post Assign --data-urlencode "id=$request_id" --data-urlencode "offerId=$offer_id")" == 302 ]]
+done
+[[ "$(db <<< "SELECT UsedServiceId FROM Hedgehogs WHERE Id='$hedgehog_id';")" == "$offer_id" ]]
+[[ "$(db <<< "SELECT AssignedTerritoryServiceId FROM ServiceRequests WHERE Id='$request_id' AND FulfillmentDate IS NOT NULL;")" == "$offer_id" ]]
+legacy_request_id='10000000-0000-0000-0000-000000000004'
+db <<< "UPDATE ServiceRequests SET FulfillmentDate=NULL WHERE Id='$legacy_request_id';"
+[[ "$(placement_post MarkAsFulfilled --data-urlencode "id=$legacy_request_id")" == 302 ]]
+[[ "$(db <<< "SELECT COUNT(*) FROM ServiceRequests WHERE Id='$legacy_request_id' AND FulfillmentDate IS NOT NULL AND AssignedTerritoryServiceId IS NULL;")" == 1 ]]
+echo 'Placement requests, dashboards, replies, paused offers, once-only assignment and manual closure verified.'

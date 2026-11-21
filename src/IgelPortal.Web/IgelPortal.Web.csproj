@@ -156,9 +156,6 @@
     <EmbeddedResource Update="Resources\Areas\Identity\Pages\Account\ExternalLoginModel.de-DE.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Areas\Identity\Pages\Account\ForgotPasswordModel.de-DE.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Update="Resources\Areas\Identity\Pages\Account\LoginWithRecoveryCodeModel.de-DE.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
@@ -259,9 +256,6 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Pages\AccessDenied.de-DE.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Update="Resources\Pages\Communities\JoinModel.de-DE.resx">
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Update="Resources\Pages\Communities\Members.de-DE.resx">

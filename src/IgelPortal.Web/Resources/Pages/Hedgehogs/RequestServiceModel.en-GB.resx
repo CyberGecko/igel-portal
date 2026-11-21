@@ -1,9 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
-  <data name="Hedgehog Portal service request" xml:space="preserve">
-        <value>Hedgehog Portal service request</value>
-    </data>
-  <data name="Service Request Mail Text" xml:space="preserve">
-        <value>Community {0} requested {1} for the hedgehog {2}.&lt;br /&gt;Please click on &lt;a href='{3}?requestToken={4}'&gt;this link&lt;/a&gt; to confirm your availability.&lt;br /&gt;Alternativly you can visit the following address: {3}?requestToken={4}</value>
-    </data>
-</root>

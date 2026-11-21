@@ -15,6 +15,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         public IList<Hedgehog> Hedgehogs { get; set; } = default!;
 
         public bool CanManageCommunity { get; private set; }
+        public HashSet<Guid> ManagedGroups { get; private set; } = [];
 
         public async Task<IActionResult> OnGetAsync(String? filter)
         {
@@ -41,6 +42,17 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             else
             {
                 return new RedirectToPageResult("/Index");
+            }
+
+            if (filter is null or "my")
+            {
+                var owned = await communityDataService.FindAllForUserWithRole(User?.Identity, CommunityRoles.OWNER);
+                var moderated = await communityDataService.FindAllForUserWithRole(User?.Identity, CommunityRoles.MODERATOR);
+                ManagedGroups = owned.Concat(moderated).Select(group => group.Id).ToHashSet();
+            }
+            else if (CanManageCommunity && Guid.TryParse(filter, out var managedId))
+            {
+                ManagedGroups.Add(managedId);
             }
 
             return base.Page();

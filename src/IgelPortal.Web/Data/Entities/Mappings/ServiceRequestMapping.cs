@@ -13,6 +13,10 @@ namespace IgelPortal.Web.Data.Entities.Mappings
             builder.Property(x => x.CommunityId).IsRequired();
             builder.Property(x => x.RequestToken).IsRequired();
             builder.Property(x => x.FulfillmentDate);
+            builder.Property(x => x.RequestNote).HasMaxLength(1000);
+            builder.Property(x => x.AssignedTerritoryName).HasMaxLength(255);
+            builder.Property(x => x.AssignedUserName).HasMaxLength(255);
+            builder.HasIndex(x => new { x.CommunityId, x.FulfillmentDate });
             builder.Property(x => x.CreationDate).IsRequired();
             builder.Property(x => x.ChangeDate).IsRequired();
             builder.Property(x => x.DeletedDate);

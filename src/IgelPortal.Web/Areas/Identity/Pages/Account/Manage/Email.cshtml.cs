@@ -4,22 +4,21 @@
 
 using IgelPortal.Web.Data.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Areas.Identity.Pages.Account.Manage
 {
-    public partial class EmailModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IEmailSender emailSender, 
+    public partial class EmailModel(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, PortalMail emailSender,
         IStringLocalizer<EmailModel> localizer) : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly SignInManager<ApplicationUser> _signInManager = signInManager;
-        private readonly IEmailSender _emailSender = emailSender;
+        private readonly PortalMail _emailSender = emailSender;
         private readonly IStringLocalizer<EmailModel> localizer = localizer;
 
         /// <summary>
@@ -98,10 +97,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account.Manage
                     pageHandler: null,
                     values: new { area = "Identity", userId = userId, email = Input.NewEmail, code = code },
                     protocol: Request.Scheme);
-                await _emailSender.SendEmailAsync(
-                    Input.NewEmail,
-                    this.localizer.GetString("Confirm your email"),
-                    this.localizer.GetString("Please confirm your account by <a href='{0}'>clicking here</a>.",HtmlEncoder.Default.Encode(callbackUrl)));
+                await _emailSender.ChangeEmailAsync(Input.NewEmail, callbackUrl);
 
                 StatusMessage = this.localizer.GetString("Confirmation link to change email sent. Please check your email.");
                 return RedirectToPage();
@@ -134,10 +130,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account.Manage
                 pageHandler: null,
                 values: new { area = "Identity", userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                email,
-                this.localizer.GetString("Confirm your email"),
-                this.localizer.GetString("Please confirm your account by <a href='{0}'>clicking here</a>.",HtmlEncoder.Default.Encode(callbackUrl)));
+            await _emailSender.ConfirmEmailAsync(email, callbackUrl);
 
             StatusMessage = this.localizer.GetString("Verification email sent. Please check your email.");
             return RedirectToPage();

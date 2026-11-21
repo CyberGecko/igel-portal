@@ -5,7 +5,6 @@
 using IgelPortal.Web.Data.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
@@ -14,10 +13,9 @@ using System.Text;
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
-    public class RegisterConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender sender) : PageModel
+    public class RegisterConfirmationModel(UserManager<ApplicationUser> userManager) : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly IEmailSender _sender = sender;
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used

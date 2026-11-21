@@ -13,6 +13,7 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         private readonly IHedgehogDataService dataService = dataService;
 
         public bool CanReadCare { get; private set; }
+        public bool CanRequestPlace { get; private set; }
 
         public Hedgehog Hedgehog { get; set; } = default!;
 
@@ -29,8 +30,9 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             {
                 return base.NotFound();
             }
-            if (hedgehog.AttachedUser != User.Identity?.Name && !User.IsInRole(RoleNames.ADMIN) &&
-                (!hedgehog.CommunityId.HasValue || !(await authorization.AuthorizeAsync(User, hedgehog.CommunityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded))
+            CanRequestPlace = hedgehog.CommunityId is Guid groupId &&
+                (await authorization.AuthorizeAsync(User, groupId, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded;
+            if (hedgehog.AttachedUser != User.Identity?.Name && !User.IsInRole(RoleNames.ADMIN) && !CanRequestPlace)
             {
                 return Forbid();
             }

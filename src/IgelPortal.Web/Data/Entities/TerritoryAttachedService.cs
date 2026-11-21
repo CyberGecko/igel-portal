@@ -12,6 +12,7 @@
         public Guid TerritoryServiceId { get; set; }
 
         public Int32 MaxCapacity { get; set; }
+        public bool IsPaused { get; set; }
 
         public virtual Territory? Territory { get; set; }
         public virtual TerritoryService? TerritoryService { get; set; }

@@ -3,14 +3,6 @@
   <data name="Error loading external login information during confirmation." xml:space="preserve">
         <value>Während der Bestätigung trat ein Fehler beim Laden der externen Anmeldeinformationen auf.</value>
     </data>
-  <data name="Confirm your email" xml:space="preserve">
-        <value>Bestätigen Sie ihre E-Mail Adresse</value>
-    </data>
-  <data name="Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;." xml:space="preserve">
-        <value>
-          Bitte bestätigen Sie ihr Konto indem Sie &lt;a href='{0}'&gt;hier klicken&lt;/a&gt;.
-        </value>
-    </data>
   <data name="Complete the security check again before registering." xml:space="preserve">
     <value>Bitte wiederhole die Sicherheitsprüfung, bevor du dich registrierst.</value>
   </data>

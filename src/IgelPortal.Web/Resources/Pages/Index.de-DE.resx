@@ -24,4 +24,22 @@
   <data name="Log in" xml:space="preserve">
     <value>Anmelden</value>
   </data>
+  <data name="Today and open tasks" xml:space="preserve"><value>Heute und offene Aufgaben</value></data>
+  <data name="Medication" xml:space="preserve"><value>Medikamente</value></data>
+  <data name="Review plan offer" xml:space="preserve"><value>Planangebot prüfen</value></data>
+  <data name="Overdue" xml:space="preserve"><value>Überfällig</value></data>
+  <data name="Today" xml:space="preserve"><value>Heute</value></data>
+  <data name="Upcoming" xml:space="preserve"><value>Kommend</value></data>
+  <data name="Requests for my offers" xml:space="preserve"><value>Anfragen zu meinen Angeboten</value></data>
+  <data name="Reply requested" xml:space="preserve"><value>Rückmeldung offen</value></data>
+  <data name="You offered a place" xml:space="preserve"><value>Du hast einen Platz angeboten</value></data>
+  <data name="You declined" xml:space="preserve"><value>Du hast abgesagt</value></data>
+  <data name="Group decisions" xml:space="preserve"><value>Entscheidungen für die Gruppe</value></data>
+  <data name="Join requests: {0}" xml:space="preserve"><value>Beitrittsanfragen: {0}</value></data>
+  <data name="Replies available" xml:space="preserve"><value>Zusagen vorhanden</value></data>
+  <data name="Waiting for a place" xml:space="preserve"><value>Platz gesucht</value></data>
+  <data name="My offers" xml:space="preserve"><value>Meine Angebote</value></data>
+  <data name="Paused" xml:space="preserve"><value>Pausiert</value></data>
+  <data name="{0} of {1} places free" xml:space="preserve"><value>{0} von {1} Plätzen frei</value></data>
+  <data name="Manage my offers" xml:space="preserve"><value>Meine Angebote verwalten</value></data>
 </root>

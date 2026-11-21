@@ -86,8 +86,44 @@
         </div>
     }
 }
+else if (!Model.ShowMap)
+{
+    <section class="portal-form mb-4">
+        <h2 class="h4">@Localizer["Group offers"]</h2>
+        <form method="get" asp-page="./Index" asp-route-filter="@ViewBag.Filter">
+            <label class="form-label" for="offer-search">@Localizer["Search offers"]</label>
+            <input class="form-control mb-2" type="search" id="offer-search" name="search" value="@Model.Search" />
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="free-only" name="freeOnly" value="true" checked="@Model.FreeOnly" />
+                <label class="form-check-label" for="free-only">@Localizer["Free places only"]</label>
+            </div>
+            <div class="portal-actions">
+                <button class="btn btn-primary" type="submit">@Localizer["Filter offers"]</button>
+                <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter" asp-route-map="true">@Localizer["Show map"]</a>
+            </div>
+        </form>
+    </section>
+    @if (Model.Offers.Count == 0)
+    {
+        <p class="portal-empty">@Localizer["No matching offers."]</p>
+    }
+    else
+    {
+        <div class="records-grid">
+            @foreach (var offer in Model.Offers)
+            {
+                <article class="record-card">
+                    <h2>@offer.ServiceName</h2>
+                    <p class="mb-0">@offer.TerritoryName · @offer.City</p>
+                    <p class="mb-0">@(offer.Paused ? Localizer["Paused"] : Localizer["{0} of {1} places free", offer.Free, offer.Capacity])</p>
+                </article>
+            }
+        </div>
+    }
+}
 else
 {
+    <a class="btn btn-outline-primary mb-3" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@Localizer["Back to offers"]</a>
     <div>
         <div class="row">
             <div class="w-100">
@@ -177,7 +213,7 @@ else
 }
 
 @section Head {
-    @if (ViewBag.IsCommunityOverview)
+    @if (Model.ShowMap)
     {
         <link rel="stylesheet" href="https://cdn.syncfusion.com/ej2/29.1.33/fluent.css" />
         <script src="https://cdn.syncfusion.com/ej2/29.1.33/ej2-base/dist/global/ej2-base.min.js"></script>

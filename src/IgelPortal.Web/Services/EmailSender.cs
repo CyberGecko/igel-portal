@@ -1,16 +1,17 @@
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using System.Net.Http.Json;
 
 namespace IgelPortal.Web.Services;
 
-public sealed class EmailSender(HttpClient client, IOptions<MailServiceOptions> options, ILogger<EmailSender> logger) : IEmailSender
+public sealed class EmailSender(HttpClient client, IOptions<MailServiceOptions> options, ILogger<EmailSender> logger)
 {
-    public async Task SendEmailAsync(string email, string subject, string htmlMessage)
+    public async Task SendEmailAsync(string email, EmailContent message)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(email);
-        ArgumentException.ThrowIfNullOrWhiteSpace(subject);
-        ArgumentException.ThrowIfNullOrWhiteSpace(htmlMessage);
+        ArgumentNullException.ThrowIfNull(message);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message.Subject);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message.Html);
+        ArgumentException.ThrowIfNullOrWhiteSpace(message.PlainText);
 
         var settings = options.Value;
         if (!settings.SendMail)
@@ -25,8 +26,9 @@ public sealed class EmailSender(HttpClient client, IOptions<MailServiceOptions> 
             {
                 sender = new { name = settings.Sender.Name, email = settings.Sender.Address },
                 to = new[] { new { email } },
-                subject,
-                htmlContent = htmlMessage,
+                subject = message.Subject,
+                htmlContent = message.Html,
+                textContent = message.PlainText,
                 tags = new[] { "igel-portal" }
             })
         };

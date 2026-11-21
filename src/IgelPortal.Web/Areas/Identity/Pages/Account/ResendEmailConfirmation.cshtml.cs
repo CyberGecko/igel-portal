@@ -5,21 +5,20 @@
 using IgelPortal.Web.Data.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
-    public partial class ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IStringLocalizer<ResendEmailConfirmationModel> localizer) : PageModel
+    public partial class ResendEmailConfirmationModel(UserManager<ApplicationUser> userManager, PortalMail emailSender, IStringLocalizer<ResendEmailConfirmationModel> localizer) : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly IEmailSender _emailSender = emailSender;
+        private readonly PortalMail _emailSender = emailSender;
         private readonly IStringLocalizer<ResendEmailConfirmationModel> localizer = localizer;
 
         /// <summary>
@@ -55,10 +54,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
                 pageHandler: null,
                 values: new { userId = userId, code = code },
                 protocol: Request.Scheme);
-            await _emailSender.SendEmailAsync(
-                Input.Email,
-                this.localizer.GetString("Confirm your email"),
-                this.localizer.GetString("Please confirm your account by <a href='{0}'>clicking here</a>.", HtmlEncoder.Default.Encode(callbackUrl)));
+            await _emailSender.ConfirmEmailAsync(Input.Email, callbackUrl);
 
             ModelState.AddModelError(string.Empty, this.localizer.GetString("Verification email sent. Please check your email."));
             return Page();

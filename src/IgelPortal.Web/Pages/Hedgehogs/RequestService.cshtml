@@ -1,155 +1,182 @@
-﻿@page "{handler?}"
+@page "{handler?}"
+@using IgelPortal.Web.Data.Services
 @model IgelPortal.Web.Pages.Hedgehogs.RequestServiceModel
 @{
-    ViewData["Title"] = Localizer["Hedgehog"];
+    ViewData["Title"] = Model.ResponseRequest is null ? Localizer["Find a place"] : Localizer["Placement request"];
 }
 
-@if (Model.ResponseToken is Guid token)
+@if (Model.PlacementNotice is { } notice)
 {
-    <h1>@Localizer["Confirm availability"]</h1>
-    <form method="post" asp-page-handler="ServiceResponse">
-        <input type="hidden" name="requestToken" value="@token" />
-        <button type="submit" class="btn btn-success">@Localizer["Confirm availability"]</button>
-    </form>
+    <p class="alert alert-info" role="status">@Localizer[notice]</p>
+}
+@if (Model.ServiceRequestMailFailures > 0)
+{
+    <p class="alert alert-warning" role="alert">@Localizer["Saved. {0} email notifications could not be sent.", Model.ServiceRequestMailFailures]</p>
+}
+@if (Model.ResponseRequest is { } incoming)
+{
+    <div class="page-heading"><h1>@Localizer["Placement request for {0}", incoming.Hedgehog]</h1></div>
+    <section class="portal-form">
+        <p><strong>@incoming.Service</strong> · @Model.GroupName</p>
+        @if (incoming.NeededFrom is { } start)
+        {
+            <p>@Localizer["From {0}", start.ToString("d")] @if (incoming.NeededUntil is { } end) { <span>@Localizer["until {0}", end.ToString("d")]</span> }</p>
+        }
+        @if (!string.IsNullOrWhiteSpace(incoming.RequestNote))
+        {
+            <p class="care-text">@incoming.RequestNote</p>
+        }
+        @if (incoming.IsFulfilled)
+        {
+            <p>@Localizer["This request is closed."]</p>
+            @if (incoming.AssignedUserName == User.Identity?.Name)
+            {
+                <p><strong>@Localizer["Assigned to your offer at {0}.", incoming.AssignedTerritoryName ?? ""]</strong></p>
+            }
+        }
+        else
+        {
+            @if (Model.MyReply is { } reply)
+            {
+                <p><strong>@Localizer[reply.IsAvailable ? "Your reply: I can help." : "Your reply: Not this time."]</strong></p>
+            }
+            @if (Model.CanReply)
+            {
+                @if (Model.Offers.Count > 0)
+                {
+                    <form method="post" asp-page-handler="ServiceResponse" class="mb-3">
+                        <input type="hidden" name="requestToken" value="@incoming.RequestToken" />
+                        <label for="placement-offer" class="form-label">@Localizer["Your offer"]</label>
+                        <select class="form-select mb-2" id="placement-offer" name="offerId" required>
+                            <option value="">@Localizer["Select a place"]</option>
+                            @foreach (var offer in Model.Offers)
+                            {
+                                <option value="@offer.Id" selected="@(offer.Id == Model.MyReply?.OfferedTerritoryServiceId)">@offer.TerritoryName · @Localizer["{0} free", offer.Free]</option>
+                            }
+                        </select>
+                        <button type="submit" name="reply" value="@PlacementReply.Available" class="btn btn-primary">@Localizer["I can help"]</button>
+                    </form>
+                }
+                else
+                {
+                    <p>@Localizer["You currently have no free matching offers."]</p>
+                }
+                <form method="post" asp-page-handler="ServiceResponse" class="portal-actions">
+                    <input type="hidden" name="requestToken" value="@incoming.RequestToken" />
+                    <button type="submit" name="reply" value="@PlacementReply.Declined" class="btn btn-outline-secondary">@Localizer["Not this time"]</button>
+                    @if (Model.MyReply is not null)
+                    {
+                        <button type="submit" name="reply" value="@PlacementReply.Withdraw" class="btn btn-link">@Localizer["Withdraw reply"]</button>
+                    }
+                </form>
+            }
+            else
+            {
+                <p>@Localizer["You have no matching offer in this group."]</p>
+                <a asp-page="/Territories/Index" asp-route-filter="my">@Localizer["Manage my offers"]</a>
+            }
+        }
+    </section>
     return;
 }
 
-<h1>@ViewData["Title"]</h1>
-@if (TempData["ServiceRequestMailFailures"] is int failures)
-{
-    <div class="alert alert-warning" role="alert">
-        @Localizer["The service request was saved. {0} email notifications could not be submitted.", failures]
-    </div>
-}
-
-<div class="row">
-    <h4>@Localizer["Request service for hedgehog {0}", ViewBag.HedgehogName]</h4>
-    <hr />
-    <div class="col-md-6">
-        <form method="post">
-            <input id="communityId" name="communityId" type="hidden" value="@ViewBag.CommunityId" />
-            <input id="hedgehogId" name="hedgehogId" type="hidden" value="@ViewBag.HedgehogId" />
-            <div class="form-group input-group mb-3">
-                <span class="control-label input-group-text">
-                    @Localizer["Requested service:"]
-                </span>
-                <select id="requestServiceId" name="requestServiceId" class="form-control" asp-items="ViewBag.RequestableServices">
-                    <option value="" disabled selected>@SharedLocalizer["Select a service"]</option>
-                </select>
-                <button type="submit" asp-page-handler="RequestService" class="btn btn-success btn-ok">@Localizer["Request"]</button>
-            </div>
-        </form>
-    </div>
+<div class="page-heading">
+    <h1>@Localizer["Find a place for {0}", Model.Hedgehog.Name]</h1>
+    <a class="btn btn-outline-secondary" asp-page="./Index" asp-route-filter="@Model.Hedgehog.CommunityId">@Localizer["Back to group hedgehogs"]</a>
 </div>
-<div class="row">
-    <h4>@Localizer["Requested services for hedgehog {0}", ViewBag.HedgehogName]</h4>
-    <hr />
-    @if (Model.ServiceRequests.Count == 0)
+<section class="portal-form mb-4">
+    <h2 class="h4">@Localizer["New request"]</h2>
+    @if (!Model.Services.Any(service => service.Recipients > 0))
     {
-        <p>@SharedLocalizer["No Services requested"]</p>
+        <p class="mb-0">@Localizer["There are no free offers with a reachable provider in this group."]</p>
     }
     else
     {
-        <table class="table">
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>
-                        <label asp-for="ServiceRequests[0].CreationDate"></label>
-                    </th>
-                    <th>
-                        <label asp-for="ServiceRequests[0].IsFulfilled"></label>
-                    </th>
-                    <th>
-                        <label asp-for=" ServiceRequests[0].Responses"></label>
-                    </th>
-                    <th>
-                        <label asp-for="ServiceRequests[0].Service"></label>
-                    </th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model.ServiceRequests)
-                {
-                    <tr @(item.Responses.Count > 0 ? $"data-bs-toggle=collapse data-bs-target=#{item.Id} aria-expanded=false aria-controls={item.Id}" : "")>
-                        @if (item.Responses.Count > 0)
-                        {
-                            <td>
-                                <i class="bi bi-chevron-down"></i>
-                            </td>
-                        }
-                        <td>
-                            @item.CreationDate
-                        </td>
-                        <td>
-                            <i class='bi bi-@(item.IsFulfilled ?"check-lg text-success":"x-lg text-danger")'></i>
-                        </td>
-                        <td>
-                            @item.Responses.Count
-                        </td>
-                        <td>
-                            @item.Service
-                        </td>
-                        <td>
-                            @if (!item.IsFulfilled)
-                            {
-                                <form method="post" asp-page-handler="MarkAsFulfilled" asp-route-id="@item.Id"><button type="submit" class="btn btn-success"><i class="bi bi-check-lg"></i><span class="d-none d-md-inline"> @Localizer["Mark as fulfilled"]</span></button></form>
-                            }
-                        </td>
-                    </tr>
-                    @if (item.Responses.Count > 0 && !item.IsFulfilled)
+        <form method="post" asp-page-handler="RequestService">
+            <input type="hidden" name="communityId" value="@Model.Hedgehog.CommunityId" />
+            <input type="hidden" name="hedgehogId" value="@Model.Hedgehog.Id" />
+            <div class="mb-3">
+                <label for="ServiceId" class="form-label">@Localizer["Service"]</label>
+                <select asp-for="ServiceId" class="form-select" required>
+                    <option value="">@Localizer["Select a service"]</option>
+                    @foreach (var service in Model.Services)
                     {
-                        <tr id="@item.Id" class="collapse">
-                            <td colspan="5">
-                                <div>
-                                    <table class="table">
-                                        <thead>
-                                            <tr>
-                                                <th>
-                                                    <label asp-for="@item.Responses[0].ResponseDate"></label>
-                                                </th>
-                                                <th>
-                                                    <label asp-for="@item.Responses[0].RespondingUserDisplayName"></label>
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach (var response in item.Responses)
-                                            {
-                                                <tr>
-                                                    <td>
-                                                        @response.ResponseDate
-                                                    </td>
-                                                    <td>
-                                                        @response.RespondingUserDisplayName
-                                                    </td>
-                                                    <td>
-                                                        @if (ViewBag.UserTerritories[item.Id].ContainsKey(response.RespondingUserName))
-                                                        {
-                                                            <div class="dropdown">
-                                                                <button class="btn btn-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                                                    <i class="bi bi-gear"></i><span class="d-none d-md-inline"> @Localizer["Initiate Action for territory"]</span>
-                                                                </button>
-                                                                <ul class="dropdown-menu">
-                                                                    @foreach (IgelPortal.Web.Data.Models.Territory territory in ViewBag.UserTerritories[item.Id][response.RespondingUserName])
-                                                                    {
-                                                                        <li><form method="post" asp-page-handler="InitiateAction" asp-route-id="@item.Id" asp-route-territoryId="@territory.Id"><button type="submit" class="dropdown-item">@territory.Name</button></form></li>
-                                                                    }
-                                                                </ul>
-                                                            </div>
-                                                        }
-                                                    </td>
-                                                </tr>
-                                            }
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </td>
-                        </tr>
+                        <option value="@service.Id" disabled="@(service.Recipients == 0)">
+                            @service.Name · @Localizer["{0} free places, {1} email recipients", service.Free, service.Recipients]
+                        </option>
                     }
-                }
-            </tbody>
-        </table>
+                </select>
+            </div>
+            <div class="care-fields mb-3">
+                <div>
+                    <label for="NeededFrom" class="form-label">@Localizer["Needed from"]</label>
+                    <input type="date" asp-for="NeededFrom" min="@Model.Today" class="form-control" required />
+                </div>
+                <div>
+                    <label for="NeededUntil" class="form-label">@Localizer["Needed until (optional)"]</label>
+                    <input type="date" asp-for="NeededUntil" min="@Model.Today" class="form-control" />
+                </div>
+            </div>
+            <label for="Note" class="form-label">@Localizer["Note for helpers (optional)"]</label>
+            <textarea asp-for="Note" class="form-control mb-3" rows="2" maxlength="1000"></textarea>
+            <button class="btn btn-primary" type="submit">@Localizer["Send request"]</button>
+        </form>
     }
-</div>
+</section>
+
+<h2 class="h4">@Localizer["Placement requests"]</h2>
+@if (Model.Requests.Count == 0)
+{
+    <p class="portal-empty">@Localizer["No requests yet."]</p>
+}
+@foreach (var request in Model.Requests)
+{
+    var available = request.Responses.Where(reply => reply.IsAvailable).ToList();
+    <article class="record-card mb-3" id="request-@request.Id">
+        <h3>@request.Service</h3>
+        <p class="mb-2">
+            <strong>@Localizer[request.AssignedTerritoryServiceId.HasValue ? "Assigned" : request.IsFulfilled ? "Closed" : "Open"]</strong>
+            @if (request.AssignedTerritoryName is { } territoryName) { <span> · @territoryName</span> }
+            @if (request.NeededFrom is { } start) { <span> · @Localizer["From {0}", start.ToString("d")]</span> }
+            @if (request.NeededUntil is { } end) { <span> @Localizer["until {0}", end.ToString("d")]</span> }
+        </p>
+        @if (request.RequestNote is { } note)
+        {
+            <p class="care-text">@note</p>
+        }
+        @if (!request.IsFulfilled)
+        {
+            <p>@Localizer["{0} available, {1} declined", available.Count, request.Responses.Count - available.Count]</p>
+            @if (available.Count > 0)
+            {
+                <p class="text-body-secondary">@Localizer["Assigning a place updates the hedgehog’s current territory immediately."]</p>
+            }
+            <ul class="list-group mb-3">
+                @foreach (var reply in available)
+                {
+                    var options = Model.Offers.Where(offer => offer.ServiceId == request.ServiceId && offer.UserName == reply.RespondingUserName &&
+                        (reply.OfferedTerritoryServiceId is null || reply.OfferedTerritoryServiceId == offer.Id)).ToList();
+                    <li class="list-group-item">
+                        <strong>@reply.RespondingUserDisplayName</strong>
+                        @if (options.Count == 0)
+                        {
+                            <p class="mb-0">@Localizer["The offered place is no longer free."]</p>
+                        }
+                        @foreach (var offer in options)
+                        {
+                            <form class="portal-actions my-2" method="post" asp-page-handler="Assign">
+                                <input type="hidden" name="id" value="@request.Id" />
+                                <input type="hidden" name="offerId" value="@offer.Id" />
+                                <span>@offer.TerritoryName · @offer.City · @Localizer["{0} free", offer.Free]</span>
+                                <button class="btn btn-primary" type="submit">@Localizer["Assign place and close request"]</button>
+                            </form>
+                        }
+                    </li>
+                }
+            </ul>
+            <form method="post" asp-page-handler="MarkAsFulfilled" asp-route-id="@request.Id">
+                <button class="btn btn-outline-secondary" type="submit">@Localizer["Close without assignment"]</button>
+            </form>
+        }
+    </article>
+}

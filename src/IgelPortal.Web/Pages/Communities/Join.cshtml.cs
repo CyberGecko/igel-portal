@@ -3,17 +3,14 @@ using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Localization;
-using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Pages.Communities;
 
 [Authorize(Roles = RoleNames.USER)]
-public class JoinModel(ICommunityDataService communities, IStringLocalizer<JoinModel> localizer,
-    IEmailSender emailSender, UserManager<ApplicationUser> users, ILogger<JoinModel> logger) : PageModel
+public class JoinModel(ICommunityDataService communities, PortalMail emailSender, UserManager<ApplicationUser> users, ILogger<JoinModel> logger) : PageModel
 {
     public IReadOnlyList<Community> Managed { get; private set; } = [];
     public IReadOnlyList<Community> Joined { get; private set; } = [];
@@ -59,12 +56,9 @@ public class JoinModel(ICommunityDataService communities, IStringLocalizer<JoinM
             var membersUrl = Url.PageLink("/Communities/Members", values: new { id = community.Id });
             if (membersUrl is not null)
             {
-                var encode = HtmlEncoder.Default;
-                var body = localizer["Member join request body", encode.Encode(user.ToString()), encode.Encode(community.Name), encode.Encode(membersUrl)];
                 try
                 {
-                    await emailSender.SendEmailAsync(community.ContactMail,
-                        localizer["A user requested to join your community {0}", community.Name], body);
+                    await emailSender.JoinRequestAsync(community.ContactMail, user.ToString(), community.Name, membersUrl);
                 }
                 catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)
                 {

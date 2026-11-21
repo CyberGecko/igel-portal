@@ -12,5 +12,7 @@ namespace IgelPortal.Web.Data.Models
         [DataType(DataType.DateTime)]
         [Display(Name = "Response date")]
         public DateTime ResponseDate { get; set; }
+        public bool IsAvailable { get; set; } = true;
+        public Guid? OfferedTerritoryServiceId { get; set; }
     }
 }

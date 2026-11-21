@@ -253,4 +253,5 @@
   <data name="Due" xml:space="preserve"><value>Fällig</value></data>
   <data name="Last dose: {0} · {1}" xml:space="preserve"><value>Letzte Gabe: {0} · {1}</value></data>
   <data name="Plans awaiting an accepted assignment: {0}" xml:space="preserve"><value>Pläne ohne bestätigte Zuständigkeit: {0}</value></data>
+  <data name="Find a place" xml:space="preserve"><value>Platz suchen</value></data>
 </root>
