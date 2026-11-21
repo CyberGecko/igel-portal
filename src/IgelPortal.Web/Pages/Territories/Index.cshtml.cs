@@ -16,6 +16,7 @@ namespace IgelPortal.Web.Pages.Territories
 
         public IList<Territory> Territories { get; set; } = default!;
 
+        public bool CanAddTerritory { get; private set; }
         public bool ShowMap { get; private set; }
         public string? Search { get; private set; }
         public bool FreeOnly { get; private set; }
@@ -33,7 +34,8 @@ namespace IgelPortal.Web.Pages.Territories
             }
             else if (Guid.TryParse(filter, out Guid communityId))
             {
-                if (!User.IsInRole(RoleNames.ADMIN) && !await communityDataService.IsCommunityMember(communityId, User.Identity))
+                CanAddTerritory = await communityDataService.IsCommunityMember(communityId, User.Identity);
+                if (!User.IsInRole(RoleNames.ADMIN) && !CanAddTerritory)
                 {
                     return Forbid();
                 }

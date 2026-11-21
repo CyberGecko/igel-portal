@@ -45,6 +45,20 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
 
     public async Task<IActionResult> OnGetAsync(Guid id, Guid hedgehogId)
     {
+        var result = await LoadRequestPageAsync(id, hedgehogId);
+        if (result is PageResult)
+        {
+            var reachable = Services.Where(service => service.Recipients > 0).Take(2).ToArray();
+            if (reachable.Length == 1)
+            {
+                ServiceId = reachable[0].Id;
+            }
+        }
+        return result;
+    }
+
+    private async Task<IActionResult> LoadRequestPageAsync(Guid id, Guid hedgehogId)
+    {
         if (!await CanManage(id)) return Forbid();
         var hedgehog = await hedgehogs.FindOne(hedgehogId);
         var group = await communities.FindOne(id);
@@ -76,7 +90,7 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
             NeededFrom < DateOnly.FromDateTime(clock.LocalNow) || NeededUntil < NeededFrom || Note?.Length > 1000)
         {
             PlacementNotice = "Check the service, dates and note.";
-            return await OnGetAsync(communityId, hedgehogId);
+            return await LoadRequestPageAsync(communityId, hedgehogId);
         }
 
         var offers = await placements.OffersAsync(communityId, ServiceId);
@@ -84,7 +98,7 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
         if (recipients.Count == 0)
         {
             PlacementNotice = "There are no free offers with a reachable provider for this service.";
-            return await OnGetAsync(communityId, hedgehogId);
+            return await LoadRequestPageAsync(communityId, hedgehogId);
         }
         if ((await requests.FindAllActiveForCommunityAndHedgehog(communityId, hedgehogId))
             .Any(request => request.ServiceId == ServiceId && !request.IsFulfilled))

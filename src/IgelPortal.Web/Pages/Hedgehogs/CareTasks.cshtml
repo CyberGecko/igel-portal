@@ -28,7 +28,8 @@ else
                         @foreach (var dose in item.Due)
                         {
                             <li>
-                                @Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")
+                                <a asp-page="./Care" asp-route-id="@item.HedgehogId" asp-route-episodeId="@item.Plan.EpisodeId"
+                                   asp-route-doseId="@dose.Id" asp-fragment="@($"dose-{item.Plan.Id}")">@Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")</a>
                                 @if (dose.ScheduledAtUtc <= DateTime.UtcNow)
                                 {
                                     <strong> · @SharedLocalizer["Due"]</strong>

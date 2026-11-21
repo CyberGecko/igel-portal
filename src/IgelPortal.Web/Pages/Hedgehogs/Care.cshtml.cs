@@ -11,15 +11,17 @@ public sealed class CareModel(CareJournalService journal, MedicationPlanService 
 {
     public CareJournal Journal { get; private set; } = default!;
     public CareClock Clock => clock;
+    public Guid? SelectedDoseId { get; private set; }
     public string Today => clock.LocalNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 
-    public async Task<IActionResult> OnGetAsync(Guid id, Guid? episodeId)
+    public async Task<IActionResult> OnGetAsync(Guid id, Guid? episodeId, Guid? doseId)
     {
         var (result, state) = await journal.ReadAsync(id, episodeId, User);
         if (result == CareResult.Missing) return NotFound();
         if (result == CareResult.Denied) return Forbid();
 
         Journal = state!;
+        SelectedDoseId = doseId;
         return Page();
     }
 
