@@ -7,6 +7,10 @@
 <div class="page-heading">
     <h1>@ViewData["Title"]</h1>
 </div>
+@if (TempData["RecordNotice"] is string notice)
+{
+    <p class="alert alert-success" role="status">@SharedLocalizer[notice]</p>
+}
 <form method="post" asp-route-filter="@ViewBag.Filter" class="portal-form mb-4">
     <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
     <input type="hidden" asp-for="Territory.Id" />

@@ -2,6 +2,7 @@
 @model IgelPortal.Web.Pages.Hedgehogs.CareModel
 @{
     var journal = Model.Journal;
+    var draft = Model.PlanDraft;
     var episode = journal.Episode!;
     bool isOpen = episode.OpenHedgehogId.HasValue;
     var currentPlans = journal.Plans.Where(plan => plan.EndedAtUtc is null && plan.CommunityId == journal.Hedgehog.CommunityId).ToList();
@@ -11,27 +12,35 @@
     <h2>@SharedLocalizer["Medication plans"]</h2>
     @if (isOpen && journal.Permissions.CanPlan)
     {
-        <details class="portal-form mb-3" id="new-medication-plan">
+        <details class="portal-form mb-3" id="new-medication-plan" open="@(draft is not null)">
             <summary>@SharedLocalizer["Create or replace a medication plan"]</summary>
-            <form method="post" asp-page-handler="Plan" class="mt-3">
+            <form method="post" asp-page-handler="Plan" asp-fragment="new-medication-plan" class="mt-3">
                 <input type="hidden" name="episodeId" value="@episode.Id" />
-                <input type="hidden" name="planId" value="@Guid.NewGuid()" />
+                <input type="hidden" name="planId" value="@(draft is not null && draft.PlanId != Guid.Empty ? draft.PlanId : Guid.NewGuid())" />
+                @if (draft is not null)
+                {
+                    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                }
                 <div class="care-fields">
                     <div>
                         <label for="medication-name" class="form-label">@SharedLocalizer["Medication"]</label>
-                        <input id="medication-name" name="medication" class="form-control" maxlength="160" required />
+                        <input id="medication-name" name="medication" class="form-control" maxlength="160" value="@(draft?.Medication)" required />
+                        @Html.ValidationMessage("medication", null, new { @class = "text-danger" })
                     </div>
                     <div>
                         <label for="medication-amount" class="form-label">@SharedLocalizer["Prescribed amount and unit"]</label>
-                        <input id="medication-amount" name="amount" class="form-control" maxlength="80" required />
+                        <input id="medication-amount" name="amount" class="form-control" maxlength="80" value="@(draft?.Amount)" required />
+                        @Html.ValidationMessage("amount", null, new { @class = "text-danger" })
                     </div>
                     <div>
                         <label for="plan-start" class="form-label">@SharedLocalizer["First day"]</label>
-                        <input id="plan-start" name="startDate" class="form-control" type="date" min="@Model.Today" value="@Model.Today" required />
+                        <input id="plan-start" name="startDate" class="form-control" type="date" min="@Model.Today" value="@(draft is null ? Model.Today : draft.StartDate)" required />
+                        @Html.ValidationMessage("startDate", null, new { @class = "text-danger" })
                     </div>
                     <div>
                         <label for="plan-end" class="form-label">@SharedLocalizer["Last day (inclusive)"]</label>
-                        <input id="plan-end" name="endDate" class="form-control" type="date" min="@Model.Today" value="@Model.Today" required />
+                        <input id="plan-end" name="endDate" class="form-control" type="date" min="@Model.Today" value="@(draft is null ? Model.Today : draft.EndDate)" required />
+                        @Html.ValidationMessage("endDate", null, new { @class = "text-danger" })
                     </div>
                 </div>
                 <fieldset class="mt-3">
@@ -41,14 +50,16 @@
                         {
                             <div>
                                 <label for="dose-time-@index" class="form-label">@(index == 1 ? SharedLocalizer["First time"] : SharedLocalizer["Optional time {0}", index])</label>
-                                <input id="dose-time-@index" name="dailyTimes" class="form-control" type="time" required="@(index == 1)" />
+                                <input id="dose-time-@index" name="dailyTimes" class="form-control" type="time" value="@(draft?.DailyTimes.ElementAtOrDefault(index - 1))" required="@(index == 1)" />
                             </div>
                         }
                     </div>
+                    @Html.ValidationMessage("dailyTimes", null, new { @class = "text-danger" })
                 </fieldset>
                 <div class="mt-3">
                     <label for="plan-instructions" class="form-label">@SharedLocalizer["Instructions (optional)"]</label>
-                    <textarea id="plan-instructions" name="instructions" class="form-control" rows="2" maxlength="1000"></textarea>
+                    <textarea id="plan-instructions" name="instructions" class="form-control" rows="2" maxlength="1000">@(draft?.Instructions)</textarea>
+                    @Html.ValidationMessage("instructions", null, new { @class = "text-danger" })
                 </div>
                 @if (currentPlans.Count > 0)
                 {
@@ -58,7 +69,7 @@
                             <option value="">@SharedLocalizer["Create a separate plan"]</option>
                             @foreach (var plan in currentPlans)
                             {
-                                <option value="@plan.Id">@plan.Medication · @plan.Amount · @Model.Clock.FromUtc(plan.CreatedAtUtc).ToString("g")</option>
+                                <option value="@plan.Id" selected="@(draft?.ReplacePlanId == plan.Id)">@plan.Medication · @plan.Amount · @Model.Clock.FromUtc(plan.CreatedAtUtc).ToString("g")</option>
                             }
                         </select>
                         <p class="form-text mb-0">@SharedLocalizer["Replacement cancels open doses in the previous plan and keeps its recorded history."]</p>
@@ -133,10 +144,17 @@
 
             @if (available && assignedToMe && journal.Permissions.CanRecord && plan.Assignment == PlanAssignment.Accepted && pending.Count > 0)
             {
-                var selectedDoseId = Model.SelectedDoseId ?? (pending.Count == 1 ? pending[0].Id : (Guid?)null);
-                <form method="post" asp-page-handler="Dose" class="portal-form care-dose-form">
+                var doseDraft = Model.DoseDraft?.PlanId == plan.Id ? Model.DoseDraft : null;
+                var selectedDoseId = pending.Any(dose => dose.Id == Model.SelectedDoseId)
+                    ? Model.SelectedDoseId : pending.Count == 1 ? pending[0].Id : null;
+                var formId = $"record-dose-{plan.Id}";
+                <form method="post" asp-page-handler="Dose" asp-fragment="@formId" id="@formId" class="portal-form care-dose-form">
                     <input type="hidden" name="planId" value="@plan.Id" />
                     <h4 class="h6">@SharedLocalizer["Record a dose"]</h4>
+                    @if (doseDraft is not null)
+                    {
+                        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                    }
                     <label for="dose-@plan.Id" class="form-label">@SharedLocalizer["Scheduled dose"]</label>
                     <select name="doseId" id="dose-@plan.Id" class="form-select mb-2" required>
                         <option value="">@SharedLocalizer["Select a scheduled dose"]</option>
@@ -145,18 +163,34 @@
                             <option value="@dose.Id" selected="@(dose.Id == selectedDoseId)">@Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")</option>
                         }
                     </select>
+                    @if (doseDraft is not null)
+                    {
+                        @Html.ValidationMessage("doseId", null, new { @class = "text-danger" })
+                    }
                     <div class="care-fields mb-2">
                         <div>
                             <label for="given-at-@plan.Id" class="form-label">@SharedLocalizer["Actually given at"]</label>
-                            <input name="givenAt" id="given-at-@plan.Id" class="form-control" type="datetime-local" value="@Model.Clock.InputNow" />
+                            <input name="givenAt" id="given-at-@plan.Id" class="form-control" type="datetime-local" value="@(doseDraft is null ? Model.Clock.InputNow : doseDraft.GivenAt)" />
+                            @if (doseDraft is not null)
+                            {
+                                @Html.ValidationMessage("givenAt", null, new { @class = "text-danger" })
+                            }
                         </div>
                         <div>
                             <label for="actual-amount-@plan.Id" class="form-label">@SharedLocalizer["Actual amount and unit"]</label>
-                            <input name="actualAmount" id="actual-amount-@plan.Id" class="form-control" maxlength="80" placeholder="@plan.Amount" />
+                            <input name="actualAmount" id="actual-amount-@plan.Id" class="form-control" maxlength="80" placeholder="@plan.Amount" value="@(doseDraft?.Amount)" />
+                            @if (doseDraft is not null)
+                            {
+                                @Html.ValidationMessage("actualAmount", null, new { @class = "text-danger" })
+                            }
                         </div>
                     </div>
                     <label for="dose-note-@plan.Id" class="form-label">@SharedLocalizer["Note or reason if not given"]</label>
-                    <textarea name="note" id="dose-note-@plan.Id" class="form-control mb-2" rows="2" maxlength="1000"></textarea>
+                    <textarea name="note" id="dose-note-@plan.Id" class="form-control mb-2" rows="2" maxlength="1000">@(doseDraft?.Note)</textarea>
+                    @if (doseDraft is not null)
+                    {
+                        @Html.ValidationMessage("note", null, new { @class = "text-danger" })
+                    }
                     <div class="portal-actions">
                         <button type="submit" class="btn btn-primary" name="given" value="true">@SharedLocalizer["Record as given"]</button>
                         <button type="submit" class="btn btn-outline-secondary" name="given" value="false">@SharedLocalizer["Record as not given"]</button>

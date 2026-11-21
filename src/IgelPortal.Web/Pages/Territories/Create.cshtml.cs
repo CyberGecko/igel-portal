@@ -46,10 +46,10 @@ namespace IgelPortal.Web.Pages.Territories
                 return Forbid();
             }
             this.Territory.UserName = base.User.Identity?.Name ?? String.Empty;
-            await this.dataService.Insert(this.Territory);
+            var id = await dataService.Insert(Territory);
 
             TempData["RecordNotice"] = "Territory added.";
-            return base.RedirectToPage("./Index", new { filter });
+            return RedirectToPage("./Edit", pageHandler: null, routeValues: new { id, filter }, fragment: "offers");
         }
     }
 }

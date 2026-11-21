@@ -41,20 +41,29 @@ namespace IgelPortal.Web.Pages.Territories
                 }
                 base.ViewData["IsCommunityOverview"] = true;
                 ShowMap = map;
-                if (!ShowMap)
+                Search = string.IsNullOrWhiteSpace(search) ? null : search.Trim();
+                FreeOnly = freeOnly;
+                if (!ShowMap || Search is not null || FreeOnly)
                 {
-                    Search = search?.Trim();
-                    FreeOnly = freeOnly;
-                    var offers = await placements.OffersAsync(communityId, freeOnly: freeOnly);
-                    Offers = offers.Where(offer => string.IsNullOrWhiteSpace(Search) ||
+                    var offers = await placements.OffersAsync(communityId, freeOnly: FreeOnly);
+                    Offers = offers.Where(offer => Search is null ||
                             offer.ServiceName.Contains(Search, StringComparison.CurrentCultureIgnoreCase) ||
                             offer.TerritoryName.Contains(Search, StringComparison.CurrentCultureIgnoreCase) ||
                             offer.City.Contains(Search, StringComparison.CurrentCultureIgnoreCase))
                         .OrderByDescending(offer => !offer.Paused && offer.Free > 0).ThenBy(offer => offer.ServiceName).ToList();
-                    return Page();
                 }
+                if (!ShowMap) return Page();
 
-                this.Territories = await this.dataService.FindAllActiveForCommunity(communityId);
+                Territories = await dataService.FindAllActiveForCommunity(communityId);
+                if (Search is not null || FreeOnly)
+                {
+                    var matchingOffers = Offers.Select(offer => offer.Id).ToHashSet();
+                    Territories = Territories.Where(territory => territory.AttachedServices.Any(offer => matchingOffers.Contains(offer.Id))).ToList();
+                    foreach (var territory in Territories)
+                    {
+                        territory.AttachedServices = territory.AttachedServices.Where(offer => matchingOffers.Contains(offer.Id)).ToList();
+                    }
+                }
 
                 base.ViewData["MiddleLat"] = this.Territories.Select(c => c.Latitude).DefaultIfEmpty().Average();
                 base.ViewData["MiddleLon"] = this.Territories.Select(c => c.Longitude).DefaultIfEmpty().Average();

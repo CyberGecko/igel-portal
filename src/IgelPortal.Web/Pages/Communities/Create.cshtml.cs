@@ -49,7 +49,7 @@ namespace IgelPortal.Web.Pages.Communities
             await this.dataService.AddUserAsOwner(communityId, base.User.Identity);
             await this.dataService.AddUserAsMember(communityId, base.User.Identity);
 
-            return base.RedirectToPage("/Index");
+            return RedirectToPage("./Details", new { id = communityId });
         }
     }
 }

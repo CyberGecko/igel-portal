@@ -50,10 +50,11 @@
         </dd>
     </dl>
 </div>
-<div class="btn-group" role="group">
+<div class="portal-actions">
     <a class="btn btn-primary" asp-page="./Edit" asp-route-id="@Model.Community.Id"><i class="bi bi-pencil"></i><span class="d-none d-md-inline"> @SharedLocalizer["Edit"]</span></a>
     @if ((await CommunityDataService.HasUserCommunityMemberRole(Model.Community.Id, User.Identity, CommunityRoles.OWNER)))
     {
+        <a class="btn btn-primary" asp-page="./Members" asp-route-id="@Model.Community.Id">@SharedLocalizer["Manage members"]</a>
         <a class="btn btn-danger" asp-page="./Delete" asp-route-id="@Model.Community.Id"><i class="bi bi-trash"></i><span class="d-none d-md-inline"> @SharedLocalizer["Delete"]</span></a>
     }
     @if (User.IsInRole(RoleNames.ADMIN))
