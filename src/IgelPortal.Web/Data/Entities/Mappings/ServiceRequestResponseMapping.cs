@@ -12,6 +12,7 @@ namespace IgelPortal.Web.Data.Entities.Mappings
             builder.Property(x => x.ServiceRequestId).IsRequired();
             builder.Property(x => x.RespondingUserName).IsRequired();
             builder.Property(x => x.ResponseDate).IsRequired();
+            builder.Property(x => x.IsAvailable).HasDefaultValue(true);
         }
     }
 }

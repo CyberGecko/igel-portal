@@ -6,4 +6,8 @@
   <data name="Service Request Mail Text" xml:space="preserve">
         <value>Die Gruppe &lt;b&gt;{0}&lt;/b&gt; hat für den Igel &lt;b&gt;{2}&lt;/b&gt; eine Anfrage für den Dienst &lt;b&gt;{1}&lt;/b&gt; gestellt.&lt;br /&gt;Klicken sie auf &lt;a href='{3}?requestToken={4}'&gt;diesen Link &lt;/a&gt; um Ihre Verfügbarkeit zu bestätigen.&lt;br /&gt;Oder rufen sie diese Adresse auf: {3}?requestToken={4}</value>
     </data>
+  <data name="Hedgehog placement request" xml:space="preserve"><value>IgelPortal – Platzanfrage</value></data>
+  <data name="Placement request email" xml:space="preserve"><value>Die Gruppe &lt;b&gt;{0}&lt;/b&gt; sucht für &lt;b&gt;{1}&lt;/b&gt; ab {3} einen Platz für „{2}“. &lt;a href="{4}"&gt;Anfrage ansehen und antworten&lt;/a&gt;</value></data>
+  <data name="A place has been assigned" xml:space="preserve"><value>IgelPortal – Dein Platz wurde ausgewählt</value></data>
+  <data name="Placement assigned email" xml:space="preserve"><value>Für &lt;b&gt;{0}&lt;/b&gt; wurde dein Platz in &lt;b&gt;{2}&lt;/b&gt; für „{1}“ ausgewählt.</value></data>
 </root>

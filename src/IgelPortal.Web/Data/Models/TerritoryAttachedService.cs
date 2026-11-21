@@ -14,6 +14,7 @@ namespace IgelPortal.Web.Data.Models
         [Range(0, Double.PositiveInfinity)]
         [Display(Name = "Max. Capacity")]
         public Int32 MaxCapacity { get; set; }
+        public bool IsPaused { get; set; }
 
         [Display(Name = "Current Capacity")]
         public Int32 CurrentCapacity { get; internal init; }

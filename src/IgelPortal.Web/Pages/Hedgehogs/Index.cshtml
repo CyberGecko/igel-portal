@@ -25,6 +25,7 @@ else
         @foreach (var item in Model.Hedgehogs)
         {
             bool isOwner = item.AttachedUser == User.Identity?.Name;
+            bool canRequest = item.CommunityId is Guid groupId && Model.ManagedGroups.Contains(groupId);
             <article class="record-card">
                 <div class="record-heading">
                     <img src="~/images/hedgehog-avatar.webp" asp-append-version="true" width="56" height="56" loading="lazy" alt="" />
@@ -65,7 +66,7 @@ else
                         <dd>@item.ChangeDate.ToShortDateString()</dd>
                     </div>
                 </dl>
-                @if (isOwner || Model.CanManageCommunity)
+                @if (isOwner || Model.CanManageCommunity || canRequest)
                 {
                     <div class="portal-actions">
                         @if (isOwner)
@@ -73,22 +74,28 @@ else
                             <a class="btn btn-outline-primary" asp-page="./Care" asp-route-id="@item.Id">@SharedLocalizer["Care journal"]</a>
                             <a class="btn btn-outline-primary" asp-page="./Edit" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>
                         }
-                        <details class="record-actions">
-                            <summary>@SharedLocalizer["More actions"]</summary>
-                            <ul class="mb-0">
-                                @if (Model.CanManageCommunity)
-                                {
-                                    <li><a asp-page="./ChangeHome" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Change Home Territory"]</a></li>
-                                    <li><a asp-page="./MoveTerritory" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Move Territory"]</a></li>
-                                    <li><a asp-page="./ChangeAttachedUser" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Change Attached User"]</a></li>
-                                    <li><a asp-page="./RequestService" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Request service"]</a></li>
-                                }
-                                @if (isOwner)
-                                {
-                                    <li><a asp-page="./Delete" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Delete"]</a></li>
-                                }
-                            </ul>
-                        </details>
+                        @if (canRequest)
+                        {
+                            <a class="btn btn-outline-primary" asp-page="./RequestService" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Find a place"]</a>
+                        }
+                        @if (isOwner || Model.CanManageCommunity)
+                        {
+                            <details class="record-actions">
+                                <summary>@SharedLocalizer["More actions"]</summary>
+                                <ul class="mb-0">
+                                    @if (Model.CanManageCommunity)
+                                    {
+                                        <li><a asp-page="./ChangeHome" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Change Home Territory"]</a></li>
+                                        <li><a asp-page="./MoveTerritory" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Move Territory"]</a></li>
+                                        <li><a asp-page="./ChangeAttachedUser" asp-route-id="@item.CommunityId" asp-route-hedgehogId="@item.Id">@Localizer["Change Attached User"]</a></li>
+                                    }
+                                    @if (isOwner)
+                                    {
+                                        <li><a asp-page="./Delete" asp-route-id="@item.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Delete"]</a></li>
+                                    }
+                                </ul>
+                            </details>
+                        }
                     </div>
                 }
             </article>

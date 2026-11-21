@@ -6,4 +6,6 @@
   <data name="Service Request Mail Text" xml:space="preserve">
         <value>Community {0} requested {1} for the hedgehog {2}.&lt;br /&gt;Please click on &lt;a href='{3}?requestToken={4}'&gt;this link&lt;/a&gt; to confirm your availability.&lt;br /&gt;Alternativly you can visit the following address: {3}?requestToken={4}</value>
     </data>
+  <data name="Placement request email" xml:space="preserve"><value>The group &lt;b&gt;{0}&lt;/b&gt; is looking for a place for &lt;b&gt;{1}&lt;/b&gt; from {3} for “{2}”. &lt;a href="{4}"&gt;View and reply&lt;/a&gt;</value></data>
+  <data name="Placement assigned email" xml:space="preserve"><value>Your place at &lt;b&gt;{2}&lt;/b&gt; for “{1}” has been assigned to &lt;b&gt;{0}&lt;/b&gt;.</value></data>
 </root>

@@ -377,6 +377,17 @@ namespace IgelPortal.Web.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
 
+                    b.Property<string>("AssignedTerritoryName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<Guid?>("AssignedTerritoryServiceId")
+                        .HasColumnType("char(36)");
+
+                    b.Property<string>("AssignedUserName")
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
                     b.Property<DateTime>("ChangeDate")
                         .HasColumnType("datetime(6)");
 
@@ -395,6 +406,16 @@ namespace IgelPortal.Web.Migrations
                     b.Property<Guid>("HedgehogId")
                         .HasColumnType("char(36)");
 
+                    b.Property<DateOnly?>("NeededFrom")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("NeededUntil")
+                        .HasColumnType("date");
+
+                    b.Property<string>("RequestNote")
+                        .HasMaxLength(1000)
+                        .HasColumnType("varchar(1000)");
+
                     b.Property<Guid>("RequestToken")
                         .HasColumnType("char(36)");
 
@@ -403,11 +424,11 @@ namespace IgelPortal.Web.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CommunityId");
-
                     b.HasIndex("HedgehogId");
 
                     b.HasIndex("ServiceId");
+
+                    b.HasIndex("CommunityId", "FulfillmentDate");
 
                     b.ToTable("ServiceRequests");
                 });
@@ -419,6 +440,14 @@ namespace IgelPortal.Web.Migrations
 
                     b.Property<string>("RespondingUserName")
                         .HasColumnType("varchar(255)");
+
+                    b.Property<bool>("IsAvailable")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("tinyint(1)")
+                        .HasDefaultValue(true);
+
+                    b.Property<Guid?>("OfferedTerritoryServiceId")
+                        .HasColumnType("char(36)");
 
                     b.Property<DateTime>("ResponseDate")
                         .HasColumnType("datetime(6)");
@@ -489,6 +518,9 @@ namespace IgelPortal.Web.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("char(36)");
+
+                    b.Property<bool>("IsPaused")
+                        .HasColumnType("tinyint(1)");
 
                     b.Property<int>("MaxCapacity")
                         .HasColumnType("int");

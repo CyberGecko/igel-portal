@@ -65,6 +65,7 @@ builder.Services.AddScoped<ICommunityDataService, CommunityDataService>();
 builder.Services.AddScoped<ITerritoryServiceDataService, TerritoryServiceDataService>();
 builder.Services.AddScoped<ITerritoryAttachedServiceDataService, TerritoryAttachedServiceDataService>();
 builder.Services.AddScoped<IServiceRequestDataService, ServiceRequestDataService>();
+builder.Services.AddScoped<PlacementService>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<PasskeyFlow>();
 

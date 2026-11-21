@@ -24,4 +24,54 @@
   <data name="The service request was saved. {0} email notifications could not be submitted." xml:space="preserve">
     <value>Die Anfrage wurde gespeichert. {0} E-Mail-Benachrichtigungen konnten nicht an Brevo übermittelt werden.</value>
   </data>
+  <data name="Find a place" xml:space="preserve"><value>Platz suchen</value></data>
+  <data name="Placement request" xml:space="preserve"><value>Platzanfrage</value></data>
+  <data name="Placement request for {0}" xml:space="preserve"><value>Platzanfrage für {0}</value></data>
+  <data name="Find a place for {0}" xml:space="preserve"><value>Platz für {0} suchen</value></data>
+  <data name="Back to group hedgehogs" xml:space="preserve"><value>Zurück zur Igelliste der Gruppe</value></data>
+  <data name="From {0}" xml:space="preserve"><value>Ab {0}</value></data>
+  <data name="until {0}" xml:space="preserve"><value>bis {0}</value></data>
+  <data name="This request is closed." xml:space="preserve"><value>Diese Anfrage ist abgeschlossen.</value></data>
+  <data name="Assigned to your offer at {0}." xml:space="preserve"><value>Dein Platz in {0} wurde ausgewählt.</value></data>
+  <data name="Your reply: I can help." xml:space="preserve"><value>Deine Rückmeldung: Ich kann helfen.</value></data>
+  <data name="Your reply: Not this time." xml:space="preserve"><value>Deine Rückmeldung: Diesmal nicht.</value></data>
+  <data name="Your offer" xml:space="preserve"><value>Dein Angebot</value></data>
+  <data name="Select a place" xml:space="preserve"><value>Platz auswählen</value></data>
+  <data name="{0} free" xml:space="preserve"><value>{0} frei</value></data>
+  <data name="I can help" xml:space="preserve"><value>Ich kann helfen</value></data>
+  <data name="You currently have no free matching offers." xml:space="preserve"><value>Du hast gerade keinen freien passenden Platz.</value></data>
+  <data name="Not this time" xml:space="preserve"><value>Diesmal nicht</value></data>
+  <data name="Withdraw reply" xml:space="preserve"><value>Rückmeldung zurückziehen</value></data>
+  <data name="You have no matching offer in this group." xml:space="preserve"><value>Du hast kein passendes Angebot in dieser Gruppe.</value></data>
+  <data name="Manage my offers" xml:space="preserve"><value>Meine Angebote verwalten</value></data>
+  <data name="New request" xml:space="preserve"><value>Neue Anfrage</value></data>
+  <data name="There are no free offers with a reachable provider in this group." xml:space="preserve"><value>In dieser Gruppe gibt es gerade keine freien Angebote mit erreichbaren Anbietenden.</value></data>
+  <data name="Service" xml:space="preserve"><value>Dienst</value></data>
+  <data name="Select a service" xml:space="preserve"><value>Dienst auswählen</value></data>
+  <data name="{0} free places, {1} email recipients" xml:space="preserve"><value>{0} freie Plätze, {1} E-Mail-Empfangende</value></data>
+  <data name="Needed from" xml:space="preserve"><value>Gesucht ab</value></data>
+  <data name="Needed until (optional)" xml:space="preserve"><value>Gesucht bis (optional)</value></data>
+  <data name="Note for helpers (optional)" xml:space="preserve"><value>Notiz für Helfende (optional)</value></data>
+  <data name="Send request" xml:space="preserve"><value>Anfrage senden</value></data>
+  <data name="Placement requests" xml:space="preserve"><value>Platzanfragen</value></data>
+  <data name="No requests yet." xml:space="preserve"><value>Es gibt noch keine Anfragen.</value></data>
+  <data name="Assigned" xml:space="preserve"><value>Zugewiesen</value></data>
+  <data name="Closed" xml:space="preserve"><value>Abgeschlossen</value></data>
+  <data name="Open" xml:space="preserve"><value>Offen</value></data>
+  <data name="{0} available, {1} declined" xml:space="preserve"><value>{0} Zusagen, {1} Absagen</value></data>
+  <data name="The offered place is no longer free." xml:space="preserve"><value>Der angebotene Platz ist inzwischen nicht mehr frei.</value></data>
+  <data name="Assign place and close request" xml:space="preserve"><value>Platz zuweisen und Anfrage abschließen</value></data>
+  <data name="Close without assignment" xml:space="preserve"><value>Ohne Zuweisung abschließen</value></data>
+  <data name="Check the service, dates and note." xml:space="preserve"><value>Prüfe den Dienst, den Zeitraum und die Notiz.</value></data>
+  <data name="There are no free offers with a reachable provider for this service." xml:space="preserve"><value>Für diesen Dienst gibt es gerade keinen freien Platz mit erreichbaren Anbietenden.</value></data>
+  <data name="There is already an open request for this service." xml:space="preserve"><value>Für diesen Dienst gibt es bereits eine offene Anfrage.</value></data>
+  <data name="Placement request sent." xml:space="preserve"><value>Die Platzanfrage wurde versendet.</value></data>
+  <data name="Your reply was withdrawn." xml:space="preserve"><value>Deine Rückmeldung wurde zurückgezogen.</value></data>
+  <data name="Your reply was saved." xml:space="preserve"><value>Deine Rückmeldung wurde gespeichert.</value></data>
+  <data name="The reply could not be saved. Check whether the request is still open and the offer is available." xml:space="preserve"><value>Die Rückmeldung konnte nicht gespeichert werden. Prüfe, ob die Anfrage noch offen und der Platz frei ist.</value></data>
+  <data name="The place is no longer available or the reply changed." xml:space="preserve"><value>Der Platz ist nicht mehr frei oder die Rückmeldung wurde geändert.</value></data>
+  <data name="Place assigned." xml:space="preserve"><value>Der Platz wurde zugewiesen.</value></data>
+  <data name="Request closed." xml:space="preserve"><value>Die Anfrage wurde abgeschlossen.</value></data>
+  <data name="Saved. {0} email notifications could not be sent." xml:space="preserve"><value>Gespeichert. {0} E-Mail-Benachrichtigungen konnten nicht gesendet werden.</value></data>
+  <data name="Assigning a place updates the hedgehog’s current territory immediately." xml:space="preserve"><value>Die Zuweisung ändert das aktuelle Revier des Igels sofort.</value></data>
 </root>

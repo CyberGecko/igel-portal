@@ -17,6 +17,12 @@ namespace IgelPortal.Web.Data.Models
         [DataType(DataType.DateTime)]
         [Display(Name = "Fulfillment date")]
         public DateTime? FulfillmentDate { get; set; }
+        public DateOnly? NeededFrom { get; set; }
+        public DateOnly? NeededUntil { get; set; }
+        public string? RequestNote { get; set; }
+        public Guid? AssignedTerritoryServiceId { get; set; }
+        public string? AssignedTerritoryName { get; set; }
+        public string? AssignedUserName { get; set; }
         [DataType(DataType.DateTime)]
         [Display(Name = "Creation date")]
         public DateTime CreationDate { get; set; }

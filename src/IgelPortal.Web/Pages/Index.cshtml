@@ -10,6 +10,95 @@
         <h1>@Localizer["Your overview"]</h1>
         <a asp-page="/Communities/Join" class="btn btn-outline-primary">@Localizer["My communities"]</a>
     </div>
+    @if (Model.MedicationTasks.Count > 0 || Model.Incoming.Count > 0)
+    {
+        <section class="mb-4" aria-labelledby="today-heading">
+            <h2 class="h4" id="today-heading">@Localizer["Today and open tasks"]</h2>
+            <div class="records-grid">
+                @if (Model.MedicationTasks.Count > 0)
+                {
+                    <article class="record-card">
+                        <h3>@Localizer["Medication"]</h3>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var task in Model.MedicationTasks)
+                            {
+                                var dose = task.Due.FirstOrDefault();
+                                <li class="list-group-item">
+                                    <a asp-page="/Hedgehogs/Care" asp-route-id="@task.HedgehogId" asp-fragment="@($"plan-{task.Plan.Id}")">@task.HedgehogName · @task.Plan.Medication</a>
+                                    @if (dose is null)
+                                    {
+                                        <p class="mb-0">@Localizer["Review plan offer"]</p>
+                                    }
+                                    else
+                                    {
+                                        var status = dose.ScheduledAtUtc < Model.Now && !Model.IsToday(dose.ScheduledAtUtc) ? "Overdue" :
+                                            Model.IsToday(dose.ScheduledAtUtc) ? "Today" : "Upcoming";
+                                        <p class="mb-0"><strong>@Localizer[status]</strong> · @Model.Clock.FromUtc(dose.ScheduledAtUtc).ToString("g")</p>
+                                    }
+                                </li>
+                            }
+                        </ul>
+                        <a asp-page="/Hedgehogs/CareTasks">@SharedLocalizer["My tasks"]</a>
+                    </article>
+                }
+                @if (Model.Incoming.Count > 0)
+                {
+                    <article class="record-card">
+                        <h3>@Localizer["Requests for my offers"]</h3>
+                        <ul class="list-group list-group-flush">
+                            @foreach (var request in Model.Incoming)
+                            {
+                                <li class="list-group-item">
+                                    <a asp-page="/Hedgehogs/RequestService" asp-page-handler="ServiceResponse" asp-route-requestToken="@request.Token">@request.Hedgehog · @request.Service</a>
+                                    <p class="mb-0">@request.Group · @Localizer[!request.HasReply ? "Reply requested" : request.HasAvailability ? "You offered a place" : "You declined"]</p>
+                                </li>
+                            }
+                        </ul>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+    @if (Model.OpenPlacements.Count > 0 || Model.Applicants.Count > 0 || Model.OwnOffers.Count > 0)
+    {
+        <div class="records-grid mb-4">
+            @if (Model.OpenPlacements.Count > 0 || Model.Applicants.Count > 0)
+            {
+                <section class="record-card">
+                    <h2>@Localizer["Group decisions"]</h2>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var group in Model.Applicants)
+                        {
+                            <li class="list-group-item"><a asp-page="/Communities/Members" asp-route-id="@group.Id">@group.Name · @Localizer["Join requests: {0}", group.Count]</a></li>
+                        }
+                        @foreach (var request in Model.OpenPlacements)
+                        {
+                            <li class="list-group-item">
+                                <a asp-page="/Hedgehogs/RequestService" asp-route-id="@request.GroupId" asp-route-hedgehogId="@request.HedgehogId" asp-fragment="@($"request-{request.Id}")">@request.Hedgehog · @request.Service</a>
+                                <p class="mb-0">@request.Group · @Localizer[request.HasAvailability ? "Replies available" : "Waiting for a place"]</p>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+            @if (Model.OwnOffers.Count > 0)
+            {
+                <section class="record-card">
+                    <h2>@Localizer["My offers"]</h2>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var offer in Model.OwnOffers.Take(5))
+                        {
+                            <li class="list-group-item">
+                                <a asp-page="/Territories/Edit" asp-route-id="@offer.TerritoryId" asp-route-filter="my" asp-fragment="offers">@offer.ServiceName · @offer.TerritoryName</a>
+                                <p class="mb-0">@(offer.Paused ? Localizer["Paused"] : Localizer["{0} of {1} places free", offer.Free, offer.Capacity])</p>
+                            </li>
+                        }
+                    </ul>
+                    <a asp-page="/Territories/Index" asp-route-filter="my">@Localizer["Manage my offers"]</a>
+                </section>
+            }
+        </div>
+    }
     <div class="row g-4">
         <section class="col-12 col-lg-6">
             <vc:hedgehog-overview-widget />

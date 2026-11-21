@@ -1,8 +1,6 @@
-using MySqlConnector;
 using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Principal;
 
 namespace IgelPortal.Web.Data.Services
 {
@@ -68,6 +66,9 @@ namespace IgelPortal.Web.Data.Services
                 HedgehogId = model.HedgehogId,
                 RequestToken = model.RequestToken,
                 FulfillmentDate = model.FulfillmentDate,
+                NeededFrom = model.NeededFrom,
+                NeededUntil = model.NeededUntil,
+                RequestNote = model.RequestNote,
             };
             entity.ChangeDate = entity.CreationDate;
             this.dbContext.Add(entity);
@@ -115,35 +116,6 @@ namespace IgelPortal.Web.Data.Services
             catch (DbUpdateConcurrencyException)
             {
                 return 0;
-            }
-        }
-
-        public async Task AddResponseToRequest(Guid id, IIdentity? identity)
-        {
-            if (String.IsNullOrWhiteSpace(identity?.Name))
-            {
-                return;
-            }
-            if (await dbContext.ServiceRequestResponses.AnyAsync(response =>
-                response.ServiceRequestId == id && response.RespondingUserName == identity.Name))
-            {
-                return;
-            }
-
-            Entities.ServiceRequestResponse entity = new()
-            {
-                RespondingUserName = identity.Name,
-                ResponseDate = DateTime.UtcNow,
-                ServiceRequestId = id
-            };
-            this.dbContext.Add(entity);
-            try
-            {
-                await this.dbContext.SaveChangesAsync();
-            }
-            catch (DbUpdateException exception) when (exception.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry })
-            {
-                this.dbContext.Entry(entity).State = EntityState.Detached;
             }
         }
 

@@ -15,46 +15,37 @@ namespace IgelPortal.Web.Tests;
 public class ServiceRequestTests
 {
     [TestMethod]
-    [DataRow(false, false, true, true)]
-    [DataRow(false, false, false, false)]
-    [DataRow(true, false, true, false)]
-    [DataRow(false, true, true, false)]
-    public async Task OnlyActiveRequestsCanReceiveResponsesFromGroupMembers(bool deleted, bool fulfilled, bool member, bool accepted)
+    [DataRow(false, false, false, true)]
+    [DataRow(true, false, false, true)]
+    [DataRow(false, true, true, true)]
+    [DataRow(false, true, false, false)]
+    public async Task ResponseLinkRequiresAnExistingRequestAndHedgehogInTheMembersGroup(
+        bool deleted, bool member, bool hedgehogDeleted, bool sameGroup)
     {
-        var request = new ServiceRequest
-        {
-            Id = Guid.NewGuid(),
-            CommunityId = Guid.NewGuid(),
-            DeletedDate = deleted ? DateTime.UnixEpoch : null,
-            FulfillmentDate = fulfilled ? DateTime.UnixEpoch : null
-        };
+        var request = new ServiceRequest { CommunityId = Guid.NewGuid(), HedgehogId = Guid.NewGuid(),
+            DeletedDate = deleted ? DateTime.UnixEpoch : null };
         var groups = Substitute.For<ICommunityDataService>();
         var requests = Substitute.For<IServiceRequestDataService>();
+        var hedgehogs = Substitute.For<IHedgehogDataService>();
         var http = new DefaultHttpContext
         {
             User = new ClaimsPrincipal(new ClaimsIdentity([new Claim(ClaimTypes.Name, "helper")], "test"))
         };
         requests.FindOneByToken(request.RequestToken).Returns(request);
         groups.IsCommunityMember(request.CommunityId, http.User.Identity).Returns(member);
-
-        // Other page handlers use those services. This path only fetches the request, checks membership, and records the response.
-        var page = new RequestServiceModel(null!, groups, null!, null!, requests, null!, null!, null!, null!,
-            NullLogger<RequestServiceModel>.Instance)
+        hedgehogs.FindOne(request.HedgehogId).Returns(new Hedgehog
+        {
+            CommunityId = sameGroup ? request.CommunityId : Guid.NewGuid(),
+            DeletedDate = hedgehogDeleted ? DateTime.UnixEpoch : null
+        });
+        var page = new RequestServiceModel(hedgehogs, groups, requests, null!, null!, null!, null!,
+            NullLogger<RequestServiceModel>.Instance, null!)
         {
             PageContext = new PageContext { HttpContext = http }
         };
 
-        var result = await page.OnPostServiceResponse(request.RequestToken);
+        var result = await page.OnGetServiceResponseAsync(request.RequestToken);
 
-        if (accepted)
-        {
-            Assert.IsInstanceOfType<RedirectToPageResult>(result);
-            await requests.Received(1).AddResponseToRequest(request.Id, http.User.Identity);
-        }
-        else
-        {
-            Assert.IsInstanceOfType<NotFoundResult>(result);
-            await requests.DidNotReceiveWithAnyArgs().AddResponseToRequest(default, default);
-        }
+        Assert.IsInstanceOfType<NotFoundResult>(result);
     }
 }

@@ -21,4 +21,13 @@
   <data name="My territories" xml:space="preserve">
     <value>Meine Reviere</value>
   </data>
+  <data name="Group offers" xml:space="preserve"><value>Angebote der Gruppe</value></data>
+  <data name="Search offers" xml:space="preserve"><value>Angebote suchen</value></data>
+  <data name="Free places only" xml:space="preserve"><value>Nur freie Plätze</value></data>
+  <data name="Filter offers" xml:space="preserve"><value>Angebote filtern</value></data>
+  <data name="Show map" xml:space="preserve"><value>Karte anzeigen</value></data>
+  <data name="No matching offers." xml:space="preserve"><value>Keine passenden Angebote.</value></data>
+  <data name="Paused" xml:space="preserve"><value>Pausiert</value></data>
+  <data name="{0} of {1} places free" xml:space="preserve"><value>{0} von {1} Plätzen frei</value></data>
+  <data name="Back to offers" xml:space="preserve"><value>Zurück zu den Angeboten</value></data>
 </root>

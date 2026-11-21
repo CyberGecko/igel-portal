@@ -1,4 +1,4 @@
-using IgelPortal.Web.Data.Models.Mapping;
+﻿using IgelPortal.Web.Data.Models.Mapping;
 using IgelPortal.Web.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -43,6 +43,7 @@ namespace IgelPortal.Web.Data.Services
             {
                 Id = Guid.NewGuid(),
                 TerritoryServiceId = model.TerritoryServiceId,
+                IsPaused = model.IsPaused,
                 MaxCapacity = model.MaxCapacity
             };
             this.dbContext.Add(entity);
@@ -60,6 +61,7 @@ namespace IgelPortal.Web.Data.Services
 
                 entity.TerritoryServiceId = model.TerritoryServiceId;
                 entity.MaxCapacity = model.MaxCapacity;
+                entity.IsPaused = model.IsPaused;
 
                 return await this.dbContext.SaveChangesAsync();
             }

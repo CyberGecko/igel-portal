@@ -51,6 +51,10 @@
     {
         <a class="btn btn-primary" asp-page="./Care" asp-route-id="@Model.Hedgehog.Id">@SharedLocalizer["Care journal"]</a>
     }
+    @if (Model.CanRequestPlace)
+    {
+        <a class="btn btn-outline-primary" asp-page="./RequestService" asp-route-id="@Model.Hedgehog.CommunityId" asp-route-hedgehogId="@Model.Hedgehog.Id">@SharedLocalizer["Find a place"]</a>
+    }
     @if (Model.Hedgehog.AttachedUser == User.Identity?.Name)
     {
         <a class="btn btn-outline-primary" asp-page="./Edit" asp-route-id="@Model.Hedgehog.Id" asp-route-filter="@ViewBag.Filter">@SharedLocalizer["Edit"]</a>

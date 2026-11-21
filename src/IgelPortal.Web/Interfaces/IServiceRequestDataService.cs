@@ -1,5 +1,4 @@
 ﻿using IgelPortal.Web.Data.Models;
-using System.Security.Principal;
 
 namespace IgelPortal.Web.Interfaces
 {
@@ -12,7 +11,6 @@ namespace IgelPortal.Web.Interfaces
         Task<Guid> Insert(ServiceRequest model);
         Task<Int32> Update(ServiceRequest model);
         Task<ServiceRequest?> FindOneByToken(Guid? requestToken);
-        Task AddResponseToRequest(Guid id, IIdentity? identity);
         Task<IList<ServiceRequest>> FindAllActiveForCommunityAndHedgehog(Guid? communityId, Guid? hedgehogId);
     }
 }

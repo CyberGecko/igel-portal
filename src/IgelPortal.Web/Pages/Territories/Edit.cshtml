@@ -17,8 +17,8 @@
     </div>
 </form>
 
-<section class="portal-form">
-    <h2 class="h4">@Localizer["Attached Services"]</h2>
+<section class="portal-form" id="offers">
+    <h2 class="h4">@Localizer["My offers"]</h2>
     @if (Model.Territory.AttachedServices.Count > 0)
     {
         <ul class="list-group mb-3">
@@ -26,10 +26,12 @@
             {
                 <li class="list-group-item">
                     <div class="fw-semibold">@service.TerritoryService</div>
-                    <div class="mb-2">@Html.DisplayNameFor(model => model.TerritoryAttachedService.MaxCapacity): @service.MaxCapacity</div>
+                    <div class="mb-2">@Localizer["{0} of {1} places free", service.CurrentCapacity, service.MaxCapacity]
+                        @if (service.IsPaused) { <span class="badge text-bg-secondary">@Localizer["Paused"]</span> }
+                    </div>
                     <div class="portal-actions">
                         <button type="button" class="btn btn-outline-primary js-edit-territory-service"
-                                data-id="@service.Id" data-service="@service.TerritoryServiceId" data-capacity="@service.MaxCapacity">
+                                data-id="@service.Id" data-service="@service.TerritoryServiceId" data-capacity="@service.MaxCapacity" data-paused="@(service.IsPaused ? "true" : "false")">
                             @SharedLocalizer["Edit"]
                         </button>
                         <form method="post" asp-page-handler="RemoveRow" asp-route-filter="@ViewBag.Filter">
@@ -55,6 +57,11 @@
             <label asp-for="TerritoryAttachedService.MaxCapacity" class="form-label"></label>
             <input asp-for="TerritoryAttachedService.MaxCapacity" class="form-control" min="0" required />
         </div>
+        <div class="form-check mb-3">
+            <input class="form-check-input" asp-for="TerritoryAttachedService.IsPaused" />
+            <label class="form-check-label" asp-for="TerritoryAttachedService.IsPaused">@Localizer["Pause this offer"]</label>
+            <div class="form-text">@Localizer["Paused offers are excluded from new requests and assignments."]</div>
+        </div>
         <div class="portal-actions">
             <button type="submit" class="btn btn-primary" id="save-territory-service"
                     data-create="@SharedLocalizer["Add service"]" data-update="@SharedLocalizer["Save"]">@SharedLocalizer["Add service"]</button>
@@ -69,6 +76,7 @@
         const serviceForm = document.getElementById('territory-service-form');
         const serviceField = document.getElementById('TerritoryAttachedService_TerritoryServiceId');
         const capacityField = document.getElementById('TerritoryAttachedService_MaxCapacity');
+        const pausedField = document.getElementById('TerritoryAttachedService_IsPaused');
         const idField = document.getElementById('TerritoryAttachedService_Id');
         const saveService = document.getElementById('save-territory-service');
         const cancelEdit = document.getElementById('cancel-service-edit');
@@ -78,6 +86,7 @@
                 idField.value = button.dataset.id;
                 serviceField.value = button.dataset.service;
                 capacityField.value = button.dataset.capacity;
+                pausedField.checked = button.dataset.paused === "true";
                 saveService.textContent = saveService.dataset.update;
                 cancelEdit.hidden = false;
                 serviceField.focus();
