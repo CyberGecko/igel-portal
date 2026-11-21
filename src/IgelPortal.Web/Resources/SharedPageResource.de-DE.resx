@@ -255,4 +255,18 @@
   <data name="Plans awaiting an accepted assignment: {0}" xml:space="preserve"><value>Pläne ohne bestätigte Zuständigkeit: {0}</value></data>
   <data name="Find a place" xml:space="preserve"><value>Platz suchen</value></data>
   <data name="Select a scheduled dose" xml:space="preserve"><value>Geplante Gabe auswählen</value></data>
+  <data name="Manage members" xml:space="preserve"><value>Mitglieder verwalten</value></data>
+  <data name="Choose a start date of today or later." xml:space="preserve"><value>Wähle als Startdatum heute oder einen späteren Tag.</value></data>
+  <data name="Choose an end date within 90 days, on or after the start date." xml:space="preserve"><value>Wähle ein Enddatum ab dem Startdatum. Der Plan darf höchstens 90 Tage umfassen.</value></data>
+  <data name="Enter up to four distinct times that exist and are unambiguous in the portal time zone." xml:space="preserve"><value>Gib eine bis vier unterschiedliche Uhrzeiten ein, die in der Zeitzone des Portals eindeutig sind.</value></data>
+  <data name="Enter a medication name of up to 160 characters." xml:space="preserve"><value>Gib einen Medikamentennamen mit höchstens 160 Zeichen ein.</value></data>
+  <data name="Enter the prescribed amount and unit, up to 80 characters." xml:space="preserve"><value>Gib die verordnete Menge und Einheit mit höchstens 80 Zeichen ein.</value></data>
+  <data name="Use no more than 1000 characters." xml:space="preserve"><value>Verwende höchstens 1000 Zeichen.</value></data>
+  <data name="Check the start of the stay and the plan you want to replace." xml:space="preserve"><value>Prüfe den Beginn des Pflegeaufenthalts und den Plan, den du ersetzen möchtest.</value></data>
+  <data name="Select a scheduled dose." xml:space="preserve"><value>Wähle eine geplante Gabe aus.</value></data>
+  <data name="Choose whether the dose was given." xml:space="preserve"><value>Gib an, ob das Medikament verabreicht wurde.</value></data>
+  <data name="Enter a valid administration time that is not in the future." xml:space="preserve"><value>Gib einen gültigen Zeitpunkt für die Gabe ein, der nicht in der Zukunft liegt.</value></data>
+  <data name="Enter the amount actually given and unit, up to 80 characters." xml:space="preserve"><value>Gib die tatsächlich gegebene Menge und Einheit mit höchstens 80 Zeichen ein.</value></data>
+  <data name="Enter a reason for skipping the dose." xml:space="preserve"><value>Gib einen Grund an, warum die Gabe ausgefallen ist.</value></data>
+  <data name="The time must be within the current stay." xml:space="preserve"><value>Der Zeitpunkt muss im aktuellen Pflegeaufenthalt liegen.</value></data>
 </root>

@@ -99,7 +99,7 @@ else if (!Model.ShowMap)
             </div>
             <div class="portal-actions">
                 <button class="btn btn-primary" type="submit">@Localizer["Filter offers"]</button>
-                <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter" asp-route-map="true">@Localizer["Show map"]</a>
+                <a class="btn btn-outline-primary" asp-page="./Index" asp-route-filter="@ViewBag.Filter" asp-route-map="true" asp-route-search="@Model.Search" asp-route-freeOnly="@Model.FreeOnly">@Localizer["Show map"]</a>
             </div>
         </form>
     </section>
@@ -123,7 +123,7 @@ else if (!Model.ShowMap)
 }
 else
 {
-    <a class="btn btn-outline-primary mb-3" asp-page="./Index" asp-route-filter="@ViewBag.Filter">@Localizer["Back to offers"]</a>
+    <a class="btn btn-outline-primary mb-3" asp-page="./Index" asp-route-filter="@ViewBag.Filter" asp-route-search="@Model.Search" asp-route-freeOnly="@Model.FreeOnly">@Localizer["Back to offers"]</a>
     <div>
         <div class="row">
             <div class="w-100">

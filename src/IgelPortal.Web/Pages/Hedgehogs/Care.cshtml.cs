@@ -2,13 +2,21 @@ using IgelPortal.Web.Data.Care;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.Extensions.Localization;
 using System.Globalization;
 
 namespace IgelPortal.Web.Pages.Hedgehogs;
 
 [Authorize(Roles = RoleNames.USER)]
-public sealed class CareModel(CareJournalService journal, MedicationPlanService medications, CareClock clock) : PageModel
+public sealed class CareModel(CareJournalService journal, MedicationPlanService medications, CareClock clock,
+    IStringLocalizer<SharedPageResource> text) : PageModel
 {
+    public sealed record PlanInput(Guid PlanId, string? Medication, string? Amount, string? Instructions,
+        string? StartDate, string? EndDate, string?[] DailyTimes, Guid? ReplacePlanId);
+    public sealed record DoseInput(Guid PlanId, string? GivenAt, string? Amount, string? Note);
+
+    public PlanInput? PlanDraft { get; private set; }
+    public DoseInput? DoseDraft { get; private set; }
     public CareJournal Journal { get; private set; } = default!;
     public CareClock Clock => clock;
     public Guid? SelectedDoseId { get; private set; }
@@ -46,13 +54,35 @@ public sealed class CareModel(CareJournalService journal, MedicationPlanService 
     public async Task<IActionResult> OnPostPlanAsync(Guid id, Guid episodeId, Guid planId, string? medication, string? amount, string? instructions,
         string? startDate, string? endDate, string?[]? dailyTimes, Guid? replacePlanId)
     {
-        if (!Valid || !MedicationSchedule.TryBuild(clock, DateOnly.FromDateTime(clock.LocalNow), startDate, endDate, dailyTimes, out var schedule))
+        var scheduleIsValid = MedicationSchedule.TryBuild(clock, DateOnly.FromDateTime(clock.LocalNow), startDate,
+            endDate, dailyTimes, out var schedule, out var invalidField);
+        if (!scheduleIsValid)
         {
-            TempData["CareNotice"] = "Check the date range and administration times. Use 1–4 distinct times per day and a period of at most 90 days. Times must exist and be unambiguous in the portal time zone.";
-            return RedirectToPage(pageName: null, pageHandler: null, routeValues: new { id }, fragment: "medication");
+            ModelState.AddModelError(invalidField!, text[invalidField switch
+            {
+                "startDate" => "Choose a start date of today or later.",
+                "endDate" => "Choose an end date within 90 days, on or after the start date.",
+                _ => "Enter up to four distinct times that exist and are unambiguous in the portal time zone."
+            }]);
         }
+        if (string.IsNullOrWhiteSpace(medication) || medication.Trim().Length > 160)
+            ModelState.AddModelError("medication", text["Enter a medication name of up to 160 characters."]);
+        if (string.IsNullOrWhiteSpace(amount) || amount.Trim().Length > 80)
+            ModelState.AddModelError("amount", text["Enter the prescribed amount and unit, up to 80 characters."]);
+        if (instructions?.Trim().Length > 1000)
+            ModelState.AddModelError("instructions", text["Use no more than 1000 characters."]);
 
-        return Done(id, await medications.CreateAsync(id, User, episodeId, medication, amount, instructions, schedule, planId, replacePlanId), "medication");
+        var result = Valid
+            ? await medications.CreateAsync(id, User, episodeId, medication, amount, instructions, schedule, planId, replacePlanId)
+            : CareResult.Invalid;
+        if (result is not (CareResult.Invalid or CareResult.Conflict)) return Done(id, result, "medication");
+
+        if (result == CareResult.Conflict)
+            ModelState.AddModelError("", text["Check the start of the stay and the plan you want to replace."]);
+        else if (Valid)
+            ModelState.AddModelError("", text["Check the entered values and try again."]);
+        PlanDraft = new(planId, medication, amount, instructions, startDate, endDate, dailyTimes ?? [], replacePlanId);
+        return await OnGetAsync(id, episodeId, null);
     }
 
     public async Task<IActionResult> OnPostOfferAsync(Guid id, Guid planId, string? helperId) => Done(id,
@@ -68,8 +98,33 @@ public sealed class CareModel(CareJournalService journal, MedicationPlanService 
         string? actualAmount, string? note)
     {
         DateTime? when = clock.TryParseLocal(givenAt, out var parsed) ? parsed : null;
-        return Done(id, Valid && given.HasValue ? await medications.RecordAsync(id, User, planId, doseId, given.Value, when, actualAmount, note)
-            : CareResult.Invalid, "medication");
+        if (doseId == Guid.Empty) ModelState.AddModelError("doseId", text["Select a scheduled dose."]);
+        if (!given.HasValue) ModelState.AddModelError("", text["Choose whether the dose was given."]);
+        if (given == true)
+        {
+            if (!when.HasValue || when > DateTime.UtcNow)
+                ModelState.AddModelError("givenAt", text["Enter a valid administration time that is not in the future."]);
+            if (string.IsNullOrWhiteSpace(actualAmount) || actualAmount.Trim().Length > 80)
+                ModelState.AddModelError("actualAmount", text["Enter the amount actually given and unit, up to 80 characters."]);
+        }
+        else if (given == false && string.IsNullOrWhiteSpace(note))
+        {
+            ModelState.AddModelError("note", text["Enter a reason for skipping the dose."]);
+        }
+        if (note?.Trim().Length > 1000)
+            ModelState.AddModelError("note", text["Use no more than 1000 characters."]);
+
+        var result = Valid && given.HasValue
+            ? await medications.RecordAsync(id, User, planId, doseId, given.Value, when, actualAmount, note)
+            : CareResult.Invalid;
+        if (result != CareResult.Invalid)
+        {
+            return Done(id, result, "medication");
+        }
+
+        if (Valid) ModelState.AddModelError("givenAt", text["The time must be within the current stay."]);
+        DoseDraft = new(planId, givenAt, actualAmount, note);
+        return await OnGetAsync(id, null, doseId == Guid.Empty ? null : doseId);
     }
 
     private bool Valid => ModelState.IsValid;
