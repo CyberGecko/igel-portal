@@ -24,7 +24,8 @@
                             {
                                 var dose = task.Due.FirstOrDefault();
                                 <li class="list-group-item">
-                                    <a asp-page="/Hedgehogs/Care" asp-route-id="@task.HedgehogId" asp-fragment="@($"plan-{task.Plan.Id}")">@task.HedgehogName · @task.Plan.Medication</a>
+                                    <a asp-page="/Hedgehogs/Care" asp-route-id="@task.HedgehogId" asp-route-episodeId="@task.Plan.EpisodeId"
+                                       asp-route-doseId="@(dose?.Id)" asp-fragment="@(dose is null ? $"plan-{task.Plan.Id}" : $"dose-{task.Plan.Id}")">@task.HedgehogName · @task.Plan.Medication</a>
                                     @if (dose is null)
                                     {
                                         <p class="mb-0">@Localizer["Review plan offer"]</p>

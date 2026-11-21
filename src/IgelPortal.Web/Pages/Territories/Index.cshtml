@@ -27,7 +27,7 @@
 
 <div class="page-heading">
     <h1>@ViewData["Title"]</h1>
-    @if (!ViewBag.IsCommunityOverview)
+    @if (!ViewBag.IsCommunityOverview || Model.CanAddTerritory)
     {
         <a class="btn btn-primary" asp-page="./Create" asp-route-filter="@ViewBag.Filter">
             <i class="bi bi-plus-circle" aria-hidden="true"></i> @SharedLocalizer["Add territory"]

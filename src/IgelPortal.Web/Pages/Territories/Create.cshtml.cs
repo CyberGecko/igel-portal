@@ -13,17 +13,23 @@ namespace IgelPortal.Web.Pages.Territories
         private readonly ITerritoryDataService dataService = dataService;
         private readonly ICommunityDataService communityDataService = communityDataService;
 
-        public async Task<IActionResult> OnGetAsync(String? filter)
+        public async Task<IActionResult> OnGetAsync(string? filter)
         {
-            base.ViewData["Filter"] = filter;
-            IEnumerable<Community> communities = await this.communityDataService.FindAllForUserWithRole(base.User.Identity, CommunityRoles.MEMBER);
-            base.ViewData["Communities"] = new SelectList(communities, "Id", "Name");
+            Territory.CommunityId = await LoadChoicesAsync(filter);
+            return Page();
+        }
 
-            return base.Page();
+        private async Task<Guid?> LoadChoicesAsync(string? filter)
+        {
+            ViewData["Filter"] = filter;
+            var groups = await CommunityFormChoices.LoadAsync(communityDataService, User.Identity, filter);
+            ViewData["Communities"] = new SelectList(groups.Options, "Id", "Name");
+
+            return groups.Selected;
         }
 
         [BindProperty]
-        public Territory Territory { get; set; } = default!;
+        public Territory Territory { get; set; } = new();
 
         // For more information, see https://aka.ms/RazorPagesCRUD.
         public async Task<IActionResult> OnPostAsync(String? filter)
@@ -32,7 +38,8 @@ namespace IgelPortal.Web.Pages.Territories
             ModelState.Remove("Territory.Community");
             if (!ModelState.IsValid)
             {
-                return await OnGetAsync(filter);
+                await LoadChoicesAsync(filter);
+                return Page();
             }
             if (Territory.CommunityId.HasValue && !await communityDataService.IsCommunityMember(Territory.CommunityId, User.Identity))
             {

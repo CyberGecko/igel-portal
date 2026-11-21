@@ -14,14 +14,22 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         private readonly ITerritoryDataService territoryDataService = territoryDataService;
         private readonly ICommunityDataService communityDataService = communityDataService;
 
-        public async Task<IActionResult> OnGet(String? filter)
+        public async Task<IActionResult> OnGetAsync(string? filter)
         {
-            base.ViewData["Filter"] = filter;
-            IList<Territory> territories = await this.territoryDataService.GetAllAdministratedByUser(base.User.Identity);
-            base.ViewData["Territories"] = new SelectList(territories.OrderBy(c => c.Community).ThenBy(c => c.Name), "Id", "Name", null, "Community");
+            Hedgehog.CommunityId = await LoadChoicesAsync(filter);
+            return Page();
+        }
 
-            base.ViewData["Communities"] = new SelectList(await this.communityDataService.FindAllForUserWithRole(base.User.Identity, CommunityRoles.MEMBER), "Id", "Name");
-            return base.Page();
+        private async Task<Guid?> LoadChoicesAsync(string? filter)
+        {
+            ViewData["Filter"] = filter;
+            var groups = await CommunityFormChoices.LoadAsync(communityDataService, User.Identity, filter);
+            ViewData["Communities"] = new SelectList(groups.Options, "Id", "Name");
+            var territories = await territoryDataService.GetAllAdministratedByUser(User.Identity);
+            ViewData["Territories"] = new SelectList(territories.OrderBy(item => item.Community).ThenBy(item => item.Name),
+                "Id", "Name", null, "Community");
+
+            return groups.Selected;
         }
 
         [BindProperty]
@@ -38,7 +46,8 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             base.ModelState.Remove("Hedgehog.UsedService");
             if (!ModelState.IsValid)
             {
-                return await OnGet(filter);
+                await LoadChoicesAsync(filter);
+                return Page();
             }
 
             if (String.IsNullOrWhiteSpace(base.User?.Identity?.Name))

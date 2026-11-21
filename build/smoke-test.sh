@@ -161,8 +161,23 @@ for path in '/Hedgehogs?filter=my' '/Territories?filter=my'; do
     status=$("${browser[@]}" --output /dev/null --write-out '%{http_code}' "$origin$path")
     [[ "$status" == 200 ]]
 done
+# Check defaults in authenticated creation forms.
+create_group='10000000-0000-0000-0000-000000000001'
+"${browser[@]}" --fail --output "$html" "$origin/Communities/Create"
+grep -q 'name="Community.ContactName" value="Igel CI"' "$html"
+grep -q 'name="Community.ContactMail" value="igel-ci@example.invalid"' "$html"
+for page in Hedgehogs Territories; do
+    "${browser[@]}" --fail --output "$html" "$origin/$page/Create/$create_group"
+    grep -F "value=\"$create_group\"" "$html" | grep -q 'selected'
+    "${browser[@]}" --fail --output "$html" "$origin/$page/Create/my"
+    if grep -F "value=\"$create_group\"" "$html" | grep -q 'selected'; then
+        echo "$page creation selected a group outside the group view." >&2
+        exit 1
+    fi
+done
 group_territories='/Territories?filter=10000000-0000-0000-0000-000000000001'
 "${browser[@]}" --fail --output "$html" "$origin$group_territories"
+grep -q "/Territories/Create/$create_group" "$html"
 if grep -q 'ej2-maps.min.js' "$html"; then
     echo 'The offers list loaded external map scripts.' >&2
     exit 1
@@ -209,12 +224,14 @@ today=$(TZ=Europe/Berlin date +%F)
 plan='10000000-0000-0000-0000-000000000007'
 plan_form=(--data-urlencode "episodeId=$episode" --data-urlencode "planId=$plan"
     --data-urlencode 'medication=CI fixture' --data-urlencode 'amount=CI amount'
-    --data-urlencode "startDate=$today" --data-urlencode "endDate=$today" --data-urlencode 'dailyTimes=12:00')
+    --data-urlencode "startDate=$today" --data-urlencode "endDate=$today" --data-urlencode 'dailyTimes=12:00' --data-urlencode 'dailyTimes=18:00')
 for attempt in 1 2; do
     [[ "$(post_care Plan "${plan_form[@]}")" == 302 ]]
 done
 [[ "$(db <<< 'SELECT COUNT(*) FROM MedicationPlans;')" == 1 ]]
-dose=$(db <<< 'SELECT Id FROM MedicationDoses;')
+dose=$(db <<< 'SELECT Id FROM MedicationDoses ORDER BY ScheduledAtUtc LIMIT 1;')
+later_dose=$(db <<< 'SELECT Id FROM MedicationDoses ORDER BY ScheduledAtUtc DESC LIMIT 1;')
+[[ -n "$later_dose" && "$later_dose" != "$dose" ]]
 test -n "$dose"
 [[ "$(post_care Offer --data-urlencode "planId=$plan" --data-urlencode 'helperId=care-helper-fixture')" == 302 ]]
 [[ "$(post_care Respond --data-urlencode "planId=$plan" --data-urlencode 'accept=true')" == 302 ]]
@@ -237,8 +254,17 @@ given_at=$(TZ=Europe/Berlin date +%Y-%m-%dT%H:%M)
 dose_form=(--data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" --data-urlencode 'given=true'
     --data-urlencode "givenAt=$given_at" --data-urlencode 'actualAmount=CI amount')
 [[ "$(post_care Dose "${dose_form[@]}")" == 302 ]]
-[[ "$(db <<< 'SELECT Status FROM MedicationDoses;')" == 0 ]]
+[[ "$(db <<< 'SELECT COUNT(*) FROM MedicationDoses WHERE Status <> 0;')" == 0 ]]
 [[ "$(post_care Respond --data-urlencode "planId=$plan" --data-urlencode 'accept=true')" == 302 ]]
+# Opening a specific task selects the corresponding pending dose.
+"${browser[@]}" --fail --output "$html" "$origin/Hedgehogs/CareTasks"
+grep -q "doseId=$later_dose" "$html"
+"${browser[@]}" --fail --output "$html" "$origin$care?episodeId=$episode&doseId=$later_dose"
+grep -F "value=\"$later_dose\"" "$html" | grep -q 'selected'
+if grep -F "value=\"$dose\"" "$html" | grep -q 'selected'; then
+    echo 'The care journal selected the wrong dose.' >&2
+    exit 1
+fi
 # The second request tries a different outcome so an overwrite would be detectable.
 [[ "$(post_care Dose "${dose_form[@]}")" == 302 ]]
 [[ "$(post_care Dose --data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" \
@@ -277,7 +303,7 @@ placement_post() {
 }
 
 token=$(read_csrf "$manager")
-grep -q "value=\"$service_id\"" "$html"
+grep -F "value=\"$service_id\"" "$html" | grep -q 'selected'
 [[ "$(placement_post RequestService --data-urlencode "communityId=$group_id" --data-urlencode "hedgehogId=$hedgehog_id" \
     --data-urlencode "ServiceId=$service_id" --data-urlencode "NeededFrom=$today" --data-urlencode 'Note=Wintering fixture')" == 302 ]]
 request_id=$(db <<< 'SELECT Id FROM ServiceRequests WHERE FulfillmentDate IS NULL;')
@@ -290,6 +316,7 @@ cp "$temporary/helper.cookies" "$cookies"
 grep -q "requestToken=$request_token" "$html"
 token=$(read_csrf "$request_page/ServiceResponse?requestToken=$request_token")
 grep -q 'Wintering fixture' "$html"
+grep -F "value=\"$offer_id\"" "$html" | grep -q 'selected'
 for action in Declined Withdraw Available Available; do
     [[ "$(placement_post ServiceResponse --data-urlencode "requestToken=$request_token" \
         --data-urlencode "reply=$action" --data-urlencode "offerId=$offer_id")" == 302 ]]
