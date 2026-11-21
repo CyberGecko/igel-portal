@@ -1,20 +1,18 @@
-using System.Text.Encodings.Web;
 using IgelPortal.Web.Data.Care;
 using IgelPortal.Web.Data.Models;
 using IgelPortal.Web.Data.Services;
 using IgelPortal.Web.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.Extensions.Localization;
 
 namespace IgelPortal.Web.Pages.Hedgehogs;
 
 [Authorize(Roles = RoleNames.USER)]
 public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataService communities,
     IServiceRequestDataService requests, PlacementService placements, IAuthorizationService authorization,
-    IEmailSender email, IStringLocalizer<RequestServiceModel> localizer, ILogger<RequestServiceModel> logger,
+    PortalMail email, ILogger<RequestServiceModel> logger,
     CareClock clock) : PageModel
 {
     public Hedgehog Hedgehog { get; private set; } = default!;
@@ -102,15 +100,13 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
         };
         var responseUrl = Url.PageLink("./RequestService", "ServiceResponse", new { requestToken = request.RequestToken }, Request.Scheme)
             ?? throw new InvalidOperationException("Could not generate the service-response URL.");
-        var encode = HtmlEncoder.Default;
-        var body = localizer["Placement request email", encode.Encode(group.Name), encode.Encode(hedgehog.Name),
-            encode.Encode(offers[0].ServiceName), encode.Encode(NeededFrom.Value.ToString("d")), encode.Encode(responseUrl)];
         await requests.Insert(request);
 
         var failures = 0;
         await Parallel.ForEachAsync(recipients, new ParallelOptions { MaxDegreeOfParallelism = 4 }, async (recipient, _) =>
         {
-            if (!await TryEmailAsync(recipient, localizer["Hedgehog placement request"], body))
+            if (!await TryEmailAsync(() => email.PlacementRequestAsync(recipient, group.Name, hedgehog.Name,
+                offers[0].ServiceName, NeededFrom.Value, NeededUntil, responseUrl)))
                 Interlocked.Increment(ref failures);
         });
         ServiceRequestMailFailures = failures;
@@ -155,10 +151,10 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
         PlacementNotice = assignment is null ? "The place is no longer available or the reply changed." : "Place assigned.";
         if (assignment?.Email is { Length: > 0 } recipient)
         {
-            var encode = HtmlEncoder.Default;
-            var body = localizer["Placement assigned email", encode.Encode(assignment.Hedgehog), encode.Encode(assignment.Service),
-                encode.Encode(assignment.Territory)];
-            if (!await TryEmailAsync(recipient, localizer["A place has been assigned"], body))
+            var responseUrl = Url.PageLink("./RequestService", "ServiceResponse", new { requestToken = request.RequestToken }, Request.Scheme)
+                ?? throw new InvalidOperationException("Could not generate the service-response URL.");
+            if (!await TryEmailAsync(() => email.PlacementAssignedAsync(recipient, assignment.Hedgehog, assignment.Service,
+                assignment.Territory, responseUrl)))
                 ServiceRequestMailFailures = 1;
         }
         return RedirectToPage(new { id = request.CommunityId, hedgehogId = request.HedgehogId });
@@ -184,11 +180,11 @@ public class RequestServiceModel(IHedgehogDataService hedgehogs, ICommunityDataS
         return hedgehog is { IsDeleted: false } && hedgehog.CommunityId == request.CommunityId ? request : null;
     }
 
-    private async Task<bool> TryEmailAsync(string recipient, string subject, string body)
+    private async Task<bool> TryEmailAsync(Func<Task> send)
     {
         try
         {
-            await email.SendEmailAsync(recipient, subject, body);
+            await send();
             return true;
         }
         catch (Exception exception) when (exception is HttpRequestException or TaskCanceledException)

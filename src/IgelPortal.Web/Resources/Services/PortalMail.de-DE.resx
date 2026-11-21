@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="Confirm your email address" xml:space="preserve"><value>Bestätige deine E-Mail-Adresse</value></data>
+  <data name="Confirm your email address to activate your IgelPortal account." xml:space="preserve"><value>Bestätige deine E-Mail-Adresse, um dein Konto im IgelPortal zu aktivieren.</value></data>
+  <data name="Confirm email address" xml:space="preserve"><value>E-Mail-Adresse bestätigen</value></data>
+  <data name="If you did not create an account or request this email, you can ignore it." xml:space="preserve"><value>Wenn du kein Konto erstellt und diese E-Mail nicht angefordert hast, kannst du sie ignorieren.</value></data>
+  <data name="Confirm your new email address" xml:space="preserve"><value>Bestätige deine neue E-Mail-Adresse</value></data>
+  <data name="Confirm that you want to use this address for your IgelPortal account." xml:space="preserve"><value>Bestätige, dass du diese Adresse für dein Konto im IgelPortal verwenden möchtest.</value></data>
+  <data name="Confirm new address" xml:space="preserve"><value>Neue Adresse bestätigen</value></data>
+  <data name="If you did not request this change, you can ignore this email." xml:space="preserve"><value>Wenn du diese Änderung nicht angefordert hast, kannst du diese E-Mail ignorieren.</value></data>
+  <data name="Reset your password" xml:space="preserve"><value>Setze dein Passwort zurück</value></data>
+  <data name="You requested a new password for your IgelPortal account. Use the link below to set it." xml:space="preserve"><value>Du hast für dein Konto im IgelPortal ein neues Passwort angefordert. Über den Link kannst du es festlegen.</value></data>
+  <data name="Set a new password" xml:space="preserve"><value>Neues Passwort festlegen</value></data>
+  <data name="If you did not request this, you can ignore this email. Your password stays the same." xml:space="preserve"><value>Wenn du das nicht angefordert hast, kannst du diese E-Mail ignorieren. Dein Passwort bleibt unverändert.</value></data>
+  <data name="New request to join your group" xml:space="preserve"><value>Neue Beitrittsanfrage</value></data>
+  <data name="{0} would like to join {1}. You can review the request in the member list." xml:space="preserve"><value>{0} möchte der Gruppe {1} beitreten. In der Mitgliederliste kannst du die Anfrage prüfen.</value></data>
+  <data name="Review join request" xml:space="preserve"><value>Beitrittsanfrage ansehen</value></data>
+  <data name="from {0} to {1}" xml:space="preserve"><value>vom {0} bis zum {1}</value></data>
+  <data name="from {0}" xml:space="preserve"><value>ab {0}</value></data>
+  <data name="A hedgehog needs a place" xml:space="preserve"><value>Ein Igel sucht einen Platz</value></data>
+  <data name="{0} is looking for a place for {1} for “{2}” {3}. Let the group know whether you can help." xml:space="preserve"><value>Die Gruppe {0} sucht für {1} {3} einen Platz für „{2}“. Gib der Gruppe Bescheid, ob du helfen kannst.</value></data>
+  <data name="View request and reply" xml:space="preserve"><value>Anfrage ansehen und antworten</value></data>
+  <data name="Your offer was selected" xml:space="preserve"><value>Dein Platzangebot wurde ausgewählt</value></data>
+  <data name="Your place at {0} was assigned to {1} for “{2}”. Open the request to review the details." xml:space="preserve"><value>Dein Platz in {0} wurde {1} für „{2}“ zugewiesen. Die Details findest du in der Anfrage.</value></data>
+  <data name="View assignment" xml:space="preserve"><value>Zuweisung ansehen</value></data>
+  <data name="Hello," xml:space="preserve"><value>Hallo,</value></data>
+  <data name="The IgelPortal team" xml:space="preserve"><value>Viele Grüße vom IgelPortal-Team</value></data>
+  <data name="If the button does not work, use this link." xml:space="preserve"><value>Falls der Button nicht funktioniert, nutze diesen Link.</value></data>
+</root>

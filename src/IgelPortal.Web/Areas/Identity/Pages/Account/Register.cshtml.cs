@@ -8,13 +8,11 @@ using Microsoft.AspNetCore.RateLimiting;
 using IgelPortal.Web.Pages.Hedgehogs;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Localization;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
@@ -28,12 +26,12 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
         private readonly IUserStore<ApplicationUser> _userStore;
         private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
-        private readonly IEmailSender _emailSender;
+        private readonly PortalMail _emailSender;
         private readonly IStringLocalizer<RegisterModel> localizer;
         private readonly RegistrationCaptcha captcha;
 
         public RegisterModel(UserManager<ApplicationUser> userManager, IUserStore<ApplicationUser> userStore, SignInManager<ApplicationUser> signInManager, ILogger<RegisterModel> logger,
-                             IEmailSender emailSender, IStringLocalizer<RegisterModel> localizer, RegistrationCaptcha captcha)
+                             PortalMail emailSender, IStringLocalizer<RegisterModel> localizer, RegistrationCaptcha captcha)
         {
             _userManager = userManager;
             _userStore = userStore;
@@ -101,9 +99,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
                                                values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
                                                protocol: Request.Scheme);
 
-                    await _emailSender.SendEmailAsync(Input.Email,
-                                                      this.localizer.GetString("Confirm your email"),
-                                                      this.localizer.GetString("Please confirm your account by <a href='{0}'>clicking here</a>.", HtmlEncoder.Default.Encode(callbackUrl)));
+                    await _emailSender.ConfirmEmailAsync(Input.Email, callbackUrl);
 
                     if (_userManager.Options.SignIn.RequireConfirmedAccount)
                     {

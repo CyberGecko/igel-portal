@@ -3,12 +3,4 @@
   <data name="Verification email sent. Please check your email." xml:space="preserve">
         <value>Es wurde eine Bestätigungsmail versendet. Bitte prüfen Sie ihre E-Mails.</value>
     </data>
-  <data name="Confirm your email" xml:space="preserve">
-        <value>Bestätigen Sie ihre E-Mail Adresse</value>
-    </data>
-  <data name="Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;." xml:space="preserve">
-        <value>
-          Bitte bestätigen Sie ihr Konto indem Sie &lt;a href='{0}'&gt;hier klicken&lt;/a&gt;.
-        </value>
-    </data>
 </root>

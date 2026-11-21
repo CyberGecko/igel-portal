@@ -14,7 +14,6 @@ using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Localization;
@@ -86,7 +85,8 @@ builder.Services.AddOptions<MailServiceOptions>()
         "MailService requires a Brevo API key and a sender name and address when enabled.")
     .ValidateOnStart();
 
-builder.Services.AddHttpClient<IEmailSender, EmailSender>(client =>
+builder.Services.AddScoped<PortalMail>();
+builder.Services.AddHttpClient<EmailSender>(client =>
 {
     client.BaseAddress = new Uri("https://api.brevo.com/");
     client.Timeout = TimeSpan.FromSeconds(15);

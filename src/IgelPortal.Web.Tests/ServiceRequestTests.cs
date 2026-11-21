@@ -38,7 +38,7 @@ public class ServiceRequestTests
             CommunityId = sameGroup ? request.CommunityId : Guid.NewGuid(),
             DeletedDate = hedgehogDeleted ? DateTime.UnixEpoch : null
         });
-        var page = new RequestServiceModel(hedgehogs, groups, requests, null!, null!, null!, null!,
+        var page = new RequestServiceModel(hedgehogs, groups, requests, null!, null!, null!,
             NullLogger<RequestServiceModel>.Instance, null!)
         {
             PageContext = new PageContext { HttpContext = http }

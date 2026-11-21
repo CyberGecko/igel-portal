@@ -4,22 +4,18 @@
 
 using IgelPortal.Web.Data.Identity;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI.Services;
+using IgelPortal.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Extensions.Localization;
-using System.ComponentModel.DataAnnotations;
 using System.Text;
-using System.Text.Encodings.Web;
 
 namespace IgelPortal.Web.Areas.Identity.Pages.Account
 {
-    public class ForgotPasswordModel(UserManager<ApplicationUser> userManager, IEmailSender emailSender, IStringLocalizer<ForgotPasswordModel> localizer) : PageModel
+    public class ForgotPasswordModel(UserManager<ApplicationUser> userManager, PortalMail emailSender) : PageModel
     {
         private readonly UserManager<ApplicationUser> _userManager = userManager;
-        private readonly IEmailSender _emailSender = emailSender;
-        private readonly IStringLocalizer<ForgotPasswordModel> localizer = localizer;
+        private readonly PortalMail _emailSender = emailSender;
 
         /// <summary>
         ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
@@ -49,10 +45,7 @@ namespace IgelPortal.Web.Areas.Identity.Pages.Account
                     values: new { area = "Identity", code },
                     protocol: Request.Scheme);
 
-                await _emailSender.SendEmailAsync(
-                    Input.Email,
-                    this.localizer.GetString("Reset Password"),
-                    this.localizer.GetString("Please reset your password by <a href='{0}'>clicking here</a>.", HtmlEncoder.Default.Encode(callbackUrl)));
+                await _emailSender.ResetPasswordAsync(Input.Email, callbackUrl);
 
                 return RedirectToPage("./ForgotPasswordConfirmation");
             }

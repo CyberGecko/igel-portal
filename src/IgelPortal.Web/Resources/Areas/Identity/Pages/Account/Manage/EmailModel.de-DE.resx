@@ -1,11 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="Confirm your email" xml:space="preserve">
-        <value>Bestätigen Sie Ihre E-Mail</value>
-    </data>
-  <data name="Please confirm your account by &lt;a href='{0}'&gt;clicking here&lt;/a&gt;." xml:space="preserve">
-        <value>Bitte bestätigen Sie Ihr Konto, indem Sie &lt;a href='{0}'&gt;hier klicken&lt;/a&gt;.</value>
-    </data>
   <data name="Confirmation link to change email sent. Please check your email." xml:space="preserve">
         <value>Bestätigungslink zum Ändern der E-Mail gesendet. Bitte überprüfen Sie Ihre E-Mail.</value>
     </data>
