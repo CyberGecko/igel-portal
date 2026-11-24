@@ -18,4 +18,9 @@
   <data name="Get home" xml:space="preserve">
         <value>Zurück ins Heimatrevier</value>
     </data>
+  <data name="Checking available services…" xml:space="preserve"><value>Verfügbare Dienste werden geladen …</value></data>
+  <data name="No free services in this territory." xml:space="preserve"><value>In diesem Revier ist gerade kein Dienst verfügbar.</value></data>
+  <data name="Could not load services. Select the territory again." xml:space="preserve"><value>Die Dienste konnten nicht geladen werden. Wähle das Revier erneut aus.</value></data>
+  <data name="Home territory: {0}" xml:space="preserve"><value>Heimatrevier: {0}</value></data>
+  <data name="Return to the home territory" xml:space="preserve"><value>Ins Heimatrevier zurückbringen</value></data>
 </root>

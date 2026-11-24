@@ -13,6 +13,8 @@ namespace IgelPortal.Web.Pages.Hedgehogs
         private readonly IHedgehogDataService dataService = dataService;
         private readonly ITerritoryDataService territoryDataService = territoryDataService;
 
+        public bool CanReturnHome { get; private set; }
+        public string? HomeTerritory { get; private set; }
         public SelectList Territories { get; set; } = default!;
 
         public async Task<IActionResult> OnGet(Guid? id, Guid? hedgehogId)
@@ -31,7 +33,11 @@ namespace IgelPortal.Web.Pages.Hedgehogs
             var territories = await this.territoryDataService.FindAllActiveForCommunity(id);
             this.Territories = new SelectList(territories.OrderBy(c => c.UserName).ThenBy(c => c.Name), "Id", "Name");
 
-            base.ViewData["CurrentTerritory"] = hedgehog?.CurrentTerritory;
+            base.ViewData["CurrentTerritory"] = hedgehog.CurrentTerritory;
+            HomeTerritory = hedgehog.HomeTerritory;
+            CanReturnHome = hedgehog.HomeTerritoryId is Guid homeId &&
+                (hedgehog.CurrentTerritoryId != homeId || hedgehog.UsedServiceId.HasValue) &&
+                await territoryDataService.FindOne(homeId) is { IsDeleted: false } home && home.CommunityId == id;
             base.ViewData["HedgehogId"] = hedgehogId;
             base.ViewData["CommunityId"] = id;
             return Page();
@@ -68,22 +74,49 @@ namespace IgelPortal.Web.Pages.Hedgehogs
                 return NotFound();
             }
 
-            if (usedServiceId.HasValue)
+            if (!ModelState.IsValid || !newTerritoryId.HasValue || !usedServiceId.HasValue)
             {
-                var territory = await territoryDataService.FindOne(newTerritoryId);
-                if (territory is null || territory.IsDeleted || territory.CommunityId != communityId ||
-                    !territory.AttachedServices.Any(service => service.Id == usedServiceId && !service.IsPaused && service.CurrentCapacity > 0))
-                {
-                    return BadRequest();
-                }
+                return BadRequest();
             }
 
-            currentHedgehog.CurrentTerritoryId = usedServiceId.HasValue ? newTerritoryId : currentHedgehog.HomeTerritoryId;
+            var territory = await territoryDataService.FindOne(newTerritoryId);
+            if (territory is null || territory.IsDeleted || territory.CommunityId != communityId ||
+                !territory.AttachedServices.Any(service => service.Id == usedServiceId && !service.IsPaused && service.CurrentCapacity > 0))
+            {
+                return BadRequest();
+            }
+
+            currentHedgehog.CurrentTerritoryId = newTerritoryId;
             currentHedgehog.UsedServiceId = usedServiceId;
             await dataService.Update(currentHedgehog);
 
             return base.RedirectToPage("./Index", new { filter = communityId });
         }
+
+        public async Task<IActionResult> OnPostReturnHomeAsync(Guid? hedgehogId, Guid? communityId)
+        {
+            if (!await CanManage(communityId))
+            {
+                return Forbid();
+            }
+            var hedgehog = await dataService.FindOne(hedgehogId);
+            if (hedgehog is null || hedgehog.IsDeleted || hedgehog.CommunityId != communityId)
+            {
+                return NotFound();
+            }
+
+            if (hedgehog.HomeTerritoryId is not Guid homeId ||
+                await territoryDataService.FindOne(homeId) is not { IsDeleted: false } home || home.CommunityId != communityId)
+            {
+                return BadRequest();
+            }
+
+            hedgehog.CurrentTerritoryId = homeId;
+            hedgehog.UsedServiceId = null;
+            await dataService.Update(hedgehog);
+            return RedirectToPage("./Index", new { filter = communityId });
+        }
+
         private async Task<bool> CanManage(Guid? communityId) =>
             communityId.HasValue && (await authorization.AuthorizeAsync(User, communityId.Value, PolicyNames.COMMUNITY_OWNER_OR_MODERATOR)).Succeeded;
     }

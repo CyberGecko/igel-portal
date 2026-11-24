@@ -84,6 +84,8 @@ register='/Identity/Account/Register'
 token=$(read_csrf "$register")
 test -n "$token"
 grep -q '<altcha-widget' "$html"
+grep -q 'autocomplete="given-name"' "$html"
+grep -q 'autocomplete="family-name"' "$html"
 challenge=$("${browser[@]}" --fail "$origin/registration-captcha")
 solution=$(dotnet run --file build/solve-registration-captcha.cs --verbosity quiet <<< "$challenge")
 
@@ -185,6 +187,17 @@ fi
 "${browser[@]}" --fail --output "$html" "$origin$group_territories&map=true"
 grep -q 'ej2-maps.min.js' "$html"
 
+token=$(read_csrf '/Communities/Create')
+status=$("${browser[@]}" --output "$html" --dump-header "$temporary/headers" --write-out '%{http_code}' \
+    --data-urlencode "__RequestVerificationToken=$token" --data-urlencode 'Community.Name=New CI group' \
+    --data-urlencode 'Community.ContactName=Igel CI' --data-urlencode "Community.ContactMail=$email" "$origin/Communities/Create")
+[[ "$status" == 302 ]]
+new_group=$(db <<< "SELECT Id FROM Communities WHERE Name='New CI group';")
+test -n "$new_group"
+grep -qi "^location: /Communities/Details?id=$new_group" "$temporary/headers"
+"${browser[@]}" --fail --output "$html" "$origin/Communities/Details?id=$new_group"
+grep -q "/Communities/Members/$new_group" "$html"
+
 echo 'MariaDB startup, registration, login, territories and passkey authorization verified.'
 
 # Exercise medication permissions and the once-only recording against MariaDB.
@@ -207,7 +220,7 @@ post_care() {
     local handler=$1
     shift
     curl --silent --show-error --max-time 10 --header 'X-Forwarded-Proto: https' \
-        --cookie "$cookies" --output /dev/null --write-out '%{http_code}' \
+        --cookie "$cookies" --output "$html" --write-out '%{http_code}' \
         --data-urlencode "__RequestVerificationToken=$token" "$@" "$origin$care?handler=$handler"
 }
 
@@ -225,6 +238,13 @@ plan='10000000-0000-0000-0000-000000000007'
 plan_form=(--data-urlencode "episodeId=$episode" --data-urlencode "planId=$plan"
     --data-urlencode 'medication=CI fixture' --data-urlencode 'amount=CI amount'
     --data-urlencode "startDate=$today" --data-urlencode "endDate=$today" --data-urlencode 'dailyTimes=12:00' --data-urlencode 'dailyTimes=18:00')
+yesterday=${admission%T*}
+[[ "$(post_care Plan --data-urlencode "episodeId=$episode" --data-urlencode "planId=$plan" \
+    --data-urlencode 'medication=Retained medication' --data-urlencode 'amount=CI amount' \
+    --data-urlencode "startDate=$today" --data-urlencode "endDate=$yesterday" --data-urlencode 'dailyTimes=12:00')" == 200 ]]
+grep -q 'id="new-medication-plan" open' "$html"
+grep -q 'value="Retained medication"' "$html"
+grep -q 'field-validation-error.*data-valmsg-for="endDate"' "$html"
 for attempt in 1 2; do
     [[ "$(post_care Plan "${plan_form[@]}")" == 302 ]]
 done
@@ -265,6 +285,11 @@ if grep -F "value=\"$dose\"" "$html" | grep -q 'selected'; then
     echo 'The care journal selected the wrong dose.' >&2
     exit 1
 fi
+[[ "$(post_care Dose --data-urlencode "planId=$plan" --data-urlencode "doseId=$later_dose" \
+    --data-urlencode 'given=true' --data-urlencode "givenAt=$given_at" --data-urlencode 'note=Retained note')" == 200 ]]
+grep -F "value=\"$later_dose\"" "$html" | grep -q 'selected'
+grep -q 'Retained note' "$html"
+grep -q 'field-validation-error.*data-valmsg-for="actualAmount"' "$html"
 # The second request tries a different outcome so an overwrite would be detectable.
 [[ "$(post_care Dose "${dose_form[@]}")" == 302 ]]
 [[ "$(post_care Dose --data-urlencode "planId=$plan" --data-urlencode "doseId=$dose" \
@@ -294,6 +319,17 @@ service_id='10000000-0000-0000-0000-000000000003'
 offer_id='20000000-0000-0000-0000-000000000002'
 request_page='/Hedgehogs/RequestService'
 manager="$request_page?id=$group_id&hedgehogId=$hedgehog_id"
+
+"${browser[@]}" --fail --output "$html" "$origin$group_territories&search=Wintering&freeOnly=true"
+grep -qi 'map=true.*search=Wintering.*freeOnly=true' "$html"
+"${browser[@]}" --fail --output "$html" "$origin$group_territories&search=Wintering&freeOnly=true&map=true"
+grep -q 'Wintering site' "$html"
+grep -qi 'search=Wintering.*freeOnly=true' "$html"
+"${browser[@]}" --fail --output "$html" "$origin$group_territories&search=no-matching-territory&freeOnly=true&map=true"
+if grep -q 'Wintering site' "$html"; then
+    echo 'The map displayed a territory excluded by the offer filters.' >&2
+    exit 1
+fi
 
 placement_post() {
     local handler=$1

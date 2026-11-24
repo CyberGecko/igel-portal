@@ -5,13 +5,25 @@ namespace IgelPortal.Web.Data.Care;
 internal static class MedicationSchedule
 {
     internal static bool TryBuild(CareClock clock, DateOnly today, string? from, string? to,
-        string?[]? dailyTimes, out IReadOnlyList<DateTime> schedule)
+        string?[]? dailyTimes, out IReadOnlyList<DateTime> schedule) =>
+        TryBuild(clock, today, from, to, dailyTimes, out schedule, out _);
+
+    internal static bool TryBuild(CareClock clock, DateOnly today, string? from, string? to,
+        string?[]? dailyTimes, out IReadOnlyList<DateTime> schedule, out string? invalidField)
     {
         schedule = [];
+        invalidField = "startDate";
         if (!DateOnly.TryParseExact(from, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start) ||
-            !DateOnly.TryParseExact(to, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end) ||
-            end.DayNumber - start.DayNumber is < 0 or >= 90 || dailyTimes is null || dailyTimes.Length > 4 ||
             start < today)
+            return false;
+
+        invalidField = "endDate";
+        if (!DateOnly.TryParseExact(to, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var end) ||
+            end.DayNumber - start.DayNumber is < 0 or >= 90)
+            return false;
+
+        invalidField = "dailyTimes";
+        if (dailyTimes is null || dailyTimes.Length > 4)
             return false;
 
         var times = new SortedSet<TimeOnly>();
@@ -33,6 +45,7 @@ internal static class MedicationSchedule
             }
         }
         schedule = result;
+        invalidField = null;
         return true;
     }
 }

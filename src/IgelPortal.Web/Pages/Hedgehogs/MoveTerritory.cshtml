@@ -1,77 +1,85 @@
-﻿@page
+@page
 @model IgelPortal.Web.Pages.Hedgehogs.MoveTerritoryModel
 @{
-    ViewData["Title"] = Localizer["Hedgehog"];
+    ViewData["Title"] = Localizer["Move Territory"];
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="page-heading"><h1>@ViewData["Title"]</h1></div>
+<p>@Localizer["Current territory:"] @(ViewBag.CurrentTerritory ?? SharedLocalizer["No territory"].Value)</p>
 
-<h4>@Localizer["Move Territory"]</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form method="post">
-            <input id="hedgehogId" name="hedgehogId" type="hidden" value="@ViewBag.HedgehogId" />
-            <input id="communityId" name="communityId" type="hidden" value="@ViewBag.CommunityId" />
-            <div class="form-group input-group mb-3">
-                <span class="control-label input-group-text">
-                    @Localizer["Current territory:"]
-                </span>
-                <input type="text" disabled class="form-control" value="@ViewBag.CurrentTerritory" />
-            </div>
-            <div class="form-group input-group mb-3">
-                <span class="control-label input-group-text">
-                    @Localizer["New territory:"]
-                </span>
-                <select id="newTerritoryId" name="newTerritoryId" class="form-control" asp-items="Model.Territories" onchange="getTerritoryServices()">
-                    <option value="" disabled selected>@SharedLocalizer["Select a territory"]</option>
-                </select>
-            </div>
-            <div class="form-group input-group mb-3">
-                <span class="control-label input-group-text">
-                    @Localizer["Used service:"]
-                </span>
-                <select id="usedServiceId" name="usedServiceId" class="form-control">
-                    <option value="" disabled selected>@SharedLocalizer["Select a service"]</option>
-                    <option value="">@Localizer["Get home"]</option>
-                </select>
-            </div>
-            <div class="form-group mb-3">
-                <button type="submit" class="btn btn-success">@SharedLocalizer["Save"]</button>
-            </div>
-        </form>
+<form method="post" class="portal-form mb-4" id="move-territory-form"
+      data-services-url="@Url.Page("./MoveTerritory", "LoadTerritoryServices", new { id = ViewBag.CommunityId })"
+      data-loading="@Localizer["Checking available services…"]"
+      data-empty="@Localizer["No free services in this territory."]"
+      data-error="@Localizer["Could not load services. Select the territory again."]">
+    <input name="hedgehogId" type="hidden" value="@ViewBag.HedgehogId" />
+    <input name="communityId" type="hidden" value="@ViewBag.CommunityId" />
+    <div class="mb-3">
+        <label for="newTerritoryId" class="form-label">@Localizer["New territory:"]</label>
+        <select id="newTerritoryId" name="newTerritoryId" class="form-select" asp-items="Model.Territories" required>
+            <option value="">@SharedLocalizer["Select a territory"]</option>
+        </select>
     </div>
-</div>
+    <div class="mb-3">
+        <label for="usedServiceId" class="form-label">@Localizer["Used service:"]</label>
+        <select id="usedServiceId" name="usedServiceId" class="form-select" aria-describedby="service-status" required disabled>
+            <option value="">@SharedLocalizer["Select a service"]</option>
+        </select>
+        <p id="service-status" class="form-text" role="status"></p>
+    </div>
+    <button type="submit" class="btn btn-primary" disabled>@SharedLocalizer["Save"]</button>
+</form>
 
+@if (Model.CanReturnHome)
+{
+    <form method="post" asp-page-handler="ReturnHome" class="portal-form">
+        <input name="hedgehogId" type="hidden" value="@ViewBag.HedgehogId" />
+        <input name="communityId" type="hidden" value="@ViewBag.CommunityId" />
+        <p>@Localizer["Home territory: {0}", Model.HomeTerritory ?? ""]</p>
+        <button type="submit" class="btn btn-outline-primary">@Localizer["Return to the home territory"]</button>
+    </form>
+}
 
 @section Scripts {
-    <script>
-        function getTerritoryServices() {
-            var selectedTerritoryId = $("#newTerritoryId").find(":selected").val();
+<script>
+    const moveForm = document.getElementById('move-territory-form');
+    const territory = document.getElementById('newTerritoryId');
+    const service = document.getElementById('usedServiceId');
+    const serviceStatus = document.getElementById('service-status');
+    const save = moveForm.querySelector('button[type="submit"]');
+    let lookup;
 
-            $.ajax({
-                type: "GET",
-                url: "./MoveTerritory?handler=LoadTerritoryServices",
-                data: {
-                    id: $("#communityId").val(),
-                    territoryId: selectedTerritoryId
-                },
-                success: function (result) {
-                    $('#usedServiceId option:gt(2)').remove().end();
-                    let usedServiceSelect = $('#usedServiceId');
+    async function loadServices() {
+        lookup?.abort();
+        service.options.length = 1;
+        service.value = '';
+        service.disabled = true;
+        save.disabled = true;
+        serviceStatus.textContent = '';
+        if (!territory.value) return;
 
-                    let optionTemplate = $('<option></option>');
-                    $.each(result, (index, element) => {
-                        let option = optionTemplate.clone();
-                        option.text(element.name);
-                        option.attr('value', element.id);
-                        usedServiceSelect.append(option);
-                    });
-                },
-                error: function () {
-                    console.log("failure");
-                }
-            })
+        const request = new AbortController();
+        lookup = request;
+        serviceStatus.textContent = moveForm.dataset.loading;
+        const url = new URL(moveForm.dataset.servicesUrl, window.location.href);
+        url.searchParams.set('territoryId', territory.value);
+        try {
+            const response = await fetch(url, { signal: request.signal });
+            if (!response.ok) throw new Error();
+            const offers = await response.json();
+            if (request.signal.aborted) return;
+            for (const offer of offers) service.add(new Option(offer.name, offer.id));
+            service.disabled = offers.length === 0;
+            if (offers.length === 1) service.value = offers[0].id;
+            save.disabled = !service.value;
+            serviceStatus.textContent = offers.length ? '' : moveForm.dataset.empty;
+        } catch {
+            if (!request.signal.aborted) serviceStatus.textContent = moveForm.dataset.error;
         }
-    </script>
+    }
+
+    territory.addEventListener('change', loadServices);
+    service.addEventListener('change', () => { save.disabled = !service.value; });
+    loadServices();
+</script>
 }
